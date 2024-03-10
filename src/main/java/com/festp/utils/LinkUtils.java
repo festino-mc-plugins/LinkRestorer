@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.bukkit.ChatColor;
+
 public class LinkUtils {
 
 	// TODO check telegram desktop code
@@ -74,8 +76,12 @@ public class LinkUtils {
 				continue;
 			}
 			
+			int linkStart = matcher.start();
+			if (linkStart > 0 && message.charAt(linkStart - 1) == ChatColor.COLOR_CHAR)
+				linkStart++;
+
 			boolean hasProtocol = matcher.end(SCHEME_GROUP_INDEX) - matcher.start(SCHEME_GROUP_INDEX) > 0;
-			Link link = new Link(message, matcher.start(), matcher.end(), hasProtocol);
+			Link link = new Link(message, linkStart, matcher.end(), hasProtocol);
 			links.add(link);
 		}
 		
