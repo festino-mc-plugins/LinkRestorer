@@ -160,6 +160,9 @@ public class Chatter
 	
 	private void sendRawJson(Player player, String rawJsonMessage)
 	{
+		boolean isLogging = config.get(Config.Key.LOG_DEBUG, false);
+		if (isLogging) Logger.info("Sending raw JSON: " + rawJsonMessage);
+		
 		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
 			@Override
 			public void run() {
