@@ -6,8 +6,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import com.festp.Chatter;
-import com.festp.utils.Link;
-import com.festp.utils.LinkUtils;
 
 public class ChatHandler implements Listener
 {
@@ -21,12 +19,9 @@ public class ChatHandler implements Listener
 	public void OnChat(AsyncPlayerChatEvent event)
 	{
 		String message = event.getMessage();
-		
-		Iterable<Link> links = LinkUtils.findLinks(message);
-		if (links == null)
-			return;
 
-		chatter.sendFormatted(event.getRecipients(), event.getPlayer(), message, event.getFormat(), links, true);
-		event.setCancelled(true);
+		boolean sent = chatter.sendFormatted(event.getRecipients(), event.getPlayer(), message, event.getFormat(), true);
+		if (sent)
+			event.setCancelled(true);
 	}
 }

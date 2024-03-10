@@ -9,9 +9,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 
 import com.festp.Chatter;
-import com.festp.utils.CommandUtils;
-import com.festp.utils.Link;
-import com.festp.utils.LinkUtils;
+import com.festp.parsing.CommandUtils;
 
 public class SmallCommandsHandler implements Listener
 {
@@ -54,25 +52,19 @@ public class SmallCommandsHandler implements Listener
 		if (message == "")
 			return;
 		
-		Iterable<Link> links = LinkUtils.findLinks(message);
-		if (links == null)
-			return;
-		
-		chatter.sendFormatted(null, sender, message, "* %1$s %2$s", links, false);
-		event.setCancelled(true);
+		boolean sent = chatter.sendFormatted(null, sender, message, "* %1$s %2$s", false);
+		if (sent)
+			event.setCancelled(true);
 	}
 
 	private void onSayCommand(Cancellable event, CommandSender sender, String message)
 	{
 		if (message == "")
 			return;
-		
-		Iterable<Link> links = LinkUtils.findLinks(message);
-		if (links == null)
-			return;
 
-		chatter.sendFormatted(null, sender, message, "[%1$s] %2$s", links, false);
-		event.setCancelled(true);
+		boolean sent = chatter.sendFormatted(null, sender, message, "[%1$s] %2$s", false);
+		if (sent)
+			event.setCancelled(true);
 	}
 
 	private boolean isMeCommand(String command) {

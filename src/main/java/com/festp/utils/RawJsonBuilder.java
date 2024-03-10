@@ -5,6 +5,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.festp.Chatter;
+import com.festp.parsing.Link;
+import com.festp.parsing.StyledMessage;
 
 public class RawJsonBuilder
 {
@@ -26,17 +28,8 @@ public class RawJsonBuilder
 	{
 		command.append(tryGetWrapped(str, color));
 	}
-	public String tryGetWrapped(String str, String color)
-	{
-		return str == "" ? "" : getWrapped(str, color);
-	}
-	public void wrap(String str, String color)
-	{
-		command.append(getWrapped(str, color));
-	}
-	private String getWrapped(String str, String color)
-	{
-		return "{\"text\":\"" + color + str + "\"},";
+	public void append(String str) {
+		command.append(str);
 	}
 
 	public void appendSender(CommandSender sender, String color, boolean decorating)
@@ -62,8 +55,10 @@ public class RawJsonBuilder
 		command.append("},");
 	}
 	
-	public void appendMessage(String message, Iterable<Link> links, String color)
+	public void appendMessage(StyledMessage styledMessage, String color)
 	{
+		String message = styledMessage.plainText;
+		Iterable<Link> links = styledMessage.links;
 		startList();
         
 		int lastIndex = 0;
@@ -88,7 +83,7 @@ public class RawJsonBuilder
 		endList();
 	}
 	
-	public void appendJoinedLinks(String message, Iterable<Link> links, String color, String sep)
+	public void appendJoinedLinks(Iterable<Link> links, String color, String sep)
 	{
 		startList();
         
@@ -188,18 +183,31 @@ public class RawJsonBuilder
 		tryRemoveComma();
 		return command.toString();
 	}
-	private void tryRemoveComma() {
-		int index = command.length() - 1;
-		if (index >= 0 && command.charAt(index) == ',')
-			command.deleteCharAt(index);
-	}
 	public StringBuilder releaseStringBuilder() {
 		tryRemoveComma();
 		StringBuilder res = command;
 		command = null;
 		return res;
 	}
-	public void append(String str) {
-		command.append(str);
+	
+	private void tryRemoveComma() {
+		int index = command.length() - 1;
+		if (index >= 0 && command.charAt(index) == ',')
+			command.deleteCharAt(index);
+	}
+	
+	private void wrap(String str, String color)
+	{
+		command.append(getWrapped(str, color));
+	}
+
+	private  String tryGetWrapped(String str, String color)
+	{
+		return str == "" ? "" : getWrapped(str, color);
+	}
+	
+	private String getWrapped(String str, String color)
+	{
+		return "{\"text\":\"" + color + str + "\"},";
 	}
 }

@@ -13,7 +13,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.festp.config.Config;
-import com.festp.utils.Link;
+import com.festp.parsing.Link;
+import com.festp.parsing.StyledMessage;
+import com.festp.parsing.StyledMessageParser;
 import com.festp.utils.RawJsonBuilder;
 
 public class Chatter
@@ -50,8 +52,12 @@ public class Chatter
 	 * @param message is full message containing link(s)
 	 * @param format use "%1$s" for the sender name and "%2$s" for the message, i.e. "<%1$s> %2$s"
 	 * @param link is the first link found*/
-	public void sendFormatted(Set<Player> recipients, CommandSender sender, String message, String format, Iterable<Link> links, boolean sendToConsole)
+	public boolean sendFormatted(Set<Player> recipients, CommandSender sender, String message, String format, boolean sendToConsole)
 	{
+		StyledMessage styledMessage = StyledMessageParser.parse(message);
+		if (styledMessage == null || !styledMessage.hasLinks)
+			return false;
+		
 		if (sendToConsole)
 		{
 			String consoleMessage = format.replace(PLACEHOLDER_NAME, getDisplayName(sender)).replace(PLACEHOLDER_MESSAGE, message);
@@ -60,7 +66,7 @@ public class Chatter
 		
 		// check if actually no recipients
 		if (recipients != null && recipients.isEmpty() || Bukkit.getOnlinePlayers().size() == 0)
-			return;
+			return true;
 		
 		if (recipients == null)
 		{
@@ -79,15 +85,21 @@ public class Chatter
 			int end = matcher.end();
 			builder.tryWrap(format.substring(prevEnd, start), "");
 
-			int colorIndex = format.lastIndexOf(ChatColor.COLOR_CHAR, start);
-			if (0 <= colorIndex && colorIndex + 2 <= end)
-				lastColor = format.substring(colorIndex, colorIndex + 2);
+			int colorStart = format.lastIndexOf(ChatColor.COLOR_CHAR, start);
+			int colorEnd = colorStart + 2;
+			if (0 <= colorStart && colorEnd <= end)
+			{
+				while (colorStart >= 2 && format.charAt(colorStart - 2) == ChatColor.COLOR_CHAR) {
+					colorStart -= 2;
+				}
+				lastColor = format.substring(colorStart, colorEnd);
+			}
 
 			String placeholder = format.substring(start, end);
 			if (placeholder.equals(PLACEHOLDER_NAME))
 				builder.appendSender(sender, lastColor, true);
 			if (placeholder.equals(PLACEHOLDER_MESSAGE))
-				builder.appendMessage(message, links, lastColor);
+				builder.appendMessage(styledMessage, lastColor);
 
 			prevEnd = end;
 		}
@@ -98,15 +110,16 @@ public class Chatter
 		for (Player p : recipients) {
 			sendRawJson(p, rawJson);
 		}
+		return true;
 	}
 	
-	public void sendWhisperMessage(CommandSender sender, Player[] recipients, String message, Iterable<Link> links, String color)
+	public void sendWhisperMessage(CommandSender sender, Player[] recipients, StyledMessage styledMessage, String color)
 	{
 		String fromStr = "commands.message.display.outgoing"; // "You whisper to %s: %s"
 		String toStr = "commands.message.display.incoming"; // "%s whispers to you: %s"
 		
 		RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
-		builder.appendMessage(message, links, color);
+		builder.appendMessage(styledMessage, color);
 		StringBuilder modifiedMessage = builder.releaseStringBuilder();
 
 		builder = new RawJsonBuilder(config.getBuilderSettings());
@@ -132,10 +145,10 @@ public class Chatter
 		}
 	}
 	
-	public void sendOnlyLinks(CommandSender sender, Player[] recipients, String message, Iterable<Link> links, String color)
+	public void sendOnlyLinks(CommandSender sender, Player[] recipients, Iterable<Link> links, String color)
 	{
 		RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
-		builder.appendJoinedLinks(message, links, color, ", ");
+		builder.appendJoinedLinks(links, color, ", ");
 		String linkCommand = builder.build();
 		
 		if (sender instanceof Player)

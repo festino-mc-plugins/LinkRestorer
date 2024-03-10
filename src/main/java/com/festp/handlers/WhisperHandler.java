@@ -18,9 +18,9 @@ import org.bukkit.event.server.ServerCommandEvent;
 import com.festp.Chatter;
 import com.festp.Logger;
 import com.festp.config.Config;
-import com.festp.utils.CommandUtils;
-import com.festp.utils.Link;
-import com.festp.utils.LinkUtils;
+import com.festp.parsing.CommandUtils;
+import com.festp.parsing.StyledMessage;
+import com.festp.parsing.StyledMessageParser;
 
 public class WhisperHandler implements Listener
 {
@@ -73,19 +73,20 @@ public class WhisperHandler implements Listener
 		if (message == "")
 			return;
 		
-		Iterable<Link> links = LinkUtils.findLinks(message);
-		if (links == null)
+		StyledMessage styledMessage = StyledMessageParser.parse(message);
+		if (!styledMessage.hasLinks)
 			return;
+		
 		if (isLogging) Logger.info("Got links, sending messages...");
 		
 		if (!config.get(Config.Key.WHISPER_NEW_MESSAGE, false))
 		{
 			event.setCancelled(true);
-			chatter.sendWhisperMessage(sender, recipients, message, links, color);
+			chatter.sendWhisperMessage(sender, recipients, styledMessage, color);
 		}
 		else
 		{
-			chatter.sendOnlyLinks(sender, recipients, message, links, color);
+			chatter.sendOnlyLinks(sender, recipients, styledMessage.links, color);
 		}
 	}
 
