@@ -1,5 +1,7 @@
 package com.festp.parsing;
 
+import com.festp.utils.LinkUtils;
+
 public class Link
 {
 	public String orig;
@@ -14,8 +16,16 @@ public class Link
 		this.endIndex = endIndex;
 		this.hasProtocol = hasProtocol;
 	}
+
+	public String getUrl() {
+		String url = LinkUtils.applyBrowserEncoding(getText());
+		if (!hasProtocol)
+			url = "https://" + url;
+		
+		return url;
+	}
 	
-	public String getString()
+	public String getText()
 	{
 		return orig.substring(beginIndex, endIndex);
 	}

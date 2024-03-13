@@ -21,13 +21,14 @@ import com.festp.config.Config;
 import com.festp.parsing.CommandUtils;
 import com.festp.parsing.StyledMessage;
 import com.festp.parsing.StyledMessageParser;
+import com.festp.parsing.TextStyle;
 
 public class WhisperHandler implements Listener
 {
 	private Chatter chatter;
 	private Config config;
 	
-	private String color = ChatColor.GRAY.toString() + ChatColor.ITALIC.toString();
+	private static final String STYLE_CODES = ChatColor.GRAY.toString() + ChatColor.ITALIC.toString();
 	
 	public WhisperHandler(Chatter chatter, Config config)
 	{
@@ -79,14 +80,17 @@ public class WhisperHandler implements Listener
 		
 		if (isLogging) Logger.info("Got links, sending messages...");
 		
+		TextStyle style = new TextStyle();
+		style = style.update(STYLE_CODES, 0, STYLE_CODES.length());
+		
 		if (!config.get(Config.Key.WHISPER_NEW_MESSAGE, false))
 		{
 			event.setCancelled(true);
-			chatter.sendWhisperMessage(sender, recipients, styledMessage, color);
+			chatter.sendWhisperMessage(sender, recipients, styledMessage, style);
 		}
 		else
 		{
-			chatter.sendOnlyLinks(sender, recipients, styledMessage.links, color);
+			chatter.sendOnlyLinks(sender, recipients, styledMessage.links, style);
 		}
 	}
 

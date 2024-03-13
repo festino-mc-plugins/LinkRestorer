@@ -8,7 +8,39 @@ public class TextStyle {
 	
 	public TextStyle() { }
 	
-	public void update(String s, int minIndex, int maxIndex)
+	public TextStyle update(String s, int minIndex, int maxIndex)
+	{
+		TextStyle copy = new TextStyle();
+		copy.color = color;
+		copy.style = style;
+		copy.updateMutable(s, minIndex, maxIndex);
+		return copy;
+	}
+	
+	public String getCodes()
+	{
+		if (isRgbColor())
+			return style;
+		
+		return style + color;
+	}
+	
+	/**
+	 * @return empty string or JSON fields with a trailing comma like '"color":"#ABCDEF",'*/
+	public String getJson()
+	{
+		if (isRgbColor())
+			return "\"color\":\"" + color + "\",";
+		
+		return "";
+	}
+	
+	private boolean isRgbColor()
+	{
+		return color.length() > 0 && color.charAt(0) == '#';
+	}
+	
+	private void updateMutable(String s, int minIndex, int maxIndex)
 	{
 		for (int i = minIndex; i < maxIndex; i += 2)
 		{
@@ -17,7 +49,7 @@ public class TextStyle {
 			{
 				// x234567
 				i += 7 * 2;
-				if (i >= maxIndex)
+				if (i > maxIndex)
 					return;
 				
 				color = "#";
@@ -29,27 +61,6 @@ public class TextStyle {
 				update(c);
 			}
 		}
-	}
-	
-	public String getCodes()
-	{
-		if (isRgbColor())
-			return style;
-		
-		return style + color;
-	}
-	
-	public String getJson()
-	{
-		if (isRgbColor())
-			return ",\"color\":\"" + color + "\"";
-		
-		return "";
-	}
-	
-	private boolean isRgbColor()
-	{
-		return color.length() > 0 && color.charAt(0) == '#';
 	}
 	
 	private void update(char code)
@@ -69,5 +80,32 @@ public class TextStyle {
 			if (!style.contains(newStyle))
 				style += newStyle;
 		}
+	}
+
+	/** @param color is TextSyle of ChatColor.GRAY.toString() + ChatColor.ITALIC.toString()
+	 *  @return "color":"gray","italic":"true", */
+	public Object getFullJson() {
+		String styleStr = getCodes();
+		StringBuilder res = new StringBuilder();
+		for (int i = 1; i < styleStr.length(); i += 2)
+		{
+			ChatColor c = ChatColor.getByChar(styleStr.charAt(i));
+			if (c == ChatColor.ITALIC)
+				res.append("\"italic\":\"true\",");
+			else if (c == ChatColor.UNDERLINE)
+				res.append("\"underlined\":\"true\",");
+			else if (c == ChatColor.BOLD)
+				res.append("\"bold\":\"true\",");
+			else if (c == ChatColor.STRIKETHROUGH)
+				res.append("\"strikethrough\":\"true\",");
+			else if (c == ChatColor.MAGIC)
+				res.append("\"obfuscated\":\"true\",");
+			else {
+				res.append("\"color\":\"");
+				res.append(c.name().toLowerCase());
+				res.append("\",");
+			}
+		}
+		return res.toString() + getJson();
 	}
 }

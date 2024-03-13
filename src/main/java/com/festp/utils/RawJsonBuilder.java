@@ -1,5 +1,7 @@
 package com.festp.utils;
 
+import java.util.List;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -7,6 +9,8 @@ import org.bukkit.entity.Player;
 import com.festp.Chatter;
 import com.festp.parsing.Link;
 import com.festp.parsing.StyledMessage;
+import com.festp.parsing.TextStyle;
+import com.festp.parsing.TextStyleSwitch;
 
 public class RawJsonBuilder
 {
@@ -24,24 +28,24 @@ public class RawJsonBuilder
 		command = new StringBuilder(c);
 	}
 	
-	public void tryWrap(String str, String color)
+	public void tryWrap(String str, TextStyle style)
 	{
-		command.append(tryGetWrapped(str, color));
+		command.append(tryGetWrapped(str, style));
 	}
 	public void append(String str) {
 		command.append(str);
 	}
 
-	public void appendSender(CommandSender sender, String color, boolean decorating)
+	public void appendSender(CommandSender sender, TextStyle style, boolean decorating)
 	{
 		if (sender instanceof Player)
-			appendPlayer((Player)sender, color, decorating);
+			appendPlayer((Player)sender, style, decorating);
 		else {
 			String name = Chatter.getDisplayName(sender);
-			wrap(name, color);
+			wrap(name, style);
 		}
 	}
-	public void appendPlayer(Player player, String color, boolean decorating)
+	public void appendPlayer(Player player, TextStyle style, boolean decorating)
 	{
 		String nickname;
 		if (decorating)
@@ -49,46 +53,81 @@ public class RawJsonBuilder
 		else
 			nickname = player.getName();
 		String uuid = player.getUniqueId().toString();
-		command.append("{\"text\":\"" + color + nickname + "\",");
-		command.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"" + nickname + "\\nType: Player\\n" + uuid + "\"},");
+		command.append("{");
+		command.append(style.getJson());
+		command.append("\"text\":\"" + style.getCodes() + nickname);
+		command.append("\",\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"" + nickname + "\\nType: Player\\n" + uuid + "\"},");
 		command.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/tell " + nickname + " \"}");
 		command.append("},");
 	}
 	
-	public void appendMessage(StyledMessage styledMessage, String color)
+	public void appendMessage(StyledMessage styledMessage, TextStyle style)
 	{
 		String message = styledMessage.plainText;
-		Iterable<Link> links = styledMessage.links;
+		List<Link> links = styledMessage.links;
+		List<TextStyleSwitch> styles = styledMessage.styleSwitches;
 		startList();
-        
-		int lastIndex = 0;
-		for (Link link : links)
+		
+		int index = 0;
+		int linkIndex = 0, styleIndex = 0;
+		while (index < message.length())
 		{
-			if (lastIndex < link.beginIndex) {
-				tryWrap(message.substring(lastIndex, link.beginIndex), color);
+			// find style, endIndex and link (may be null)
+			int endIndex = message.length();
+			if (styleIndex < styles.size())
+			{
+				if (index >= styles.get(styleIndex).index) {
+					style = styles.get(styleIndex).style;
+					styleIndex++;
+				}
 			}
-			else if (lastIndex == 0 && link.beginIndex == 0) {
+			if (styleIndex < styles.size()) {
+				endIndex = styles.get(styleIndex).index;
+			}
+			
+			Link link = null;
+			if (linkIndex < links.size())
+			{
+				if (links.get(linkIndex).endIndex <= index)
+				{
+					linkIndex++;
+				}
+			}
+			if (linkIndex < links.size())
+			{
+				link = links.get(linkIndex);
+				if (index < link.beginIndex) {
+					endIndex = Math.min(link.beginIndex, endIndex);
+					link = null;
+				}
+				else {
+					endIndex = Math.min(link.endIndex, endIndex);
+				}
+			}
+
+			if (index == 0 && link != null) {
 				// workaround for links at the beginning: they would convert all the plain text to that link
-				wrap("", color);
+				wrap("", new TextStyle());
 			}
 			
-			appendLink(link, color);
-			
-			lastIndex = link.endIndex;
-		}
-		if (lastIndex < message.length()) {
-			tryWrap(message.substring(lastIndex), color);
+			String text = message.substring(index, endIndex);
+			if (link == null)
+				tryWrap(text, style);
+			else
+				appendLink(text, link.getUrl(), style);
+
+			index = endIndex;
 		}
 		
 		endList();
 	}
 	
-	public void appendJoinedLinks(Iterable<Link> links, String color, String sep)
+	public void appendJoinedLinks(Iterable<Link> links, TextStyle style, String sep)
 	{
 		startList();
         
 		boolean isFirst = true;
-		String wrappedSep = tryGetWrapped(sep, color);
+		String wrappedSep = tryGetWrapped(sep, style);
 		for (Link link : links)
 		{
 			if (isFirst) {
@@ -97,33 +136,31 @@ public class RawJsonBuilder
 			else {
 				command.append(wrappedSep);
 			}
-			appendLink(link, color);
+			appendLink(link.getText(), link.getUrl(), style);
 		}
 
 		endList();
 	}
 	
-	public void appendLink(Link link, String color)
+	public void appendLink(String text, String url, TextStyle style)
 	{
-		String linkStr = link.getString();
-		String linkClick = LinkUtils.applyBrowserEncoding(linkStr);
-		if (!link.hasProtocol)
-			linkClick = "https://" + linkClick;
-		command.append("{\"text\":\"");
-		command.append(color);
+		command.append("{");
+		command.append(style.getJson());
+		command.append("\"text\":\"");
+		command.append(style.getCodes());
 		if (settings.isLinkUnderlined)
 			command.append(ChatColor.UNDERLINE);
-		command.append(linkStr);
+		command.append(text);
 		command.append("\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"");
-		command.append(linkClick);
+		command.append(url);
 		command.append("\"}},");
 	}
 	
 	/** Check for more info: <a>https://minecraft.fandom.com/wiki/Raw_JSON_text_format#Translated_Text</a> */
-	public void appendTranslated(String identifier, CharSequence[] textComponents, String color)
+	public void appendTranslated(String identifier, CharSequence[] textComponents, TextStyle style)
 	{
 		command.append("{");
-		command.append(getColorTags(color));
+		command.append(style.getFullJson());
 		command.append("\"translate\":\"");
 		command.append(identifier);
 		command.append("\"");
@@ -140,33 +177,6 @@ public class RawJsonBuilder
 			n++;
 		}
 		command.append("]},");
-	}
-	
-	/** @param color is ChatColor.GRAY.toString() + ChatColor.ITALIC.toString()
-	 *  @return "color":"gray","italic":"true", */
-	private static String getColorTags(String color)
-	{
-		StringBuilder res = new StringBuilder();
-		for (int i = 1; i < color.length(); i += 2)
-		{
-			ChatColor c = ChatColor.getByChar(color.charAt(i));
-			if (c == ChatColor.ITALIC)
-				res.append("\"italic\":\"true\",");
-			else if (c == ChatColor.UNDERLINE)
-				res.append("\"underlined\":\"true\",");
-			else if (c == ChatColor.BOLD)
-				res.append("\"bold\":\"true\",");
-			else if (c == ChatColor.STRIKETHROUGH)
-				res.append("\"strikethrough\":\"true\",");
-			else if (c == ChatColor.MAGIC)
-				res.append("\"obfuscated\":\"true\",");
-			else {
-				res.append("\"color\":\"");
-				res.append(c.name().toLowerCase());
-				res.append("\",");
-			}
-		}
-		return res.toString();
 	}
 	
 	public void startList()
@@ -196,18 +206,25 @@ public class RawJsonBuilder
 			command.deleteCharAt(index);
 	}
 	
-	private void wrap(String str, String color)
+	private void wrap(String str, TextStyle style)
 	{
-		command.append(getWrapped(str, color));
+		command.append(getWrapped(str, style));
 	}
 
-	private  String tryGetWrapped(String str, String color)
+	private  String tryGetWrapped(String str, TextStyle style)
 	{
-		return str == "" ? "" : getWrapped(str, color);
+		return str == "" ? "" : getWrapped(str, style);
 	}
 	
-	private String getWrapped(String str, String color)
+	private String getWrapped(String str, TextStyle style)
 	{
-		return "{\"text\":\"" + color + str + "\"},";
+		StringBuilder builder = new StringBuilder();
+		builder.append("{");
+		builder.append(style.getJson());
+		builder.append("\"text\":\"");
+		builder.append(style.getCodes());
+		builder.append(str);
+		builder.append("\"},");
+		return builder.toString();
 	}
 }

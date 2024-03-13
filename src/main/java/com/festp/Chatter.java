@@ -16,6 +16,7 @@ import com.festp.config.Config;
 import com.festp.parsing.Link;
 import com.festp.parsing.StyledMessage;
 import com.festp.parsing.StyledMessageParser;
+import com.festp.parsing.TextStyle;
 import com.festp.utils.RawJsonBuilder;
 
 public class Chatter
@@ -78,12 +79,12 @@ public class Chatter
 		Pattern pattern = Pattern.compile("[%][\\d][$][s]", Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(format);
 		int prevEnd = 0;
-		String lastColor = ChatColor.RESET.toString();
+		TextStyle style = new TextStyle();
 		while (matcher.find())
 		{
 			int start = matcher.start();
 			int end = matcher.end();
-			builder.tryWrap(format.substring(prevEnd, start), "");
+			builder.tryWrap(format.substring(prevEnd, start), style);
 
 			int colorStart = format.lastIndexOf(ChatColor.COLOR_CHAR, start);
 			int colorEnd = colorStart + 2;
@@ -92,18 +93,18 @@ public class Chatter
 				while (colorStart >= 2 && format.charAt(colorStart - 2) == ChatColor.COLOR_CHAR) {
 					colorStart -= 2;
 				}
-				lastColor = format.substring(colorStart, colorEnd);
+				style = style.update(format, colorStart, colorEnd);
 			}
 
 			String placeholder = format.substring(start, end);
 			if (placeholder.equals(PLACEHOLDER_NAME))
-				builder.appendSender(sender, lastColor, true);
+				builder.appendSender(sender, style, true);
 			if (placeholder.equals(PLACEHOLDER_MESSAGE))
-				builder.appendMessage(styledMessage, lastColor);
+				builder.appendMessage(styledMessage, style);
 
 			prevEnd = end;
 		}
-		builder.tryWrap(format.substring(prevEnd), "");
+		builder.tryWrap(format.substring(prevEnd), style);
 		builder.endList();
 
 		String rawJson = builder.releaseStringBuilder().toString();
@@ -113,17 +114,17 @@ public class Chatter
 		return true;
 	}
 	
-	public void sendWhisperMessage(CommandSender sender, Player[] recipients, StyledMessage styledMessage, String color)
+	public void sendWhisperMessage(CommandSender sender, Player[] recipients, StyledMessage styledMessage, TextStyle style)
 	{
 		String fromStr = "commands.message.display.outgoing"; // "You whisper to %s: %s"
 		String toStr = "commands.message.display.incoming"; // "%s whispers to you: %s"
 		
 		RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
-		builder.appendMessage(styledMessage, color);
+		builder.appendMessage(styledMessage, style);
 		StringBuilder modifiedMessage = builder.releaseStringBuilder();
 
 		builder = new RawJsonBuilder(config.getBuilderSettings());
-		builder.appendSender(sender, color, false);
+		builder.appendSender(sender, style, false);
 		StringBuilder wrapNameFrom = builder.releaseStringBuilder();
 		
 		for (Player recipient : recipients)
@@ -131,24 +132,24 @@ public class Chatter
 			if (sender instanceof Player)
 			{
 				builder = new RawJsonBuilder(config.getBuilderSettings());
-				builder.appendPlayer(recipient, color, false);
+				builder.appendPlayer(recipient, style, false);
 				StringBuilder wrapNameTo = builder.releaseStringBuilder();
 				
 				RawJsonBuilder from = new RawJsonBuilder(config.getBuilderSettings());
-				from.appendTranslated(fromStr, new CharSequence[] { wrapNameTo, modifiedMessage }, color);
+				from.appendTranslated(fromStr, new CharSequence[] { wrapNameTo, modifiedMessage }, style);
 				sendRawJson((Player)sender, from.build());
 			}
 			
 			RawJsonBuilder to = new RawJsonBuilder(config.getBuilderSettings());
-			to.appendTranslated(toStr, new CharSequence[] { wrapNameFrom, modifiedMessage }, color);
+			to.appendTranslated(toStr, new CharSequence[] { wrapNameFrom, modifiedMessage }, style);
 			sendRawJson(recipient, to.build());
 		}
 	}
 	
-	public void sendOnlyLinks(CommandSender sender, Player[] recipients, Iterable<Link> links, String color)
+	public void sendOnlyLinks(CommandSender sender, Player[] recipients, Iterable<Link> links, TextStyle style)
 	{
 		RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
-		builder.appendJoinedLinks(links, color, ", ");
+		builder.appendJoinedLinks(links, style, ", ");
 		String linkCommand = builder.build();
 		
 		if (sender instanceof Player)
