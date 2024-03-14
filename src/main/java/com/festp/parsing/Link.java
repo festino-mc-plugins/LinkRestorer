@@ -4,21 +4,21 @@ import com.festp.utils.LinkUtils;
 
 public class Link
 {
-	public String orig;
-	public int beginIndex;
-	public int endIndex;
-	public boolean hasProtocol;
+	private final String _text;
+	public final int beginIndex;
+	public final int endIndex;
+	public final boolean hasProtocol;
 	
 	public Link(String orig, int beginIndex, int endIndex, boolean hasProtocol)
 	{
-		this.orig = orig;
+		_text = orig.substring(beginIndex, endIndex);
 		this.beginIndex = beginIndex;
 		this.endIndex = endIndex;
 		this.hasProtocol = hasProtocol;
 	}
 
 	public String getUrl() {
-		String url = LinkUtils.applyBrowserEncoding(getText());
+		String url = LinkUtils.applyBrowserEncoding(_text);
 		if (!hasProtocol)
 			url = "https://" + url;
 		
@@ -27,6 +27,6 @@ public class Link
 	
 	public String getText()
 	{
-		return orig.substring(beginIndex, endIndex);
+		return _text;
 	}
 }
