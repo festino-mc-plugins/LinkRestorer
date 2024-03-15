@@ -9,8 +9,7 @@ public class LinkParser {
 	// TODO check telegram desktop code
 	// TextWithTags Ui::InputField::getTextWithTags, getTextWithTagsPart, getTextPart...
 	
-	// TODO? prevent using both latin and cyrillic letters
-	private static String LINK_REGEX = "(((?:https?):\\/\\/)?(?:(?:[-a-z0-9_à-ÿÀ-ß]{1,}\\.){1,}([a-z0-9à-ÿÀ-ß]{1,}).*?(?=[\\.\\?!,;:]?(?:[" + String.valueOf(org.bukkit.ChatColor.COLOR_CHAR) + " \\n]|$))))";
+	private static String LINK_REGEX = "(((?:https?):\\/\\/)?(?:(?:[-a-z0-9_ï¿½-ï¿½ï¿½-ï¿½]{1,}\\.){1,}([a-z0-9ï¿½-ï¿½ï¿½-ï¿½]{1,}).*?(?=[\\.\\?!,;:]?(?:[" + String.valueOf(org.bukkit.ChatColor.COLOR_CHAR) + " \\n]|$))))";
 	private static Pattern PATTERN = Pattern.compile(LINK_REGEX, Pattern.CASE_INSENSITIVE);
 	private static int SCHEME_GROUP_INDEX = 2;
 	private static int TLD_GROUP_INDEX = 3;
