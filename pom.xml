@@ -3,12 +3,15 @@
   <groupId>ClickableLinks</groupId>
   <artifactId>ClickableLinks</artifactId>
   <version>1.1.5</version>
+  <properties>
+     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   <build>
     <defaultGoal>clean package</defaultGoal>
     
 	<resources>
       <resource>
-        <directory>.</directory>
+        <directory>src/main/java/</directory>
         <filtering>false</filtering>
         <includes>
           <include>LICENSE</include>
@@ -37,14 +40,26 @@
         <id>spigot-repo</id>
         <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
     </repository>
-</repositories>
+  </repositories>
   <dependencies>
     <!--This adds the Spigot API artifact to the build -->
     <dependency>
-           <groupId>org.spigotmc</groupId>
-           <artifactId>spigot-api</artifactId>
-           <version>1.19.2-R0.1-SNAPSHOT</version>
-           <scope>provided</scope>
+      <groupId>org.spigotmc</groupId>
+      <artifactId>spigot-api</artifactId>
+      <version>1.19.2-R0.1-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>5.1.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>5.1.0</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>
