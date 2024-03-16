@@ -1,6 +1,6 @@
 api-version: 1.14
 name: ClickableLinks
-version: 1.2.1
+version: 1.2.2
 authors: [FEST_Channel, EvilGeniys]
 description: Bring clickable links to minecraft chat!
 website: https://github.com/festino-mc-plugins/ClickableLinks
