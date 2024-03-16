@@ -1,4 +1,5 @@
 # ClickableLinks
+[![Tests](https://github.com/festino-mc-plugins/ClickableLinks/actions/workflows/main.yml/badge.svg)](https://github.com/festino-mc-plugins/ClickableLinks/actions/workflows/main.yml)  
  Brings clickable links to minecraft chat.  
 
 Other pages: [Spigot](https://www.spigotmc.org/resources/clickablelinks.105786/)  
