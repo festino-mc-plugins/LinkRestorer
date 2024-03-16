@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 public class LinkParserTests {
 
 	@ParameterizedTest
-	@ValueSource(strings = {"simple text", "o.o"})
+	@ValueSource(strings = {"simple text", "o.o", "T.T"})
 	void parseNoLinks(String text) {
 		List<Link> links = LinkParser.getLinks(text);
 		Assertions.assertEquals(0, links.size());
