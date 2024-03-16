@@ -93,7 +93,7 @@ public class Chatter
 				while (colorStart >= 2 && format.charAt(colorStart - 2) == ChatColor.COLOR_CHAR) {
 					colorStart -= 2;
 				}
-				style = style.update(format, colorStart, colorEnd);
+				style.update(format, colorStart, colorEnd);
 			}
 
 			String placeholder = format.substring(start, end);

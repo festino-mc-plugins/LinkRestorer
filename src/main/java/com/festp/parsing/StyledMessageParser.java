@@ -22,8 +22,8 @@ public class StyledMessageParser {
 					i += 2;
 				}
 				
-				style = style.update(message, startIndex, i);
-				TextStyleSwitch styleSwitch = new TextStyleSwitch(style, plainBuilder.length());
+				style.update(message, startIndex, i);
+				TextStyleSwitch styleSwitch = new TextStyleSwitch(style.clone(), plainBuilder.length());
 				switches.add(styleSwitch);
 				
 				i--;

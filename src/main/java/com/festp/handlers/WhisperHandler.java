@@ -80,8 +80,7 @@ public class WhisperHandler implements Listener
 		
 		if (isLogging) Logger.info("Got links, sending messages...");
 		
-		TextStyle style = new TextStyle();
-		style = style.update(STYLE_CODES, 0, STYLE_CODES.length());
+		TextStyle style = new TextStyle().update(STYLE_CODES);
 		
 		if (!config.get(Config.Key.WHISPER_NEW_MESSAGE, false))
 		{

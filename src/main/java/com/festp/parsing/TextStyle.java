@@ -2,19 +2,49 @@ package com.festp.parsing;
 
 import org.bukkit.ChatColor;
 
-public class TextStyle {
-	String color = "";
-	String style = "";
+public class TextStyle implements Cloneable {
+	private String color = "";
+	private String style = "";
 	
 	public TextStyle() { }
 	
-	public TextStyle update(String s, int minIndex, int maxIndex)
+	public TextStyle clone()
 	{
 		TextStyle copy = new TextStyle();
 		copy.color = color;
 		copy.style = style;
-		copy.updateMutable(s, minIndex, maxIndex);
-		return copy;
+		return copy; 
+	}
+
+	/** @return the same TextStyle object for chaining */
+	public TextStyle update(String s)
+	{
+		return update(s, 0, s.length());
+	}
+
+	/** @return the same TextStyle object for chaining */
+	public TextStyle update(String s, int minIndex, int maxIndex)
+	{
+		for (int i = minIndex; i < maxIndex; i += 2)
+		{
+			char c = s.charAt(i + 1);
+			if (c == 'x')
+			{
+				// x234567
+				i += 7 * 2;
+				if (i > maxIndex)
+					return this;
+				
+				color = "#";
+				for (int j = 0; j < 6; j++)
+					color += s.charAt(i + 1 - 2 * 6 + 2 * j);
+			}
+			else
+			{
+				update(c);
+			}
+		}
+		return this;
 	}
 	
 	public String getCodes()
@@ -38,29 +68,6 @@ public class TextStyle {
 	private boolean isRgbColor()
 	{
 		return color.length() > 0 && color.charAt(0) == '#';
-	}
-	
-	private void updateMutable(String s, int minIndex, int maxIndex)
-	{
-		for (int i = minIndex; i < maxIndex; i += 2)
-		{
-			char c = s.charAt(i + 1);
-			if (c == 'x')
-			{
-				// x234567
-				i += 7 * 2;
-				if (i > maxIndex)
-					return;
-				
-				color = "#";
-				for (int j = 0; j < 6; j++)
-					color += s.charAt(i + 1 - 2 * 6 + 2 * j);
-			}
-			else
-			{
-				update(c);
-			}
-		}
 	}
 	
 	private void update(char code)
@@ -106,6 +113,7 @@ public class TextStyle {
 				res.append("\",");
 			}
 		}
-		return res.toString() + getJson();
+		res.append(getJson());
+		return res.toString();
 	}
 }
