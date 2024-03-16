@@ -60,8 +60,14 @@ public class RawJsonBuilder
 				.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/tell " + plainName + " \"},")
 				.toString();
 		
-		StyledMessage styledText = StyledMessageParser.parse(nickname);
-		nickname = styledText.plainText;
+		wrapMultiColor(nickname, style, eventsJson);
+	}
+	
+	public void wrapMultiColor(String s, TextStyle startStyle, String extraJson)
+	{
+		TextStyle style = startStyle;
+		StyledMessage styledText = StyledMessageParser.parse(s);
+		s = styledText.plainText;
 		List<TextStyleSwitch> styleSwitches = styledText.styleSwitches;
 		int startIndex, endIndex = 0;
 		for (int i = 0; i <= styledText.styleSwitches.size(); i++)
@@ -70,10 +76,10 @@ public class RawJsonBuilder
 			if (i > 0) {
 				style = styleSwitches.get(i - 1).style;
 			}
-			endIndex = i < styleSwitches.size() ? styleSwitches.get(i).index : nickname.length();
+			endIndex = i < styleSwitches.size() ? styleSwitches.get(i).index : s.length();
 			if (startIndex < endIndex)
 			{
-				wrap(nickname.substring(startIndex, endIndex), style, eventsJson);
+				wrap(s.substring(startIndex, endIndex), style, extraJson);
 			}
 		}
 	}
