@@ -32,6 +32,11 @@
           <target>1.8</target>
         </configuration>
       </plugin>
+        <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M7</version>
+      </plugin>
     </plugins>
   </build>
   <repositories>
@@ -41,6 +46,18 @@
         <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
     </repository>
   </repositories>
+  
+  <dependencyManagement>
+    <dependencies>    
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>5.6.1</version>
+        <scope>import</scope> <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  
   <dependencies>
     <!--This adds the Spigot API artifact to the build -->
     <dependency>
@@ -52,19 +69,16 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
-      <version>5.1.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
-      <version>5.1.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-launcher</artifactId>
-      <version>1.10.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
