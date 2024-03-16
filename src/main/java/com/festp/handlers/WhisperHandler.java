@@ -75,7 +75,7 @@ public class WhisperHandler implements Listener
 			return;
 		
 		StyledMessage styledMessage = StyledMessageParser.parse(message);
-		if (!styledMessage.hasLinks)
+		if (styledMessage == null || !styledMessage.hasLinks)
 			return;
 		
 		if (isLogging) Logger.info("Got links, sending messages...");

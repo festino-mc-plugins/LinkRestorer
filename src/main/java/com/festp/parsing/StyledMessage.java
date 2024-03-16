@@ -6,8 +6,8 @@ public class StyledMessage {
 	public final String plainText;
 	public final List<Link> links;
 	public final List<TextStyleSwitch> styleSwitches;
-	public boolean isPlain;
-	public boolean hasLinks;
+	public final boolean isPlain;
+	public final boolean hasLinks;
 	
 	public StyledMessage(String plainText, List<Link> links, List<TextStyleSwitch> styleSwitches)
 	{
