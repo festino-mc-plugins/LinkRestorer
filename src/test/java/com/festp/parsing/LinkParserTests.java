@@ -82,7 +82,9 @@ public class LinkParserTests {
 	@ValueSource(strings = {
 			"256.0.0.1",
 			"127.0.0",
-			"127.0.0.1.1"})
+			"127.0.0.1.1",
+			"1.0..1",
+			"127.0.FF.01"})
 	void parseInvalidIPv4(String url) {
 		List<Link> links = LinkParser.getLinks(url);
 		Assertions.assertEquals(0, links.size());
