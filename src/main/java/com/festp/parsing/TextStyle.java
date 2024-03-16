@@ -25,7 +25,7 @@ public class TextStyle implements Cloneable {
 	/** @return the same TextStyle object for chaining */
 	public TextStyle update(String s, int minIndex, int maxIndex)
 	{
-		for (int i = minIndex; i < maxIndex; i += 2)
+		for (int i = minIndex; i + 1 < maxIndex; i += 2)
 		{
 			char c = s.charAt(i + 1);
 			if (c == 'x')
