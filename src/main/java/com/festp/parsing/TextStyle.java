@@ -52,7 +52,7 @@ public class TextStyle implements Cloneable {
 		if (isRgbColor())
 			return style;
 		
-		return style + color;
+		return color + style;
 	}
 	
 	/**
@@ -70,6 +70,7 @@ public class TextStyle implements Cloneable {
 	public Object getFullJson() {
 		String styleStr = getCodes();
 		StringBuilder res = new StringBuilder();
+		res.append(getJson());
 		for (int i = 1; i < styleStr.length(); i += 2)
 		{
 			ChatColor c = ChatColor.getByChar(styleStr.charAt(i));
@@ -89,7 +90,6 @@ public class TextStyle implements Cloneable {
 				res.append("\",");
 			}
 		}
-		res.append(getJson());
 		return res.toString();
 	}
 	
@@ -101,12 +101,9 @@ public class TextStyle implements Cloneable {
 	private void update(char code)
 	{
 		code = Character.toLowerCase(code);
-		if (code == 'r') {
-			color = "";
-			style = "" + ChatColor.COLOR_CHAR + code;
-		}
-		else if ('0' <= code && code <= '9' || 'a' <= code && code <= 'f')
+		if ('0' <= code && code <= '9' || 'a' <= code && code <= 'f' || code == 'r')
 		{
+			style = "";
 			color = "" + ChatColor.COLOR_CHAR + code;
 		}
 		else
