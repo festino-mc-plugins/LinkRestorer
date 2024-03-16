@@ -84,7 +84,7 @@ public class Chatter
 		{
 			int start = matcher.start();
 			int end = matcher.end();
-			builder.tryWrap(format.substring(prevEnd, start), style);
+			builder.wrapMultiColor(format.substring(prevEnd, start), style, "");
 
 			int colorStart = format.lastIndexOf(ChatColor.COLOR_CHAR, start);
 			int colorEnd = colorStart + 2;
@@ -104,7 +104,7 @@ public class Chatter
 
 			prevEnd = end;
 		}
-		builder.tryWrap(format.substring(prevEnd), style);
+		builder.wrapMultiColor(format.substring(prevEnd), style, "");
 		builder.endList();
 
 		String rawJson = builder.releaseStringBuilder().toString();
