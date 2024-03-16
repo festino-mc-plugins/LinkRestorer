@@ -64,33 +64,9 @@ public class TextStyle implements Cloneable {
 		
 		return "";
 	}
-	
-	private boolean isRgbColor()
-	{
-		return color.length() > 0 && color.charAt(0) == '#';
-	}
-	
-	private void update(char code)
-	{
-		code = Character.toLowerCase(code);
-		if (code == 'r') {
-			color = "";
-			style = "";
-		}
-		else if ('0' <= code && code <= '9' || 'a' <= code && code <= 'f')
-		{
-			color = "" + ChatColor.COLOR_CHAR + code;
-		}
-		else
-		{
-			String newStyle = "" + ChatColor.COLOR_CHAR + code;
-			if (!style.contains(newStyle))
-				style += newStyle;
-		}
-	}
 
-	/** @param color is TextSyle of ChatColor.GRAY.toString() + ChatColor.ITALIC.toString()
-	 *  @return "color":"gray","italic":"true", */
+	/** @return <b>"color":"gray","italic":"true",</b><br>
+	 * if object is TextSyle of ChatColor.GRAY.toString() + ChatColor.ITALIC.toString()*/
 	public Object getFullJson() {
 		String styleStr = getCodes();
 		StringBuilder res = new StringBuilder();
@@ -115,5 +91,29 @@ public class TextStyle implements Cloneable {
 		}
 		res.append(getJson());
 		return res.toString();
+	}
+	
+	private boolean isRgbColor()
+	{
+		return color.length() > 0 && color.charAt(0) == '#';
+	}
+	
+	private void update(char code)
+	{
+		code = Character.toLowerCase(code);
+		if (code == 'r') {
+			color = "";
+			style = "" + ChatColor.COLOR_CHAR + code;
+		}
+		else if ('0' <= code && code <= '9' || 'a' <= code && code <= 'f')
+		{
+			color = "" + ChatColor.COLOR_CHAR + code;
+		}
+		else
+		{
+			String newStyle = "" + ChatColor.COLOR_CHAR + code;
+			if (!style.contains(newStyle))
+				style += newStyle;
+		}
 	}
 }

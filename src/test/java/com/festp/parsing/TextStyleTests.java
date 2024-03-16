@@ -50,7 +50,7 @@ class TextStyleTests {
 				.update(ChatColor.COLOR_CHAR + "0")
 				.update(ChatColor.BOLD.toString());
 		style.update(ChatColor.COLOR_CHAR + "r");
-		Assertions.assertEquals("", style.getCodes());
+		Assertions.assertEquals(ChatColor.COLOR_CHAR + "r", style.getCodes());
 	}
 
 	@ParameterizedTest
