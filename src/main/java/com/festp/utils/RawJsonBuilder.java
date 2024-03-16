@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import com.festp.Chatter;
 import com.festp.parsing.Link;
 import com.festp.parsing.StyledMessage;
+import com.festp.parsing.StyledMessageParser;
 import com.festp.parsing.TextStyle;
 import com.festp.parsing.TextStyleSwitch;
 
@@ -52,13 +53,29 @@ public class RawJsonBuilder
 			nickname = Chatter.getDisplayName(player);
 		else
 			nickname = player.getName();
+		String plainName = ChatColor.stripColor(nickname);
 		String uuid = player.getUniqueId().toString();
-		command.append("{");
-		command.append(style.getJson());
-		command.append("\"text\":\"" + style.getCodes() + nickname);
-		command.append("\",\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"" + nickname + "\\nType: Player\\n" + uuid + "\"},");
-		command.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/tell " + nickname + " \"}");
-		command.append("},");
+		String eventsJson = new StringBuilder()
+				.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"" + plainName + "\\nType: Player\\n" + uuid + "\"},")
+				.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/tell " + plainName + " \"},")
+				.toString();
+		
+		StyledMessage styledText = StyledMessageParser.parse(nickname);
+		nickname = styledText.plainText;
+		List<TextStyleSwitch> styleSwitches = styledText.styleSwitches;
+		int startIndex, endIndex = 0;
+		for (int i = 0; i <= styledText.styleSwitches.size(); i++)
+		{
+			startIndex = endIndex;
+			if (i > 0) {
+				style = styleSwitches.get(i - 1).style;
+			}
+			endIndex = i < styleSwitches.size() ? styleSwitches.get(i).index : nickname.length();
+			if (startIndex < endIndex)
+			{
+				wrap(nickname.substring(startIndex, endIndex), style, eventsJson);
+			}
+		}
 	}
 	
 	public void appendMessage(StyledMessage styledMessage, TextStyle style)
@@ -208,18 +225,27 @@ public class RawJsonBuilder
 	
 	private void wrap(String str, TextStyle style)
 	{
-		command.append(getWrapped(str, style));
+		wrap(str, style, "");
+	}
+	private void wrap(String str, TextStyle style, String extraJson)
+	{
+		command.append(getWrapped(str, style, extraJson));
 	}
 
-	private  String tryGetWrapped(String str, TextStyle style)
+	private String tryGetWrapped(String str, TextStyle style)
 	{
 		return str == "" ? "" : getWrapped(str, style);
 	}
 	
 	private String getWrapped(String str, TextStyle style)
 	{
+		return getWrapped(str, style, "");
+	}
+	private String getWrapped(String str, TextStyle style, String extraJson)
+	{
 		StringBuilder builder = new StringBuilder();
 		builder.append("{");
+		builder.append(extraJson);
 		builder.append(style.getJson());
 		builder.append("\"text\":\"");
 		builder.append(style.getCodes());
