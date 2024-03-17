@@ -27,8 +27,16 @@ class TextStyleTests {
 		char c = ChatColor.COLOR_CHAR;
 		String codes = c + "x" + c + "4" + c + "0" + c + "A" + c + "4" + c + "F" + c + "D";
 		TextStyle style = new TextStyle().update(codes);
-		Assertions.assertEquals("", style.getCodes());
+		Assertions.assertEquals(c + "r", style.getCodes());
 		Assertions.assertEquals("\"color\":\"" + hexColor + "\",", style.getJson());
+	}
+
+	@Test
+	void parsesCodeAfterHexColor() {
+		char c = ChatColor.COLOR_CHAR;
+		String codes = c + "x" + c + "4" + c + "0" + c + "A" + c + "4" + c + "F" + c + "D";
+		TextStyle style = new TextStyle().update(codes + c + "l");
+		Assertions.assertEquals(c + "r" + c + "l", style.getCodes());
 	}
 	
 	@Test
