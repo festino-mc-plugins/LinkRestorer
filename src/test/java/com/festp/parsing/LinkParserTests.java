@@ -65,6 +65,34 @@ public class LinkParserTests {
 	}
 
 	@Test
+	void parseComplexLink() {
+		//String url = "a http://username:password@example.com:8080/test?param=value&p=1#anchor a";
+		String url = "http://example.com:8080/test?param=value&p=1#anchor";
+		List<Link> links = LinkParser.getLinks("a " + url + " a");
+		Assertions.assertEquals(1, links.size());
+		
+		Link link = links.get(0);
+		Assertions.assertEquals(2, link.beginIndex);
+		Assertions.assertEquals(url.length() + 2, link.endIndex);
+		Assertions.assertEquals(url, link.getText());
+		Assertions.assertEquals(url, link.getUrl());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"https://www.лекарство.net/",
+			"https://example.com/初音ミク"})
+	void parseNonLatin(String url) {
+		List<Link> links = LinkParser.getLinks(url);
+		Assertions.assertEquals(1, links.size());
+		
+		Link link = links.get(0);
+		Assertions.assertEquals(0, link.beginIndex);
+		Assertions.assertEquals(url.length(), link.endIndex);
+		Assertions.assertEquals(url, link.getText());
+	}
+
+	@Test
 	void parseIPv4() {
 		String url = "127.0.0.1";
 		List<Link> links = LinkParser.getLinks(url);
