@@ -9,10 +9,10 @@ public class LinkParser {
 	// TODO check telegram desktop code
 	// TextWithTags Ui::InputField::getTextWithTags, getTextWithTagsPart, getTextPart...
 	
-	private static String LINK_REGEX = "(((?:https?):\\/\\/)?(?:(?:[-a-z0-9_�-��-�]{1,}\\.){1,}([a-z0-9�-��-�]{1,}).*?(?=[\\.\\?!,;:]?(?:[" + String.valueOf(org.bukkit.ChatColor.COLOR_CHAR) + " \\n]|$))))";
-	private static Pattern PATTERN = Pattern.compile(LINK_REGEX, Pattern.CASE_INSENSITIVE);
-	private static int SCHEME_GROUP_INDEX = 2;
-	private static int TLD_GROUP_INDEX = 3;
+	private static final String LINK_REGEX = "(((?:https?):\\/\\/)?(?:(?:[-a-z0-9_а-яА-Я]{1,}\\.){1,}([a-z0-9а-яА-Я]{1,}).*?(?=[\\.\\?!,;:]?(?:[" + String.valueOf(org.bukkit.ChatColor.COLOR_CHAR) + " \\n]|$))))";
+	private static final Pattern PATTERN = Pattern.compile(LINK_REGEX, Pattern.CASE_INSENSITIVE);
+	private static final int SCHEME_GROUP_INDEX = 2;
+	private static final int TLD_GROUP_INDEX = 3;
 
 	/**@param message is a plain text 
 	 * @return <b>null</b> if no links found */
