@@ -35,9 +35,12 @@ public class TextStyle implements Cloneable {
 				if (i > maxIndex)
 					return this;
 				
+				style = ChatColor.RESET.toString();
 				color = "#";
 				for (int j = 0; j < 6; j++)
 					color += s.charAt(i + 1 - 2 * 6 + 2 * j);
+				
+				i -= 2;
 			}
 			else
 			{
