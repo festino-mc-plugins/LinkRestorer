@@ -86,16 +86,6 @@ public class Chatter
 			int end = matcher.end();
 			style = builder.wrapMultiColor(format.substring(prevEnd, start), style, "");
 
-			int colorStart = format.lastIndexOf(ChatColor.COLOR_CHAR, start);
-			int colorEnd = colorStart + 2;
-			if (0 <= colorStart && colorEnd <= end)
-			{
-				while (colorStart >= 2 && format.charAt(colorStart - 2) == ChatColor.COLOR_CHAR) {
-					colorStart -= 2;
-				}
-				style.update(format, colorStart, colorEnd);
-			}
-
 			String placeholder = format.substring(start, end);
 			if (placeholder.equals(PLACEHOLDER_NAME))
 				builder.appendSender(sender, style, true);
