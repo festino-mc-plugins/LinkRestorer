@@ -63,7 +63,7 @@ public class RawJsonBuilder
 		wrapMultiColor(nickname, style, eventsJson);
 	}
 	
-	public void wrapMultiColor(String s, TextStyle startStyle, String extraJson)
+	public TextStyle wrapMultiColor(String s, TextStyle startStyle, String extraJson)
 	{
 		TextStyle style = startStyle;
 		StyledMessage styledText = StyledMessageParser.parse(s);
@@ -82,6 +82,7 @@ public class RawJsonBuilder
 				wrap(s.substring(startIndex, endIndex), style, extraJson);
 			}
 		}
+		return style;
 	}
 	
 	public void appendMessage(StyledMessage styledMessage, TextStyle style)

@@ -84,7 +84,7 @@ public class Chatter
 		{
 			int start = matcher.start();
 			int end = matcher.end();
-			builder.wrapMultiColor(format.substring(prevEnd, start), style, "");
+			style = builder.wrapMultiColor(format.substring(prevEnd, start), style, "");
 
 			int colorStart = format.lastIndexOf(ChatColor.COLOR_CHAR, start);
 			int colorEnd = colorStart + 2;
