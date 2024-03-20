@@ -15,18 +15,21 @@ import com.festp.parsing.TextStyleSwitch;
 
 public class RawJsonBuilder
 {
-	RawJsonBuilderSettings settings;
-	StringBuilder command;
+	private final RawJsonBuilderSettings settings;
+	private final TextStyle baseStyle;
+	private StringBuilder command;
 	
 	public RawJsonBuilder(RawJsonBuilderSettings settings)
 	{
 		this.settings = settings;
+		this.baseStyle = new TextStyle();
 		command = new StringBuilder();
 	}
-	public RawJsonBuilder(RawJsonBuilderSettings settings, CharSequence c)
+	public RawJsonBuilder(RawJsonBuilderSettings settings, TextStyle baseStyle)
 	{
 		this.settings = settings;
-		command = new StringBuilder(c);
+		this.baseStyle = baseStyle;
+		command = new StringBuilder();
 	}
 	
 	public void tryWrap(String str, TextStyle style)
@@ -205,7 +208,7 @@ public class RawJsonBuilder
 	
 	public void startList()
 	{
-		command.append("[");
+		command.append("[").append("{").append(baseStyle.getFullJson()).append("\"text\":\"\"},");
 	}
 	public void endList()
 	{
