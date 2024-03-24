@@ -4,12 +4,12 @@ import org.bukkit.ChatColor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class StyledMessageParserTests {
+class RecursiveStyledMessageParserTests {
 
 	@Test
 	void parsesPlainText() {
 		String message = "hi";
-		StyledMessage styledMessage = StyledMessageParser.parse(message);
+		StyledMessage styledMessage = new RecursiveStyledMessageParser().parse(message);
 		Assertions.assertTrue(styledMessage.isPlain);
 		Assertions.assertFalse(styledMessage.hasLinks);
 		Assertions.assertEquals(message, styledMessage.plainText);
@@ -20,7 +20,7 @@ class StyledMessageParserTests {
 	@Test
 	void parsesColors() {
 		String message = ChatColor.GRAY + "hi, " + ChatColor.WHITE + "Player";
-		StyledMessage styledMessage = StyledMessageParser.parse(message);
+		StyledMessage styledMessage = new RecursiveStyledMessageParser().parse(message);
 		Assertions.assertFalse(styledMessage.isPlain);
 		Assertions.assertEquals("hi, Player", styledMessage.plainText);
 		Assertions.assertEquals(2, styledMessage.styleSwitches.size());
@@ -31,7 +31,7 @@ class StyledMessageParserTests {
 	@Test
 	void parsesLinks() {
 		String message = "see example.com";
-		StyledMessage styledMessage = StyledMessageParser.parse(message);
+		StyledMessage styledMessage = new RecursiveStyledMessageParser().parse(message);
 		Assertions.assertFalse(styledMessage.isPlain);
 		Assertions.assertTrue(styledMessage.hasLinks);
 		Assertions.assertEquals(message, styledMessage.plainText);

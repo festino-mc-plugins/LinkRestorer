@@ -8,8 +8,8 @@ import org.bukkit.entity.Player;
 
 import com.festp.Chatter;
 import com.festp.parsing.Link;
+import com.festp.parsing.RecursiveStyledMessageParser;
 import com.festp.parsing.StyledMessage;
-import com.festp.parsing.StyledMessageParser;
 import com.festp.parsing.TextStyle;
 import com.festp.parsing.TextStyleSwitch;
 
@@ -69,7 +69,7 @@ public class RawJsonBuilder
 	public TextStyle wrapMultiColor(String s, TextStyle startStyle, String extraJson)
 	{
 		TextStyle style = startStyle;
-		StyledMessage styledText = StyledMessageParser.parse(s);
+		StyledMessage styledText = new RecursiveStyledMessageParser().parse(s);
 		s = styledText.plainText;
 		List<TextStyleSwitch> styleSwitches = styledText.styleSwitches;
 		int startIndex, endIndex = 0;

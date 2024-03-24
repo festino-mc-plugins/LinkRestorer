@@ -6,7 +6,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -26,11 +25,13 @@ public class Chatter
 	
 	private JavaPlugin plugin;
 	private Config config;
+	private StyledMessageParser parser;
 	
-	public Chatter(JavaPlugin plugin, Config config)
+	public Chatter(JavaPlugin plugin, Config config, StyledMessageParser parser)
 	{
 		this.plugin = plugin;
 		this.config = config;
+		this.parser = parser;
 	}
 
 	/**
@@ -55,7 +56,7 @@ public class Chatter
 	 * @param link is the first link found*/
 	public boolean sendFormatted(Set<Player> recipients, CommandSender sender, String message, String format, boolean sendToConsole)
 	{
-		StyledMessage styledMessage = StyledMessageParser.parse(message);
+		StyledMessage styledMessage = parser.parse(message);
 		if (styledMessage == null || !styledMessage.hasLinks)
 			return false;
 		
@@ -104,11 +105,16 @@ public class Chatter
 		return true;
 	}
 	
-	public void sendWhisperMessage(CommandSender sender, Player[] recipients, StyledMessage styledMessage, TextStyle style)
+	public boolean sendWhisperMessage(CommandSender sender, Player[] recipients, String message, TextStyle baseStyle)
 	{
+		StyledMessage styledMessage = parser.parse(message);
+		if (styledMessage == null || !styledMessage.hasLinks)
+			return false;
+		
 		String fromStr = "commands.message.display.outgoing"; // "You whisper to %s: %s"
 		String toStr = "commands.message.display.incoming"; // "%s whispers to you: %s"
 		
+		TextStyle style = baseStyle;
 		RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
 		builder.appendMessage(styledMessage, style);
 		StringBuilder modifiedMessage = builder.releaseStringBuilder();
@@ -134,10 +140,16 @@ public class Chatter
 			to.appendTranslated(toStr, new CharSequence[] { wrapNameFrom, modifiedMessage }, style);
 			sendRawJson(recipient, to.build());
 		}
+		return true;
 	}
 	
-	public void sendOnlyLinks(CommandSender sender, Player[] recipients, Iterable<Link> links, TextStyle style)
+	public boolean sendOnlyLinks(CommandSender sender, Player[] recipients, String message, TextStyle style)
 	{
+		StyledMessage styledMessage = parser.parse(message);
+		if (styledMessage == null || !styledMessage.hasLinks)
+			return false;
+		
+		Iterable<Link> links = styledMessage.links;
 		RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
 		builder.appendJoinedLinks(links, style, ", ");
 		String linkCommand = builder.build();
@@ -151,6 +163,7 @@ public class Chatter
 				continue;
 			sendRawJson(recipient, linkCommand);
 		}
+		return true;
 	}
 	
 	public static String getDisplayName(CommandSender sender)

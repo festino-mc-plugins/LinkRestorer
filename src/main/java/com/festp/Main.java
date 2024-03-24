@@ -11,6 +11,8 @@ import com.festp.config.LangConfig;
 import com.festp.handlers.ChatHandler;
 import com.festp.handlers.SmallCommandsHandler;
 import com.festp.handlers.WhisperHandler;
+import com.festp.parsing.RecursiveStyledMessageParser;
+import com.festp.parsing.StyledMessageParser;
 
 public class Main extends JavaPlugin
 {
@@ -22,7 +24,8 @@ public class Main extends JavaPlugin
 		Config config = new Config(this, lang);
 		config.load();
 
-		Chatter chatter = new Chatter(this, config);
+		StyledMessageParser parser = new RecursiveStyledMessageParser();
+		Chatter chatter = new Chatter(this, config, parser);
 
 		PluginManager pm = getServer().getPluginManager();
 
