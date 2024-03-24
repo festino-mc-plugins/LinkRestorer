@@ -59,12 +59,11 @@ public class WhisperHandler implements Listener
 		boolean isLogging = config.get(Config.Key.LOG_DEBUG, false);
 		if (isLogging) Logger.info("Handling whisper event... (event was " + (event.isCancelled() ? "" : "not ") + "cancelled)");
 
-		int[] indices = selectRecipients(command);
+		int[] indices = CommandUtils.selectRecipientsFromArg0(command);
 		if (indices == null)
 			return;
-		if (isLogging) Logger.info("Got recipient indices... [" + indices[0] + ":" + indices[1] + "]");
 		// if is not vanilla, recipients list may be invalid
-		Player[] recipients = getRecipients(command.substring(indices[0], indices[1]), sender);
+		Player[] recipients = CommandUtils.getRecipients(command.substring(indices[0], indices[1]), sender);
 		if (recipients == null || recipients.length == 0)
 			return;
 		if (isLogging) Logger.info("Got " + recipients.length + " recipients...");
@@ -98,67 +97,5 @@ public class WhisperHandler implements Listener
 		// (https://github.com/EssentialsX/Essentials/blob/f7cbc7b0d37ea7a674955758da099524b009ad03/Essentials/src/main/resources/plugin.yml)
 		// (https://github.com/EssentialsX/Essentials/blob/f7cbc7b0d37ea7a674955758da099524b009ad03/Essentials/src/main/resources/config.yml)
 		return command.equalsIgnoreCase("w") || command.equalsIgnoreCase("msg") || command.equalsIgnoreCase("tell");
-	}
-
-	private static int[] selectRecipients(String command)
-	{
-		int indexStart = command.indexOf(" ");
-		if (indexStart < 0)
-			return null;
-		indexStart++;
-		
-		int length = command.length();
-		while (indexStart < length && command.charAt(indexStart) == ' ')
-			indexStart++;
-		if (indexStart >= length)
-			return null;
-		
-		int indexEnd;
-		if (command.charAt(indexStart) != '@' || indexStart + 2 >= length) {
-			indexEnd = command.indexOf(" ", indexStart);
-			indexEnd = indexEnd < 0 ? length : indexEnd;
-			return new int[] { indexStart, indexEnd };
-		}
-		
-		indexEnd = indexStart + 2;
-		if (command.charAt(indexEnd) != '[') {
-			if (command.charAt(indexEnd) == ' ')
-				return new int[] { indexStart, indexEnd };
-			return null;
-		}
-		
-		indexEnd++;
-		int openedBrackets = 1;
-		while (indexEnd < length && openedBrackets > 0) {
-			char c = command.charAt(indexEnd);
-			if (c == '[')
-				openedBrackets++;
-			else if (c == ']')
-				openedBrackets--;
-			indexEnd++;
-		}
-		return new int[] { indexStart, indexEnd };
-	}
-	
-	private static Player[] getRecipients(String selector, CommandSender sender)
-	{
-		if (selector.charAt(0) != '@') {
-			Player recipient = tryGetPlayer(selector);
-			if (recipient == null)
-				return null;
-			return new Player[] { recipient };
-		}
-		
-		List<Entity> entities = Bukkit.getServer().selectEntities(sender, selector);
-		List<Player> players = new ArrayList<>();
-		for (Entity e : entities)
-			if (e instanceof Player)
-				players.add((Player)e);
-		return players.toArray(new Player[0]);
-	}
-
-	private static Player tryGetPlayer(String name)
-	{
-		return Bukkit.getPlayerExact(name);
 	}
 }
