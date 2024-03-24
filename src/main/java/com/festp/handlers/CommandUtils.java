@@ -1,4 +1,4 @@
-package com.festp.parsing;
+package com.festp.handlers;
 
 public class CommandUtils
 {

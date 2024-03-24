@@ -9,7 +9,6 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 
 import com.festp.Chatter;
-import com.festp.parsing.CommandUtils;
 
 public class SmallCommandsHandler implements Listener
 {
