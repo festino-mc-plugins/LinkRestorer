@@ -1,12 +1,7 @@
 package com.festp.handlers;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
@@ -18,8 +13,6 @@ import org.bukkit.event.server.ServerCommandEvent;
 import com.festp.Chatter;
 import com.festp.Logger;
 import com.festp.config.Config;
-import com.festp.parsing.StyledMessage;
-import com.festp.parsing.StyledMessageParser;
 import com.festp.parsing.TextStyle;
 
 public class WhisperHandler implements Listener
@@ -72,22 +65,17 @@ public class WhisperHandler implements Listener
 		if (message == "")
 			return;
 		
-		StyledMessage styledMessage = StyledMessageParser.parse(message);
-		if (styledMessage == null || !styledMessage.hasLinks)
-			return;
-		
-		if (isLogging) Logger.info("Got links, sending messages...");
-		
 		TextStyle style = new TextStyle().update(STYLE_CODES);
 		
 		if (!config.get(Config.Key.WHISPER_NEW_MESSAGE, false))
 		{
-			event.setCancelled(true);
-			chatter.sendWhisperMessage(sender, recipients, styledMessage, style);
+			boolean sent = chatter.sendWhisperMessage(sender, recipients, message, style);
+			if (sent)
+				event.setCancelled(true);
 		}
 		else
 		{
-			chatter.sendOnlyLinks(sender, recipients, styledMessage.links, style);
+			chatter.sendOnlyLinks(sender, recipients, message, style);
 		}
 	}
 
