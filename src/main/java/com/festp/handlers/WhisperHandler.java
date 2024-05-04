@@ -13,7 +13,7 @@ import org.bukkit.event.server.ServerCommandEvent;
 import com.festp.Chatter;
 import com.festp.Logger;
 import com.festp.config.Config;
-import com.festp.parsing.TextStyle;
+import com.festp.styledmessage.components.TextStyle;
 
 public class WhisperHandler implements Listener
 {

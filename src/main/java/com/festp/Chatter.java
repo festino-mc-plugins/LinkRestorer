@@ -1,21 +1,27 @@
 package com.festp;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.festp.config.Config;
-import com.festp.parsing.Link;
-import com.festp.parsing.StyledMessage;
 import com.festp.parsing.StyledMessageParser;
-import com.festp.parsing.TextStyle;
+import com.festp.styledmessage.SingleStyleMessage;
+import com.festp.styledmessage.StyledMessage;
+import com.festp.styledmessage.components.Link;
+import com.festp.styledmessage.components.MentionedPlayer;
+import com.festp.styledmessage.components.TextComponent;
+import com.festp.styledmessage.components.TextStyle;
 import com.festp.utils.RawJsonBuilder;
 
 public class Chatter
@@ -26,12 +32,14 @@ public class Chatter
 	private JavaPlugin plugin;
 	private Config config;
 	private StyledMessageParser parser;
+	private StyledMessageParser formatParser;
 	
-	public Chatter(JavaPlugin plugin, Config config, StyledMessageParser parser)
+	public Chatter(JavaPlugin plugin, Config config, StyledMessageParser parser, StyledMessageParser formatParser)
 	{
 		this.plugin = plugin;
 		this.config = config;
 		this.parser = parser;
+		this.formatParser = formatParser;
 	}
 
 	/**
@@ -57,7 +65,7 @@ public class Chatter
 	public boolean sendFormatted(Set<Player> recipients, CommandSender sender, String message, String format, boolean sendToConsole)
 	{
 		StyledMessage styledMessage = parser.parse(message);
-		if (styledMessage == null || !styledMessage.hasLinks)
+		if (!canSend(styledMessage))
 			return false;
 		
 		if (sendToConsole)
@@ -75,70 +83,90 @@ public class Chatter
 			recipients = new HashSet<>(Bukkit.getOnlinePlayers());
 		}
 		
-		final RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
-		builder.startList();
 		Pattern pattern = Pattern.compile("[%][\\d][$][s]", Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(format);
 		int prevEnd = 0;
+		// TODO CONTINUE TEXT STYLE ON MERGE
 		TextStyle style = new TextStyle();
+		StyledMessage fullStyledMessage = new StyledMessage();
 		while (matcher.find())
 		{
 			int start = matcher.start();
 			int end = matcher.end();
-			style = builder.wrapMultiColor(format.substring(prevEnd, start), style, "");
+			fullStyledMessage.append(formatParser.parse(format.substring(prevEnd, start)));
 
 			String placeholder = format.substring(start, end);
 			if (placeholder.equals(PLACEHOLDER_NAME))
-				builder.appendSender(sender, style, true);
+				fullStyledMessage.append(getSender(sender, false));
 			if (placeholder.equals(PLACEHOLDER_MESSAGE))
-				builder.appendMessage(styledMessage, style);
+				fullStyledMessage.append(styledMessage);
 
 			prevEnd = end;
 		}
-		builder.wrapMultiColor(format.substring(prevEnd), style, "");
-		builder.endList();
+		fullStyledMessage.append(formatParser.parse(format.substring(prevEnd)));
 
-		String rawJson = builder.releaseStringBuilder().toString();
+		RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
+		builder.appendStyledMessage(fullStyledMessage);
+		String rawJson = builder.toString();
 		for (Player p : recipients) {
 			sendRawJson(p, rawJson);
 		}
 		return true;
 	}
 	
+	private StyledMessage getSender(CommandSender sender, boolean stripColors)
+	{
+		String name;
+		if (stripColors)
+			name = sender.getName();
+		else
+			name = Chatter.getDisplayName(sender);
+
+		StyledMessage styledMessage = formatParser.parse(name);
+		if (sender instanceof Player) {
+			MentionedPlayer playerComponent = new MentionedPlayer(ChatColor.stripColor(name), (Player) sender);
+			for (SingleStyleMessage part : styledMessage.getStyledParts())
+			{
+				part.getComponents().add(playerComponent);
+			}
+		}
+		return styledMessage;
+	}
+	
 	public boolean sendWhisperMessage(CommandSender sender, Player[] recipients, String message, TextStyle baseStyle)
 	{
 		StyledMessage styledMessage = parser.parse(message);
-		if (styledMessage == null || !styledMessage.hasLinks)
+		if (!canSend(styledMessage))
 			return false;
 		
 		String fromStr = "commands.message.display.outgoing"; // "You whisper to %s: %s"
 		String toStr = "commands.message.display.incoming"; // "%s whispers to you: %s"
 		
 		TextStyle style = baseStyle;
-		RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
-		builder.appendMessage(styledMessage, style);
-		StringBuilder modifiedMessage = builder.releaseStringBuilder();
+		RawJsonBuilder messageBuilder = new RawJsonBuilder(config.getBuilderSettings());
+		messageBuilder.appendStyledMessage(styledMessage);
+		CharSequence messageJson = messageBuilder.toCharSequence();
 
-		builder = new RawJsonBuilder(config.getBuilderSettings());
-		builder.appendSender(sender, style, false);
-		StringBuilder wrapNameFrom = builder.releaseStringBuilder();
+		RawJsonBuilder nameFromBuilder = new RawJsonBuilder(config.getBuilderSettings());
+		nameFromBuilder.appendStyledMessage(getSender(sender, true));
+		CharSequence nameFromJson = nameFromBuilder.toCharSequence();
 		
 		for (Player recipient : recipients)
 		{
 			if (sender instanceof Player)
 			{
-				builder = new RawJsonBuilder(config.getBuilderSettings());
-				builder.appendPlayer(recipient, style, false);
-				StringBuilder wrapNameTo = builder.releaseStringBuilder();
+				RawJsonBuilder nameToBuilder = new RawJsonBuilder(config.getBuilderSettings());
+				nameToBuilder.appendStyledMessage(getSender(recipient, true));
+				CharSequence nameToJson = nameFromBuilder.toCharSequence();
 				
 				RawJsonBuilder from = new RawJsonBuilder(config.getBuilderSettings());
-				from.appendTranslated(fromStr, new CharSequence[] { wrapNameTo, modifiedMessage }, style);
-				sendRawJson((Player)sender, from.build());
+				from.appendTranslated(fromStr, new CharSequence[] { nameToJson, messageJson }, style);
+				sendRawJson((Player)sender, from.toString());
 			}
 			
 			RawJsonBuilder to = new RawJsonBuilder(config.getBuilderSettings());
-			to.appendTranslated(toStr, new CharSequence[] { wrapNameFrom, modifiedMessage }, style);
-			sendRawJson(recipient, to.build());
+			to.appendTranslated(toStr, new CharSequence[] { nameFromJson, messageJson }, style);
+			sendRawJson(recipient, to.toString());
 		}
 		return true;
 	}
@@ -146,13 +174,13 @@ public class Chatter
 	public boolean sendOnlyLinks(CommandSender sender, Player[] recipients, String message, TextStyle style)
 	{
 		StyledMessage styledMessage = parser.parse(message);
-		if (styledMessage == null || !styledMessage.hasLinks)
+		if (!canSend(styledMessage))
 			return false;
 		
-		Iterable<Link> links = styledMessage.links;
+		Iterable<Link> links = getLinks(styledMessage);
 		RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
 		builder.appendJoinedLinks(links, style, ", ");
-		String linkCommand = builder.build();
+		String linkCommand = builder.toString();
 		
 		if (sender instanceof Player)
 			sendRawJson((Player)sender, linkCommand);
@@ -175,7 +203,7 @@ public class Chatter
 		return sender.getName();
 	}
 	
-	private void sendRawJson(Player player, String rawJsonMessage)
+	private void sendRawJson(Player player, CharSequence rawJsonMessage)
 	{
 		boolean isLogging = config.get(Config.Key.LOG_DEBUG, false);
 		if (isLogging) Logger.info("Sending raw JSON: " + rawJsonMessage);
@@ -190,5 +218,29 @@ public class Chatter
 				Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command.toString());
 			}
 		});
+	}
+	
+	private List<Link> getLinks(StyledMessage styledMessage)
+	{
+		List<Link> links = new ArrayList<>();
+		for (SingleStyleMessage part : styledMessage.getStyledParts())
+			for (TextComponent component : part.getComponents())
+				if (component instanceof Link)
+					links.add((Link)component);
+		
+		return links;
+	}
+	
+	private boolean canSend(StyledMessage styledMessage)
+	{
+		if (styledMessage == null)
+			return false;
+		
+		for (SingleStyleMessage part : styledMessage.getStyledParts())
+			for (TextComponent component : part.getComponents())
+				if (component instanceof Link)
+					return true;
+		
+		return false;
 	}
 }

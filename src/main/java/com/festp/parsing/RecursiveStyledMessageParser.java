@@ -1,40 +1,64 @@
 package com.festp.parsing;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
-import org.bukkit.ChatColor;
+import com.festp.styledmessage.SingleStyleMessage;
+import com.festp.styledmessage.StyledMessage;
+import com.festp.styledmessage.components.TextComponent;
 
 public class RecursiveStyledMessageParser implements StyledMessageParser {
+	private final ComponentParser plainParser;
+	private final List<ComponentParser> leafParsers = new ArrayList<>();
+	
+	/** @param parsers expected to return non-intersecting components sorted by getBeginIndex */
+	public RecursiveStyledMessageParser(ComponentParser plainParser, Collection<ComponentParser> leafParsers)
+	{
+		this.plainParser = plainParser;
+		this.leafParsers.addAll(leafParsers);
+	}
+	
 	public StyledMessage parse(String message)
 	{
-		StringBuilder plainBuilder = new StringBuilder();
-		List<TextStyleSwitch> switches = new ArrayList<>();
-		TextStyle style = new TextStyle();
-		for (int i = 0; i < message.length(); i++)
-		{
-			char c = message.charAt(i);
-			if (c == ChatColor.COLOR_CHAR)
-			{
-				int startIndex = i;
-				while (i < message.length() && message.charAt(i) == ChatColor.COLOR_CHAR)
-				{
-					i += 2;
-				}
-				
-				style.update(message, startIndex, i);
-				TextStyleSwitch styleSwitch = new TextStyleSwitch(style.clone(), plainBuilder.length());
-				switches.add(styleSwitch);
-				
-				i--;
-				continue;
-			}
-			
-			plainBuilder.append(c);
-		}
+		List<SingleStyleSubstring> styledSubstrings = Arrays.asList(new SingleStyleSubstring(0, message.length(), new ArrayList<>()));
 		
-		String plainMessage = plainBuilder.toString();
-		List<Link> links = LinkParser.getLinks(plainMessage);
-		return new StyledMessage(plainMessage, links, switches);
+		StringBuilder prevText = new StringBuilder(message);
+		Iterable<? extends TextComponent> components = plainParser.getComponents(prevText.toString());
+		StringBuilder text = new StringBuilder();
+		int prevEnd = 0;
+		for (TextComponent component : components)
+		{
+			if (prevEnd < component.getBeginIndex())
+			{
+				text.append(prevText.subSequence(prevEnd, component.getBeginIndex()));
+			}
+			text.append(component.getPlainText());
+			prevEnd = component.getEndIndex();
+		}
+		if (prevEnd < prevText.length()) {
+			text.append(prevText.subSequence(prevEnd, prevText.length()));
+		}
+		prevText = text;
+		
+		List<String> unusedParts = Arrays.asList(prevText.toString());
+		for (ComponentParser parser : leafParsers)
+		{
+			// for part in parts:
+			for (String part : unusedParts)
+			{
+				components = parser.getComponents(part);
+				for (TextComponent component : components)
+				{
+					// remember component
+					
+				}
+				// split unused
+			}
+		}
+
+		List<SingleStyleMessage> styledParts = new ArrayList<>();
+		return new StyledMessage(styledParts);
 	}
 }

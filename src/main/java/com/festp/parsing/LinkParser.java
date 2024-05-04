@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LinkParser {
+import com.festp.styledmessage.components.Link;
+
+public class LinkParser implements ComponentParser {
 	// TODO check telegram desktop code
 	// TextWithTags Ui::InputField::getTextWithTags, getTextWithTagsPart, getTextPart...
 	
@@ -16,8 +18,8 @@ public class LinkParser {
 
 	/**@param message is a plain text 
 	 * @return <b>null</b> if no links found */
-	public static List<Link> getLinks(String message)
-	{
+	@Override
+	public List<Link> getComponents(String message) {
 		List<Link> links = new ArrayList<>();
 		
 		Matcher matcher = PATTERN.matcher(message);

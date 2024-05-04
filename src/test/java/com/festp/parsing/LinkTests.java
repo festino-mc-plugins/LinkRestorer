@@ -5,13 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import com.festp.styledmessage.components.Link;
+
 class LinkTests {
 
 	@Test
 	void getsSubstring() {
 		String orig = "open google.com please";
 		Link link = new Link(orig, 5, 15, false);
-		Assertions.assertEquals("google.com", link.getText());
+		Assertions.assertEquals("google.com", link.getPlainText());
 	}
 
 	@Test

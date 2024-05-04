@@ -4,12 +4,14 @@ import org.bukkit.ChatColor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.festp.styledmessage.StyledMessage;
+
 class RecursiveStyledMessageParserTests {
 
 	@Test
 	void parsesPlainText() {
 		String message = "hi";
-		StyledMessage styledMessage = new RecursiveStyledMessageParser().parse(message);
+		StyledMessage styledMessage = new TextStyleParser().getComponents(message);
 		Assertions.assertTrue(styledMessage.isPlain);
 		Assertions.assertFalse(styledMessage.hasLinks);
 		Assertions.assertEquals(message, styledMessage.plainText);

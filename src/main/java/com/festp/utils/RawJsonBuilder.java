@@ -1,17 +1,13 @@
 package com.festp.utils;
 
-import java.util.List;
-
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
-import com.festp.Chatter;
-import com.festp.parsing.Link;
-import com.festp.parsing.RecursiveStyledMessageParser;
-import com.festp.parsing.StyledMessage;
-import com.festp.parsing.TextStyle;
-import com.festp.parsing.TextStyleSwitch;
+import com.festp.styledmessage.SingleStyleMessage;
+import com.festp.styledmessage.StyledMessage;
+import com.festp.styledmessage.components.Link;
+import com.festp.styledmessage.components.MentionedPlayer;
+import com.festp.styledmessage.components.TextComponent;
+import com.festp.styledmessage.components.TextStyle;
+import com.festp.styledmessage.components.TextStyleSwitch;
 
 public class RawJsonBuilder
 {
@@ -21,140 +17,67 @@ public class RawJsonBuilder
 	
 	public RawJsonBuilder(RawJsonBuilderSettings settings)
 	{
-		this.settings = settings;
-		this.baseStyle = new TextStyle();
-		command = new StringBuilder();
+		this(settings, new TextStyle());
 	}
 	public RawJsonBuilder(RawJsonBuilderSettings settings, TextStyle baseStyle)
 	{
 		this.settings = settings;
 		this.baseStyle = baseStyle;
 		command = new StringBuilder();
+		command.append("{").append(baseStyle.getFullJson()).append("\"text\":\"\"},");
 	}
 	
-	public void tryWrap(String str, TextStyle style)
+	@Override
+	public String toString()
 	{
-		command.append(tryGetWrapped(str, style));
-	}
-	public void append(String str) {
-		command.append(str);
-	}
-
-	public void appendSender(CommandSender sender, TextStyle style, boolean decorating)
-	{
-		if (sender instanceof Player)
-			appendPlayer((Player)sender, style, decorating);
-		else {
-			String name = Chatter.getDisplayName(sender);
-			wrap(name, style);
-		}
-	}
-	public void appendPlayer(Player player, TextStyle style, boolean decorating)
-	{
-		String nickname;
-		if (decorating)
-			nickname = Chatter.getDisplayName(player);
-		else
-			nickname = player.getName();
-		String plainName = ChatColor.stripColor(nickname);
-		String uuid = player.getUniqueId().toString();
-		String eventsJson = new StringBuilder()
-				.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"" + plainName + "\\nType: Player\\n" + uuid + "\"},")
-				.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/tell " + plainName + " \"},")
-				.toString();
-		
-		wrapMultiColor(nickname, style, eventsJson);
+		tryEncloseList();
+		return command.toString();
 	}
 	
-	public TextStyle wrapMultiColor(String s, TextStyle startStyle, String extraJson)
+	public CharSequence toCharSequence()
 	{
-		TextStyle style = startStyle;
-		StyledMessage styledText = new RecursiveStyledMessageParser().parse(s);
-		s = styledText.plainText;
-		List<TextStyleSwitch> styleSwitches = styledText.styleSwitches;
-		int startIndex, endIndex = 0;
-		for (int i = 0; i <= styledText.styleSwitches.size(); i++)
+		tryEncloseList();
+		return command;
+	}
+	
+	public void appendRawJsonBuilder(RawJsonBuilder builder) {
+		this.command.append(builder.command);
+	}
+	
+	public void appendStyledMessage(StyledMessage styledMessage)
+	{
+		for (SingleStyleMessage part : styledMessage.getStyledParts())
 		{
-			startIndex = endIndex;
-			if (i > 0) {
-				style = styleSwitches.get(i - 1).style;
-			}
-			endIndex = i < styleSwitches.size() ? styleSwitches.get(i).index : s.length();
-			if (startIndex < endIndex)
+			StringBuilder text = new StringBuilder();
+			StringBuilder extraJson = new StringBuilder();
+			for (TextComponent component : part.getComponents())
 			{
-				wrap(s.substring(startIndex, endIndex), style, extraJson);
-			}
-		}
-		return style;
-	}
-	
-	public void appendMessage(StyledMessage styledMessage, TextStyle style)
-	{
-		String message = styledMessage.plainText;
-		List<Link> links = styledMessage.links;
-		List<TextStyleSwitch> styles = styledMessage.styleSwitches;
-		startList();
-		
-		int index = 0;
-		int linkIndex = 0, styleIndex = 0;
-		while (index < message.length())
-		{
-			// find style, endIndex and link (may be null)
-			int endIndex = message.length();
-			if (styleIndex < styles.size())
-			{
-				if (index >= styles.get(styleIndex).index) {
-					style = styles.get(styleIndex).style;
-					styleIndex++;
-				}
-			}
-			if (styleIndex < styles.size()) {
-				endIndex = styles.get(styleIndex).index;
-			}
-			
-			Link link = null;
-			if (linkIndex < links.size())
-			{
-				if (links.get(linkIndex).endIndex <= index)
+				if (component instanceof TextStyleSwitch)
 				{
-					linkIndex++;
+					appendTextStyle(text, extraJson, ((TextStyleSwitch) component).getStyle());
+				}
+				else if (component instanceof Link)
+				{
+					appendLink(text, extraJson, (Link) component);
+				}
+				else if (component instanceof MentionedPlayer)
+				{
+					appendPlayer(text, extraJson, (MentionedPlayer) component);
+				}
+				else
+				{
+					text.append(component.getPlainText());
 				}
 			}
-			if (linkIndex < links.size())
-			{
-				link = links.get(linkIndex);
-				if (index < link.beginIndex) {
-					endIndex = Math.min(link.beginIndex, endIndex);
-					link = null;
-				}
-				else {
-					endIndex = Math.min(link.endIndex, endIndex);
-				}
-			}
-
-			if (index == 0 && link != null) {
-				// workaround for links at the beginning: they would convert all the plain text to that link
-				wrap("", new TextStyle());
-			}
-			
-			String text = message.substring(index, endIndex);
-			if (link == null)
-				tryWrap(text, style);
-			else
-				appendLink(text, link.getUrl(), style);
-
-			index = endIndex;
+			tryWrap(text, extraJson);
 		}
-		
-		endList();
 	}
 	
 	public void appendJoinedLinks(Iterable<Link> links, TextStyle style, String sep)
 	{
-		startList();
-        
+		// TODO create StyledMessage and use appendStyledMessage
 		boolean isFirst = true;
-		String wrappedSep = tryGetWrapped(sep, style);
+		CharSequence wrappedSep = getWrapped(style.getCodes() + sep, style.getJson());
 		for (Link link : links)
 		{
 			if (isFirst) {
@@ -163,24 +86,12 @@ public class RawJsonBuilder
 			else {
 				command.append(wrappedSep);
 			}
-			appendLink(link.getText(), link.getUrl(), style);
+			StringBuilder text = new StringBuilder();
+			StringBuilder extraJson = new StringBuilder();
+			appendTextStyle(text, extraJson, style);
+			appendLink(text, extraJson, link);
+			tryWrap(text, extraJson);
 		}
-
-		endList();
-	}
-	
-	public void appendLink(String text, String url, TextStyle style)
-	{
-		command.append("{");
-		command.append(style.getJson());
-		command.append("\"text\":\"");
-		command.append(style.getCodes());
-		if (settings.isLinkUnderlined)
-			command.append(ChatColor.UNDERLINE);
-		command.append(text);
-		command.append("\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"");
-		command.append(url);
-		command.append("\"}},");
 	}
 	
 	/** Check for more info: <a>https://minecraft.fandom.com/wiki/Raw_JSON_text_format#Translated_Text</a> */
@@ -206,25 +117,44 @@ public class RawJsonBuilder
 		command.append("]},");
 	}
 	
-	public void startList()
+	private CharSequence getLinkJson(Link link)
 	{
-		command.append("[").append("{").append(baseStyle.getFullJson()).append("\"text\":\"\"},");
+		StringBuilder linkJson = new StringBuilder();
+		linkJson.append("clickEvent\":{\"action\":\"open_url\",\"value\":\"");
+		linkJson.append(link.getUrl());
+		linkJson.append("\"},");
+		return linkJson;
 	}
-	public void endList()
+	
+	private void appendPlayer(StringBuilder text, StringBuilder json, MentionedPlayer player)
 	{
+		String plainName = player.getPlainText();
+		String uuid = player.getPlayer().getUniqueId().toString();
+		StringBuilder eventsJson = new StringBuilder()
+				.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"" + plainName + "\\nType: Player\\n" + uuid + "\"},")
+				.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/tell " + plainName + " \"},");
+		
+		json.append(eventsJson);
+	}
+	
+	private void appendTextStyle(StringBuilder text, StringBuilder json, TextStyle style) {
+		text.append(style.getCodes());
+		json.append(style.getJson());
+	}
+	
+	private void appendLink(StringBuilder text, StringBuilder json, Link link)
+	{
+		if (settings.isLinkUnderlined)
+			text.append(ChatColor.UNDERLINE);
+		text.append(link.getPlainText());
+		json.append(getLinkJson(link));
+	}
+	
+	private void tryEncloseList()
+	{
+		command.insert(0, "[");
 		tryRemoveComma();
 		command.append("]");
-	}
-	public String build()
-	{
-		tryRemoveComma();
-		return command.toString();
-	}
-	public StringBuilder releaseStringBuilder() {
-		tryRemoveComma();
-		StringBuilder res = command;
-		command = null;
-		return res;
 	}
 	
 	private void tryRemoveComma() {
@@ -233,34 +163,25 @@ public class RawJsonBuilder
 			command.deleteCharAt(index);
 	}
 	
-	private void wrap(String str, TextStyle style)
+	private void tryWrap(CharSequence str, CharSequence extraJson)
 	{
-		wrap(str, style, "");
-	}
-	private void wrap(String str, TextStyle style, String extraJson)
-	{
-		command.append(getWrapped(str, style, extraJson));
-	}
-
-	private String tryGetWrapped(String str, TextStyle style)
-	{
-		return str == "" ? "" : getWrapped(str, style);
+		if (str.length() > 0)
+			command.append(getWrapped(str, extraJson));
 	}
 	
-	private String getWrapped(String str, TextStyle style)
+	private void wrap(CharSequence text,  CharSequence extraJson)
 	{
-		return getWrapped(str, style, "");
+		command.append(getWrapped(text, extraJson));
 	}
-	private String getWrapped(String str, TextStyle style, String extraJson)
+	
+	private CharSequence getWrapped(CharSequence text, CharSequence extraJson)
 	{
 		StringBuilder builder = new StringBuilder();
 		builder.append("{");
 		builder.append(extraJson);
-		builder.append(style.getJson());
 		builder.append("\"text\":\"");
-		builder.append(style.getCodes());
-		builder.append(str);
+		builder.append(text);
 		builder.append("\"},");
-		return builder.toString();
+		return builder;
 	}
 }

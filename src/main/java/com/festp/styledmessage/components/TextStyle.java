@@ -1,4 +1,4 @@
-package com.festp.parsing;
+package com.festp.styledmessage.components;
 
 import org.bukkit.ChatColor;
 
