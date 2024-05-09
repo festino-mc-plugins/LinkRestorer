@@ -9,6 +9,8 @@ import com.festp.styledmessage.components.TextStyle;
 import com.festp.styledmessage.components.TextStyleSwitch;
 
 public class TextStyleParser implements ComponentParser {
+	// TODO use baseStyle
+	
 	@Override
 	public List<TextStyleSwitch> getComponents(String message) {
 		List<TextStyleSwitch> switches = new ArrayList<>();
