@@ -59,13 +59,13 @@ public class StyledMessageBuilder {
 			
 			if (endStyle != null)
 			{
-				// update nextStartStyle using endStyle
+				nextStartStyle = mergeStyles(nextStartStyle, endStyle.components);
 			}
 			
 			styles = newStyles;
 			plainText = newPlainText.toString();
 		}
-		
+
 		startStyle = nextStartStyle;
 		
 		for (ComponentParser parser : splittingParsers)
@@ -94,7 +94,7 @@ public class StyledMessageBuilder {
 		
 		return this;
 	}
-	
+
 	private boolean validateSubstring(SingleStyleSubstring styledSubstring, String plainText, String text, ComponentParser parser)
 	{
 		if (styledSubstring.beginIndex < 0)
@@ -138,13 +138,19 @@ public class StyledMessageBuilder {
 				oldStyledSubstring.components.size() == 0 ? styledSubstring.components : null;
 			
 			if (components == null) {
-				components = Lists.newArrayList(oldStyledSubstring.components);
-				components.addAll(styledSubstring.components);
-				// TODO update updaable
+				components = mergeStyles(oldStyledSubstring.components, styledSubstring.components);
 			}
 			
 			styles.add(new SingleStyleSubstring(beginIndex, Math.min(endIndex, beginIndex + partLength), components));
 			beginIndex += partLength;
 		} 
+	}
+	
+	
+	private List<TextComponent> mergeStyles(List<TextComponent> oldStyle, List<TextComponent> newComponents) {
+		List<TextComponent> newStyle = Lists.newArrayList(oldStyle);
+		newStyle.addAll(newComponents);
+		// TODO update updaable
+		return newStyle;
 	}
 }
