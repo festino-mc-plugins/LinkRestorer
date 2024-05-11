@@ -35,7 +35,7 @@ public class StyledMessage {
 		return parts;
 	}
 
-	public void append(StyledMessage next) {
-		parts.addAll(next.parts);
+	public void addAll(List<SingleStyleMessage> nextStyledParts) {
+		parts.addAll(nextStyledParts);
 	}
 }
