@@ -7,12 +7,11 @@ import org.bukkit.ChatColor;
 import com.festp.styledmessage.components.TextStyle;
 import com.google.common.collect.Lists;
 
-public class TextStyleParser implements ComponentParser {
-	// TODO use baseStyle
-	
+public class TextStyleParser implements ComponentParser
+{
 	@Override
 	public List<SingleStyleSubstring> getComponents(String message) {
-		List<SingleStyleSubstring> switches = Lists.newArrayList();
+		List<SingleStyleSubstring> substrings = Lists.newArrayList();
 		TextStyle style = new TextStyle();
 		int beginIndex = 0;
 		int substringBegin = 0;
@@ -30,9 +29,9 @@ public class TextStyleParser implements ComponentParser {
 				i += 2;
 			}
 			
-			if (beginIndex != nextBeginIndex || i == message.length())
+			if (beginIndex != nextBeginIndex)
 			{
-				switches.add(new SingleStyleSubstring(substringBegin, nextBeginIndex, Lists.newArrayList(style.clone())));
+				substrings.add(new SingleStyleSubstring(substringBegin, nextBeginIndex, Lists.newArrayList(style.clone())));
 			}
 			
 			style.update(message, nextBeginIndex, i);
@@ -43,12 +42,8 @@ public class TextStyleParser implements ComponentParser {
 		}
 
 		int nextBeginIndex = message.length();
-		if (beginIndex != nextBeginIndex)
-		{
-			switches.add(new SingleStyleSubstring(substringBegin, nextBeginIndex, Lists.newArrayList(style)));
-		}
+		substrings.add(new SingleStyleSubstring(substringBegin, nextBeginIndex, Lists.newArrayList(style)));
 		
-		return switches;
+		return substrings;
 	}
-
 }
