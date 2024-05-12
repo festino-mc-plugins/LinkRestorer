@@ -87,7 +87,7 @@ public class TextStyle implements Cloneable, TextComponent {
 				res.append("\"strikethrough\":\"true\",");
 			else if (c == ChatColor.MAGIC)
 				res.append("\"obfuscated\":\"true\",");
-			else {
+			else if (c != ChatColor.RESET && !isRgbColor()) {
 				res.append("\"color\":\"");
 				res.append(c.name().toLowerCase());
 				res.append("\",");
