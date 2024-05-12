@@ -24,16 +24,16 @@ public class StyledMessageBuilder {
 	
 	public StyledMessage build()
 	{
-		StyledMessage result;
-		if (styledMessage.getStyledParts().isEmpty()) {
-			result =  new StyledMessage(Lists.newArrayList(new SingleStyleMessage("", startStyle)));
-		}
-		else {
-			result = styledMessage;
-			styledMessage = new StyledMessage();
-		}
+		if (styledMessage.getStyledParts().isEmpty())
+			return new StyledMessage(Lists.newArrayList(new SingleStyleMessage("", Lists.newArrayList())));
+		
+		return styledMessage;
+	}
+	
+	public void clear()
+	{
+		styledMessage = new StyledMessage();
 		startStyle = Lists.newArrayList();
-		return result;
 	}
 	
 	public StyledMessageBuilder append(String text)
