@@ -2,7 +2,7 @@ package com.festp.styledmessage;
 
 import java.util.List;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.festp.parsing.SingleStyleSubstring;
@@ -19,7 +19,7 @@ public class ClosableStyledMessageTests {
 		
 		List<SingleStyleMessage> newParts = message.getStyledParts();
 		
-		Assert.assertArrayEquals(parts.toArray(), newParts.toArray());
+		Assertions.assertArrayEquals(parts.toArray(), newParts.toArray());
 	}
 	
 	@Test
@@ -30,8 +30,8 @@ public class ClosableStyledMessageTests {
 		
 		List<ClosableStyledMessagePart> openParts = message.getOpenParts();
 		
-		Assert.assertEquals("a", openParts.get(0).getPlainText());
-		Assert.assertEquals(1, openParts.size());
+		Assertions.assertEquals("a", openParts.get(0).getPlainText());
+		Assertions.assertEquals(1, openParts.size());
 	}
 	
 	@Test
@@ -48,9 +48,9 @@ public class ClosableStyledMessageTests {
 		openParts.get(0).replace(styledSubstrings, false);
 		List<SingleStyleMessage> newParts = message.getStyledParts();
 
-		Assert.assertEquals("b", newParts.get(0).getText());
-		Assert.assertEquals("d", newParts.get(1).getText());
-		Assert.assertEquals(2, newParts.size());
+		Assertions.assertEquals("b", newParts.get(0).getText());
+		Assertions.assertEquals("d", newParts.get(1).getText());
+		Assertions.assertEquals(2, newParts.size());
 	}
 	
 	@Test
@@ -66,8 +66,8 @@ public class ClosableStyledMessageTests {
 		openParts.get(0).replace(styledSubstrings, false);
 		List<SingleStyleMessage> newParts = message.getStyledParts();
 
-		Assert.assertEquals("abc", newParts.get(0).getText());
-		Assert.assertEquals(1, newParts.size());
+		Assertions.assertEquals("abc", newParts.get(0).getText());
+		Assertions.assertEquals(1, newParts.size());
 	}
 	
 	@Test
@@ -83,8 +83,8 @@ public class ClosableStyledMessageTests {
 		openParts.get(0).replace(styledSubstrings, false);
 		List<SingleStyleMessage> newParts = message.getStyledParts();
 
-		Assert.assertEquals("cde", newParts.get(0).getText());
-		Assert.assertEquals(1, newParts.size());
+		Assertions.assertEquals("cde", newParts.get(0).getText());
+		Assertions.assertEquals(1, newParts.size());
 	}
 	
 	@Test
@@ -103,9 +103,9 @@ public class ClosableStyledMessageTests {
 		message.getOpenParts().get(0).replace(styledSubstrings2, false);
 		List<SingleStyleMessage> newParts = message.getStyledParts();
 
-		Assert.assertEquals("a", newParts.get(0).getText());
-		Assert.assertEquals("c", newParts.get(1).getText());
-		Assert.assertEquals(2, newParts.size());
+		Assertions.assertEquals("a", newParts.get(0).getText());
+		Assertions.assertEquals("c", newParts.get(1).getText());
+		Assertions.assertEquals(2, newParts.size());
 	}
 	
 	// closed

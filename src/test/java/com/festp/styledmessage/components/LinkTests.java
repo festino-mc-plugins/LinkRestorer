@@ -1,4 +1,4 @@
-package com.festp.parsing;
+package com.festp.styledmessage.components;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -8,21 +8,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 import com.festp.styledmessage.components.Link;
 
 class LinkTests {
-
 	@Test
-	void getsSubstring() {
-		String orig = "open google.com please";
-		Link link = new Link(orig, 5, 15, false);
-		Assertions.assertEquals("google.com", link.getPlainText());
-	}
-
-	@Test
-	void addsProtocol() {
-		String orig = "open google.com please";
-		Link link = new Link(orig, 5, 15, false);
-		Assertions.assertEquals("https://google.com", link.getUrl());
-		link = new Link(orig, 5, 15, true);
-		Assertions.assertEquals("google.com", link.getUrl());
+	void getUrl_ReturnUrl() {
+		String expectedUrl = "google.com";
+		
+		String url = new Link(expectedUrl).getUrl();
+		
+		Assertions.assertEquals("google.com", url);
 	}
 
 
@@ -32,8 +24,9 @@ class LinkTests {
 			"https://www.лекарство.net,https://www.%D0%BB%D0%B5%D0%BA%D0%B0%D1%80%D1%81%D1%82%D0%B2%D0%BE.net"
 			}, delimiter = ',')
 	void appliesUrlEncoding(String text, String expectedUrl) {
-		Link link = new Link(text, 0, text.length(), true);
-		Assertions.assertEquals(expectedUrl, link.getUrl());
+		String url = new Link(text).getUrl();
+		
+		Assertions.assertEquals(expectedUrl, url);
 	}
 	
 }

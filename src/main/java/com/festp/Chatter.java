@@ -15,9 +15,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.festp.config.Config;
-import com.festp.parsing.StyledMessageParser;
 import com.festp.styledmessage.SingleStyleMessage;
 import com.festp.styledmessage.StyledMessage;
+import com.festp.styledmessage.StyledMessageBuilder;
 import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.MentionedPlayer;
 import com.festp.styledmessage.components.TextComponent;
@@ -31,15 +31,15 @@ public class Chatter
 	
 	private JavaPlugin plugin;
 	private Config config;
-	private StyledMessageParser parser;
-	private StyledMessageParser formatParser;
+	private final StyledMessageBuilder builder;
+	private final StyledMessageBuilder textBuilder;
 	
-	public Chatter(JavaPlugin plugin, Config config, StyledMessageParser parser, StyledMessageParser formatParser)
+	public Chatter(JavaPlugin plugin, Config config, StyledMessageBuilder builder, StyledMessageBuilder textBuilder)
 	{
 		this.plugin = plugin;
 		this.config = config;
-		this.parser = parser;
-		this.formatParser = formatParser;
+		this.builder = builder;
+		this.textBuilder = textBuilder;
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class Chatter
 	 * @param link is the first link found*/
 	public boolean sendFormatted(Set<Player> recipients, CommandSender sender, String message, String format, boolean sendToConsole)
 	{
-		StyledMessage styledMessage = parser.parse(message);
+		StyledMessage styledMessage = builder.append(message).build();
 		if (!canSend(styledMessage))
 			return false;
 		
@@ -86,24 +86,22 @@ public class Chatter
 		Pattern pattern = Pattern.compile("[%][\\d][$][s]", Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(format);
 		int prevEnd = 0;
-		// TODO CONTINUE TEXT STYLE ON MERGE
-		TextStyle style = new TextStyle();
 		StyledMessage fullStyledMessage = new StyledMessage();
 		while (matcher.find())
 		{
 			int start = matcher.start();
 			int end = matcher.end();
-			fullStyledMessage.append(formatParser.parse(format.substring(prevEnd, start)));
+			fullStyledMessage.addAll(textBuilder.append(format.substring(prevEnd, start)).build().getStyledParts());
 
 			String placeholder = format.substring(start, end);
 			if (placeholder.equals(PLACEHOLDER_NAME))
-				fullStyledMessage.append(getSender(sender, false));
+				fullStyledMessage.addAll(getSender(sender, false).getStyledParts());
 			if (placeholder.equals(PLACEHOLDER_MESSAGE))
-				fullStyledMessage.append(styledMessage);
+				fullStyledMessage.addAll(styledMessage.getStyledParts());
 
 			prevEnd = end;
 		}
-		fullStyledMessage.append(formatParser.parse(format.substring(prevEnd)));
+		fullStyledMessage.addAll(textBuilder.append(format.substring(prevEnd)).build().getStyledParts());
 
 		RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
 		builder.appendStyledMessage(fullStyledMessage);
@@ -122,9 +120,9 @@ public class Chatter
 		else
 			name = Chatter.getDisplayName(sender);
 
-		StyledMessage styledMessage = formatParser.parse(name);
+		StyledMessage styledMessage = textBuilder.append(name).build();
 		if (sender instanceof Player) {
-			MentionedPlayer playerComponent = new MentionedPlayer(ChatColor.stripColor(name), (Player) sender);
+			MentionedPlayer playerComponent = new MentionedPlayer((Player) sender, ChatColor.stripColor(name));
 			for (SingleStyleMessage part : styledMessage.getStyledParts())
 			{
 				part.getComponents().add(playerComponent);
@@ -135,7 +133,7 @@ public class Chatter
 	
 	public boolean sendWhisperMessage(CommandSender sender, Player[] recipients, String message, TextStyle baseStyle)
 	{
-		StyledMessage styledMessage = parser.parse(message);
+		StyledMessage styledMessage = builder.append(message).build();
 		if (!canSend(styledMessage))
 			return false;
 		
@@ -173,7 +171,7 @@ public class Chatter
 	
 	public boolean sendOnlyLinks(CommandSender sender, Player[] recipients, String message, TextStyle style)
 	{
-		StyledMessage styledMessage = parser.parse(message);
+		StyledMessage styledMessage = builder.append(message).build();
 		if (!canSend(styledMessage))
 			return false;
 		

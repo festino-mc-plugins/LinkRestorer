@@ -1,8 +1,6 @@
 package com.festp;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,9 +13,9 @@ import com.festp.handlers.SmallCommandsHandler;
 import com.festp.handlers.WhisperHandler;
 import com.festp.parsing.ComponentParser;
 import com.festp.parsing.LinkParser;
-import com.festp.parsing.RecursiveStyledMessageParser;
-import com.festp.parsing.StyledMessageParser;
 import com.festp.parsing.TextStyleParser;
+import com.festp.styledmessage.StyledMessageBuilder;
+import com.google.common.collect.Lists;
 
 public class Main extends JavaPlugin
 {
@@ -30,9 +28,9 @@ public class Main extends JavaPlugin
 		config.load();
 
 		ComponentParser textStyleParser = new TextStyleParser();
-		StyledMessageParser formatParser = new RecursiveStyledMessageParser(textStyleParser, new ArrayList<>());
-		ComponentParser[] leafParsers = new ComponentParser[] {new LinkParser()};
-		StyledMessageParser parser = new RecursiveStyledMessageParser(textStyleParser, Arrays.asList(leafParsers));
+		StyledMessageBuilder formatParser = new StyledMessageBuilder(Lists.newArrayList(textStyleParser), Lists.newArrayList());
+		ComponentParser[] splittingParsers = new ComponentParser[] { new LinkParser() };
+		StyledMessageBuilder parser = new StyledMessageBuilder(Lists.newArrayList(textStyleParser), Lists.newArrayList(splittingParsers));
 		Chatter chatter = new Chatter(this, config, parser, formatParser);
 
 		PluginManager pm = getServer().getPluginManager();

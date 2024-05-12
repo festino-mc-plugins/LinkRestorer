@@ -1,19 +1,18 @@
 package com.festp.parsing;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.ChatColor;
 
 import com.festp.styledmessage.components.TextStyle;
-import com.festp.styledmessage.components.TextStyleSwitch;
+import com.google.common.collect.Lists;
 
 public class TextStyleParser implements ComponentParser {
 	// TODO use baseStyle
 	
 	@Override
-	public List<TextStyleSwitch> getComponents(String message) {
-		List<TextStyleSwitch> switches = new ArrayList<>();
+	public List<SingleStyleSubstring> getComponents(String message) {
+		List<SingleStyleSubstring> switches = Lists.newArrayList();
 		TextStyle style = new TextStyle();
 		int beginIndex = 0;
 		int substringBegin = 0;
@@ -33,9 +32,7 @@ public class TextStyleParser implements ComponentParser {
 			
 			if (beginIndex != nextBeginIndex || i == message.length())
 			{
-				String plainText = message.substring(substringBegin, nextBeginIndex);
-				TextStyleSwitch styleSwitch = new TextStyleSwitch(style.clone(), beginIndex, nextBeginIndex, plainText);
-				switches.add(styleSwitch);
+				switches.add(new SingleStyleSubstring(substringBegin, nextBeginIndex, Lists.newArrayList(style.clone())));
 			}
 			
 			style.update(message, nextBeginIndex, i);
@@ -44,13 +41,11 @@ public class TextStyleParser implements ComponentParser {
 			substringBegin = i;
 			i--;
 		}
-		
-		if (substringBegin != message.length())
+
+		int nextBeginIndex = message.length();
+		if (beginIndex != nextBeginIndex)
 		{
-			int nextBeginIndex = message.length();
-			String plainText = message.substring(substringBegin, nextBeginIndex);
-			TextStyleSwitch styleSwitch = new TextStyleSwitch(style, beginIndex, nextBeginIndex, plainText);
-			switches.add(styleSwitch);
+			switches.add(new SingleStyleSubstring(substringBegin, nextBeginIndex, Lists.newArrayList(style)));
 		}
 		
 		return switches;

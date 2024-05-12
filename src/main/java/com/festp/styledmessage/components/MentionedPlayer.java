@@ -3,33 +3,20 @@ package com.festp.styledmessage.components;
 import org.bukkit.entity.Player;
 
 public class MentionedPlayer implements TextComponent {
-	private String plainText;
-	private Player player;
+	private final Player player;
+	private final String decoratedName;
 	
-	public MentionedPlayer(String plainText, Player player)
+	public MentionedPlayer(Player player, String decoratedName)
 	{
-		this.plainText = plainText;
 		this.player = player;
-	}
-
-	@Override
-	public String getPlainText() {
-		return plainText;
+		this.decoratedName = decoratedName;
 	}
 
 	public Player getPlayer() {
 		return player;
 	}
 
-	// TODO remove indices from TextComponent
-	
-	@Override
-	public int getBeginIndex() {
-		return 0;
-	}
-
-	@Override
-	public int getEndIndex() {
-		return plainText.length();
+	public String getName() {
+		return decoratedName;
 	}
 }

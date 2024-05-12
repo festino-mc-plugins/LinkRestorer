@@ -7,24 +7,24 @@ import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.MentionedPlayer;
 import com.festp.styledmessage.components.TextComponent;
 import com.festp.styledmessage.components.TextStyle;
-import com.festp.styledmessage.components.TextStyleSwitch;
 
 public class RawJsonBuilder
 {
 	private final RawJsonBuilderSettings settings;
-	private final TextStyle baseStyle;
+	private final TextStyle baseTextStyle;
 	private StringBuilder command;
-	
+
 	public RawJsonBuilder(RawJsonBuilderSettings settings)
 	{
 		this(settings, new TextStyle());
 	}
-	public RawJsonBuilder(RawJsonBuilderSettings settings, TextStyle baseStyle)
+	
+	public RawJsonBuilder(RawJsonBuilderSettings settings, TextStyle baseTextStyle)
 	{
 		this.settings = settings;
-		this.baseStyle = baseStyle;
+		this.baseTextStyle = baseTextStyle;
 		command = new StringBuilder();
-		command.append("{").append(baseStyle.getFullJson()).append("\"text\":\"\"},");
+		command.append("{").append(baseTextStyle.getFullJson()).append("\"text\":\"\"},");
 	}
 	
 	@Override
@@ -52,9 +52,9 @@ public class RawJsonBuilder
 			StringBuilder extraJson = new StringBuilder();
 			for (TextComponent component : part.getComponents())
 			{
-				if (component instanceof TextStyleSwitch)
+				if (component instanceof TextStyle)
 				{
-					appendTextStyle(text, extraJson, ((TextStyleSwitch) component).getStyle());
+					appendTextStyle(text, extraJson, (TextStyle) component);
 				}
 				else if (component instanceof Link)
 				{
@@ -64,10 +64,8 @@ public class RawJsonBuilder
 				{
 					appendPlayer(text, extraJson, (MentionedPlayer) component);
 				}
-				else
-				{
-					text.append(component.getPlainText());
-				}
+				
+				text.append(part.getText());
 			}
 			tryWrap(text, extraJson);
 		}
@@ -128,7 +126,7 @@ public class RawJsonBuilder
 	
 	private void appendPlayer(StringBuilder text, StringBuilder json, MentionedPlayer player)
 	{
-		String plainName = player.getPlainText();
+		String plainName = player.getName();
 		String uuid = player.getPlayer().getUniqueId().toString();
 		StringBuilder eventsJson = new StringBuilder()
 				.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"" + plainName + "\\nType: Player\\n" + uuid + "\"},")
@@ -146,7 +144,6 @@ public class RawJsonBuilder
 	{
 		if (settings.isLinkUnderlined)
 			text.append(ChatColor.UNDERLINE);
-		text.append(link.getPlainText());
 		json.append(getLinkJson(link));
 	}
 	

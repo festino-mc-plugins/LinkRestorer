@@ -2,7 +2,7 @@ package com.festp.styledmessage.components;
 
 import org.bukkit.ChatColor;
 
-public class TextStyle implements Cloneable {
+public class TextStyle implements Cloneable, TextComponent {
 	private String color = "";
 	private String style = "";
 	

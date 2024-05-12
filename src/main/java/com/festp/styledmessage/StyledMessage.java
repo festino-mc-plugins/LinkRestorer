@@ -20,15 +20,6 @@ public class StyledMessage {
 	{
 		this.parts = parts;
 	}
-
-	public boolean isPlain()
-	{
-		for (SingleStyleMessage part : parts)
-			if (part.getComponents().size() > 0)
-				return false;
-		
-		return true;
-	}
 	
 	public List<SingleStyleMessage> getStyledParts()
 	{

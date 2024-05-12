@@ -14,25 +14,60 @@ public class LinkParserTests {
 	@ParameterizedTest
 	@ValueSource(strings = {"simple text", "o.o", "T.T"})
 	void parseNoLinks(String text) {
-		List<Link> links = new LinkParser().getComponents(text);
-		Assertions.assertEquals(0, links.size());
+		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(text);
+		
+		Assertions.assertEquals(1, substrings.size());
+		Assertions.assertEquals(0, substrings.get(0).beginIndex);
+		Assertions.assertEquals(text.length(), substrings.get(0).endIndex);
+		Assertions.assertEquals(0, substrings.get(0).components.size());
 	}
 
-	@ParameterizedTest
-	@ValueSource(strings = {
-			"http://www.example.com",
-			"http://www.example.com.",
-			"see http://www.example.com", 
-			"link -> http://www.example.com <- !!!"})
-	void parseSingleLink(String text) {
+	@Test
+	void parse_SingleLink_OnlyLink() {
 		String url = "http://www.example.com";
-		List<Link> links = new LinkParser().getComponents(text);
-		Assertions.assertEquals(1, links.size());
-		Link link = links.get(0);
-		Assertions.assertEquals(url, link.getPlainText());
-		Assertions.assertEquals(url, link.getUrl());
-		Assertions.assertEquals(text.indexOf(url), link.getBeginIndex());
-		Assertions.assertEquals(text.indexOf(url) + url.length(), link.getEndIndex());
+		String text = url;
+
+		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(text);
+		
+		Assertions.assertEquals(1, substrings.size());
+		assertLink(substrings.get(0), 0, url.length(), url);
+	}
+
+	@Test
+	void parse_SingleLink_DotAtTheEnd() {
+		String url = "http://www.example.com";
+		String text = url + ".";
+
+		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(text);
+
+		Assertions.assertEquals(2, substrings.size());
+		assertLink(substrings.get(0), 0, url.length(), url);
+		assertPlain(substrings.get(1), url.length(), url.length() + 1);
+	}
+
+	@Test
+	void parse_SingleLink_WordAtBeginning() {
+		String url = "http://www.example.com";
+		String text = "see " + url;
+
+		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(text);
+
+		Assertions.assertEquals(2, substrings.size());
+		assertPlain(substrings.get(0), 0, 4);
+		assertLink(substrings.get(1), 4, 4 + url.length(), url);
+	}
+
+	@Test
+	void parse_SingleLink_WordsAtEnds() {
+		String url = "http://www.example.com";
+		String text = "link -> " + url + " <- !!!";
+
+		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(text);
+
+		Assertions.assertEquals(3, substrings.size());
+		assertPlain(substrings.get(0), 0, 8);
+		assertLink(substrings.get(1), 8, 8 + url.length(), url);
+		assertPlain(substrings.get(2), 8 + url.length(), 8 + url.length() + 7);
 	}
 
 	@ParameterizedTest
@@ -40,44 +75,39 @@ public class LinkParserTests {
 			"www.example.com",
 			"example.com"})
 	void parseProtocolless(String text) {
-		List<Link> links = new LinkParser().getComponents(text);
-		Assertions.assertEquals(1, links.size());
-		Link link = links.get(0);
-		Assertions.assertEquals(text, link.getPlainText());
-		Assertions.assertEquals(Link.DEFAULT_PROTOCOL + text, link.getUrl());
+		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(text);
+
+		Assertions.assertEquals(1, substrings.size());
+		assertLink(substrings.get(0), 0, text.length(), "https://" + text);
 	}
 
 	@Test
 	void parseMultipleLinks() {
-		String message = "link1: http://www.link1.com, link2: http://www.link2.com.";
-		List<Link> links = new LinkParser().getComponents(message);
-		Assertions.assertEquals(2, links.size());
+		String url_1 = "http://www.link1.com";
+		String url_2 = "http://www.link2.com";
+		String message = "link1: " + url_1 + ", link2: " + url_2 + ".";
+		int start_1 = message.indexOf(url_1);
+		int start_2 = message.indexOf(url_2);
 		
-		Link link1 = links.get(0);
-		Assertions.assertEquals(7, link1.getBeginIndex());
-		Assertions.assertEquals(27, link1.getEndIndex());
-		Assertions.assertEquals("http://www.link1.com", link1.getPlainText());
-		Assertions.assertEquals("http://www.link1.com", link1.getUrl());
+		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(message);
 
-		Link link2 = links.get(1);
-		Assertions.assertEquals(36, link2.getBeginIndex());
-		Assertions.assertEquals(56, link2.getEndIndex());
-		Assertions.assertEquals("http://www.link2.com", link2.getPlainText());
-		Assertions.assertEquals("http://www.link2.com", link2.getUrl());
+		Assertions.assertEquals(5, substrings.size());
+		assertPlain(substrings.get(0), 0, start_1);
+		assertLink(substrings.get(1), start_1, start_1 + url_1.length(), url_1);
+		assertPlain(substrings.get(2), start_1 + url_1.length(), start_2);
+		assertLink(substrings.get(3), start_2, start_2 + url_2.length(), url_2);
+		assertPlain(substrings.get(4), start_2 + url_2.length(), start_2 + url_2.length() + 1);
 	}
 
 	@Test
 	void parseComplexLink() {
 		//String url = "a http://username:password@example.com:8080/test?param=value&p=1#anchor a";
 		String url = "http://example.com:8080/test?param=value&p=1#anchor";
-		List<Link> links = new LinkParser().getComponents("a " + url + " a");
-		Assertions.assertEquals(1, links.size());
-		
-		Link link = links.get(0);
-		Assertions.assertEquals(2, link.getBeginIndex());
-		Assertions.assertEquals(url.length() + 2, link.getEndIndex());
-		Assertions.assertEquals(url, link.getPlainText());
-		Assertions.assertEquals(url, link.getUrl());
+
+		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(url);
+
+		Assertions.assertEquals(1, substrings.size());
+		assertLink(substrings.get(0), 0, url.length(), url);
 	}
 
 	@ParameterizedTest
@@ -85,28 +115,27 @@ public class LinkParserTests {
 			"https://www.лекарство.net/",
 			"https://example.com/初音ミク"})
 	void parseNonLatin(String url) {
-		List<Link> links = new LinkParser().getComponents(url);
-		Assertions.assertEquals(1, links.size());
-		
-		Link link = links.get(0);
-		Assertions.assertEquals(0, link.getBeginIndex());
-		Assertions.assertEquals(url.length(), link.getEndIndex());
-		Assertions.assertEquals(url, link.getPlainText());
+		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(url);
+
+		Assertions.assertEquals(1, substrings.size());
+		assertLink(substrings.get(0), 0, url.length());
 	}
 
 	@Test
 	void parseIPv4() {
 		LinkParser linkParser = new LinkParser();
 		String url = "127.0.0.1";
-		List<Link> links = linkParser.getComponents(url);
-		Assertions.assertEquals(1, links.size());
-		Assertions.assertEquals(url, links.get(0).getPlainText());
-		Assertions.assertEquals(Link.DEFAULT_PROTOCOL + url, links.get(0).getUrl());
 		
-		links = linkParser.getComponents(url + ".");
-		Assertions.assertEquals(1, links.size());
-		Assertions.assertEquals(url, links.get(0).getPlainText());
-		Assertions.assertEquals(Link.DEFAULT_PROTOCOL + url, links.get(0).getUrl());
+		List<SingleStyleSubstring> substrings = linkParser.getComponents(url);
+		
+		Assertions.assertEquals(1, substrings.size());
+		assertLink(substrings.get(0), 0, url.length(), "https://" + url);
+		
+		substrings = linkParser.getComponents(url + ".");
+		
+		Assertions.assertEquals(2, substrings.size());
+		assertLink(substrings.get(0), 0, url.length(), "https://" + url);
+		assertPlain(substrings.get(1), url.length(), url.length() + 1);
 	}
 
 	@ParameterizedTest
@@ -117,7 +146,31 @@ public class LinkParserTests {
 			"1.0..1",
 			"127.0.FF.01"})
 	void parseInvalidIPv4(String url) {
-		List<Link> links = new LinkParser().getComponents(url);
-		Assertions.assertEquals(0, links.size());
+		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(url);
+		
+		Assertions.assertEquals(1, substrings.size());
+		assertPlain(substrings.get(0), 0, url.length());
+	}
+	
+	private static void assertPlain(SingleStyleSubstring substring, int beginIndex, int endIndex)
+	{
+		Assertions.assertEquals(beginIndex, substring.beginIndex);
+		Assertions.assertEquals(endIndex, substring.endIndex);
+		Assertions.assertEquals(0, substring.components.size());
+	}
+	
+	private static void assertLink(SingleStyleSubstring substring, int beginIndex, int endIndex, String url)
+	{
+		assertLink(substring, beginIndex, endIndex);
+		Link link = (Link) substring.components.get(0);
+		Assertions.assertEquals(url, link.getUrl());
+	}
+	
+	private static void assertLink(SingleStyleSubstring substring, int beginIndex, int endIndex)
+	{
+		Assertions.assertEquals(beginIndex, substring.beginIndex);
+		Assertions.assertEquals(endIndex, substring.endIndex);
+		Assertions.assertEquals(1, substring.components.size());
+		Assertions.assertTrue(substring.components.get(0) instanceof Link);
 	}
 }
