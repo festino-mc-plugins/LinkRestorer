@@ -137,6 +137,8 @@ class ClosableStyledMessage
 	 * */
 	private void appendSubstring(List<SingleStyleMessage> parts, SingleStyleSubstring styledSubstring, List<SingleStyleMessage> oldParts)
 	{
+		if (styledSubstring.beginIndex == styledSubstring.endIndex) return;
+		
 		int partBeginIndex = 0;
 		for (SingleStyleMessage oldPart : oldParts)
 		{
@@ -156,8 +158,10 @@ class ClosableStyledMessage
 			
 			int beginIndex = Math.max(styledSubstring.beginIndex - partBeginIndex, 0);
 			int endIndex = Math.min(styledSubstring.endIndex - partBeginIndex, partLength);
-			String plainText = oldPart.getText().substring(beginIndex, endIndex);
-			parts.add(new SingleStyleMessage(plainText, components));
+			if (beginIndex < endIndex) {
+				String plainText = oldPart.getText().substring(beginIndex, endIndex);
+				parts.add(new SingleStyleMessage(plainText, components));
+			}
 			partBeginIndex = partEndIndex;
 			if (partBeginIndex >= styledSubstring.endIndex) break;
 		} 
