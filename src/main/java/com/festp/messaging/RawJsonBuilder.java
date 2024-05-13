@@ -64,9 +64,8 @@ public class RawJsonBuilder
 				{
 					appendPlayer(text, extraJson, (MentionedPlayer) component);
 				}
-				
-				text.append(part.getText());
 			}
+			text.append(part.getText());
 			tryWrap(text, extraJson);
 		}
 	}
