@@ -13,14 +13,13 @@ import org.bukkit.event.server.ServerCommandEvent;
 import com.festp.Logger;
 import com.festp.config.Config;
 import com.festp.messaging.Chatter;
+import com.festp.messaging.SpigotMessageSender;
 import com.festp.styledmessage.components.TextStyle;
 
 public class WhisperHandler implements Listener
 {
 	private Chatter chatter;
 	private Config config;
-	
-	private static final String STYLE_CODES = ChatColor.GRAY.toString() + ChatColor.ITALIC.toString();
 	
 	public WhisperHandler(Chatter chatter, Config config)
 	{
@@ -65,17 +64,15 @@ public class WhisperHandler implements Listener
 		if (message == "")
 			return;
 		
-		TextStyle style = new TextStyle().update(STYLE_CODES);
-		
 		if (!config.get(Config.Key.WHISPER_NEW_MESSAGE, false))
 		{
-			boolean sent = chatter.sendWhisperMessage(sender, recipients, message, style);
+			boolean sent = chatter.sendWhisperMessage(sender, recipients, message);
 			if (sent)
 				event.setCancelled(true);
 		}
 		else
 		{
-			chatter.sendOnlyLinks(sender, recipients, message, style);
+			chatter.sendOnlyLinks(sender, recipients, message);
 		}
 	}
 

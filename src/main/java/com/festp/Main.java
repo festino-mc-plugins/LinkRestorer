@@ -12,6 +12,9 @@ import com.festp.handlers.ChatHandler;
 import com.festp.handlers.SmallCommandsHandler;
 import com.festp.handlers.WhisperHandler;
 import com.festp.messaging.Chatter;
+import com.festp.messaging.MessageSender;
+import com.festp.messaging.RawJsonChatter;
+import com.festp.messaging.SpigotMessageSender;
 import com.festp.parsing.ComponentParser;
 import com.festp.parsing.LinkParser;
 import com.festp.parsing.TextStyleParser;
@@ -28,11 +31,11 @@ public class Main extends JavaPlugin
 		Config config = new Config(this, lang);
 		config.load();
 
-		ComponentParser textStyleParser = new TextStyleParser();
-		StyledMessageBuilder formatParser = new StyledMessageBuilder(Lists.newArrayList(textStyleParser), Lists.newArrayList());
+		ComponentParser[] globalParsers = new ComponentParser[] { new TextStyleParser() };
 		ComponentParser[] splittingParsers = new ComponentParser[] { new LinkParser() };
-		StyledMessageBuilder parser = new StyledMessageBuilder(Lists.newArrayList(textStyleParser), Lists.newArrayList(splittingParsers));
-		Chatter chatter = new Chatter(this, config, parser, formatParser);
+		StyledMessageBuilder styledMessageBuilder = new StyledMessageBuilder(Lists.newArrayList(globalParsers), Lists.newArrayList(splittingParsers));
+		MessageSender messageSender = new SpigotMessageSender(this, config);
+		Chatter chatter = new RawJsonChatter(config, styledMessageBuilder, messageSender);
 
 		PluginManager pm = getServer().getPluginManager();
 

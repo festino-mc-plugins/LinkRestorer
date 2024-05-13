@@ -33,7 +33,7 @@ class StyledMessageBuilderTests
 		String message = "hi";
 		StyledMessageBuilder parser = new StyledMessageBuilder(Lists.newArrayList(), Lists.newArrayList());
 		
-		parser.append(message);
+		parser.append(message, true);
 		StyledMessage styledMessage = parser.build();
 		
 		Assertions.assertEquals(1, styledMessage.getStyledParts().size());
@@ -53,7 +53,7 @@ class StyledMessageBuilderTests
 				));
 		StyledMessageBuilder parser = new StyledMessageBuilder(Lists.newArrayList(parserMock), Lists.newArrayList());
 		
-		parser.append(message);
+		parser.append(message, true);
 		StyledMessage styledMessage = parser.build();
 
 		Assertions.assertEquals(3, styledMessage.getStyledParts().size());
@@ -78,7 +78,7 @@ class StyledMessageBuilderTests
 		List<ComponentParser> splittingParsers =  isSplitting ? parsers : Lists.newArrayList();
 		StyledMessageBuilder parser = new StyledMessageBuilder(globalParsers, splittingParsers);
 		
-		parser.append(message);
+		parser.append(message, true);
 
 		Mockito.verify(parserMock_1).getComponents("abcd");
 		Mockito.verify(parserMock_2).getComponents("abc");
@@ -105,9 +105,9 @@ class StyledMessageBuilderTests
 		String message3 = "ab";
 		int abcComponents = isSplitting ? 0 : 1;
 		
-		parser.append(message1);
-		parser.append(message2);
-		parser.append(message3);
+		parser.append(message1, true);
+		parser.append(message2, true);
+		parser.append(message3, true);
 		StyledMessage styledMessage = parser.build();
 		
 		List<SingleStyleMessage> parts = styledMessage.getStyledParts();

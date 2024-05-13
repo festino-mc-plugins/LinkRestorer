@@ -36,7 +36,14 @@ public class StyledMessageBuilder {
 		startStyle = Lists.newArrayList();
 	}
 	
-	public StyledMessageBuilder append(String text)
+	/** Does not change start style for next appends */
+	public StyledMessageBuilder append(StyledMessage message)
+	{
+		styledMessage.addAll(message.getStyledParts());
+		return this;
+	}
+
+	public StyledMessageBuilder append(String text, boolean useSplittingParsers)
 	{
 		ClosableStyledMessage closableMessage = new ClosableStyledMessage(Lists.newArrayList(new SingleStyleMessage(text, startStyle)));
 		
@@ -50,6 +57,12 @@ public class StyledMessageBuilder {
 
 		startStyle = closableMessage.getEndStyle();
 
+		if (!useSplittingParsers)
+		{
+			styledMessage.addAll(closableMessage.getStyledParts());
+			return this;
+		}
+		
 		for (ComponentParser parser : splittingParsers)
 		{
 			for (ClosableStyledMessagePart part : closableMessage.getOpenParts())
@@ -59,7 +72,6 @@ public class StyledMessageBuilder {
 		}
 
 		styledMessage.addAll(closableMessage.getStyledParts());
-		
 		return this;
 	}
 	
