@@ -3,6 +3,7 @@ package com.festp.messaging;
 import org.bukkit.ChatColor;
 import com.festp.styledmessage.SingleStyleMessage;
 import com.festp.styledmessage.StyledMessage;
+import com.festp.styledmessage.components.Command;
 import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.MentionedPlayer;
 import com.festp.styledmessage.components.TextComponent;
@@ -60,6 +61,10 @@ public class RawJsonBuilder
 				{
 					appendLink(text, extraJson, (Link) component);
 				}
+				else if (component instanceof Command)
+				{
+					appendCommand(text, extraJson, (Command) component);
+				}
 				else if (component instanceof MentionedPlayer)
 				{
 					appendPlayer(text, extraJson, (MentionedPlayer) component);
@@ -110,16 +115,6 @@ public class RawJsonBuilder
 		command.append("]},");
 	}
 	
-	private CharSequence getLinkJson(Link link)
-	{
-		String encodedUrl = LinkUtils.applyBrowserEncoding(link.getUrl());
-		StringBuilder linkJson = new StringBuilder();
-		linkJson.append("\"clickEvent\":{\"action\":\"open_url\",\"value\":\"");
-		linkJson.append(encodedUrl);
-		linkJson.append("\"},");
-		return linkJson;
-	}
-	
 	private void appendPlayer(StringBuilder text, StringBuilder json, MentionedPlayer player)
 	{
 		String plainName = player.getName();
@@ -143,6 +138,28 @@ public class RawJsonBuilder
 		json.append(getLinkJson(link));
 	}
 	
+	private CharSequence getLinkJson(Link link)
+	{
+		String encodedUrl = LinkUtils.applyBrowserEncoding(link.getUrl());
+		StringBuilder linkJson = new StringBuilder();
+		linkJson.append("\"clickEvent\":{\"action\":\"open_url\",\"value\":\"");
+		linkJson.append(encodedUrl);
+		linkJson.append("\"},");
+		return linkJson;
+	}
+	
+	private void appendCommand(StringBuilder text, StringBuilder json, Command command) {
+		text.append(ChatColor.UNDERLINE);
+		json.append(getCommandJson(command));
+	}
+	
+	private String getCommandJson(Command command) {
+		StringBuilder eventsJson = new StringBuilder()
+				.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"Copy command\"},")
+				.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"" + command.getCommand() + "\"},");
+		return eventsJson.toString();
+	}
+
 	private void tryEncloseList()
 	{
 		command.insert(0, "[");
