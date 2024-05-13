@@ -1,4 +1,4 @@
-package com.festp.utils;
+package com.festp.messaging;
 
 import org.bukkit.ChatColor;
 import com.festp.styledmessage.SingleStyleMessage;

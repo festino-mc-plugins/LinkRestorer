@@ -1,4 +1,4 @@
-package com.festp.utils;
+package com.festp.messaging;
 
 public class RawJsonBuilderSettings
 {

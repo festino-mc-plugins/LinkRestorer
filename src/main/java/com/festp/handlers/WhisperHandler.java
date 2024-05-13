@@ -10,9 +10,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 
-import com.festp.Chatter;
 import com.festp.Logger;
 import com.festp.config.Config;
+import com.festp.messaging.Chatter;
 import com.festp.styledmessage.components.TextStyle;
 
 public class WhisperHandler implements Listener

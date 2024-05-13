@@ -1,4 +1,4 @@
-package com.festp;
+package com.festp.messaging;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,6 +14,7 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.festp.Logger;
 import com.festp.config.Config;
 import com.festp.styledmessage.SingleStyleMessage;
 import com.festp.styledmessage.StyledMessage;
@@ -22,7 +23,6 @@ import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.MentionedPlayer;
 import com.festp.styledmessage.components.TextComponent;
 import com.festp.styledmessage.components.TextStyle;
-import com.festp.utils.RawJsonBuilder;
 
 public class Chatter
 {

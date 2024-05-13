@@ -11,6 +11,7 @@ import com.festp.config.LangConfig;
 import com.festp.handlers.ChatHandler;
 import com.festp.handlers.SmallCommandsHandler;
 import com.festp.handlers.WhisperHandler;
+import com.festp.messaging.Chatter;
 import com.festp.parsing.ComponentParser;
 import com.festp.parsing.LinkParser;
 import com.festp.parsing.TextStyleParser;

@@ -9,8 +9,8 @@ import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.festp.Logger;
+import com.festp.messaging.RawJsonBuilderSettings;
 import com.festp.utils.FileUtils;
-import com.festp.utils.RawJsonBuilderSettings;
 
 public class Config implements IConfig
 {
