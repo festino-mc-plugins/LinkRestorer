@@ -2,7 +2,7 @@ package com.festp.styledmessage.components;
 
 import org.bukkit.ChatColor;
 
-public class TextStyle implements Cloneable, TextComponent {
+public class TextStyle implements UpdatableTextComponent {
 	private String color = "";
 	private String style = "";
 	
@@ -14,6 +14,16 @@ public class TextStyle implements Cloneable, TextComponent {
 		copy.color = color;
 		copy.style = style;
 		return copy; 
+	}
+
+	/** @return the same TextStyle object for chaining */
+	public void update(UpdatableTextComponent other)
+	{
+		if (!(other instanceof TextStyle)) return;
+		
+		TextStyle otherStyle = (TextStyle) other;
+		update(otherStyle.getCodes());
+		if (otherStyle.isRgbColor()) color = otherStyle.color;
 	}
 
 	/** @return the same TextStyle object for chaining */

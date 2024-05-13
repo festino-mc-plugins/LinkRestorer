@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.festp.parsing.SingleStyleSubstring;
 import com.festp.styledmessage.components.TextComponent;
+import com.festp.styledmessage.components.UpdatableTextComponent;
 import com.google.common.collect.Lists;
 
 class ClosableStyledMessage
@@ -165,8 +166,28 @@ class ClosableStyledMessage
 	
 	private List<TextComponent> mergeStyles(List<TextComponent> oldStyle, List<TextComponent> newComponents) {
 		List<TextComponent> newStyle = Lists.newArrayList(oldStyle);
-		newStyle.addAll(newComponents);
-		// TODO update updatable
+		for (TextComponent newComponent : newComponents)
+		{
+			if (!(newComponent instanceof UpdatableTextComponent)) {
+				newStyle.add(newComponent);
+				continue;
+			}
+			boolean updated = false;
+			for (int i = 0; i < newStyle.size(); i++)
+			{
+				TextComponent oldComponent = newStyle.get(i);
+				if (newComponent.getClass().equals(oldComponent.getClass())) {
+					UpdatableTextComponent updatedComponent = ((UpdatableTextComponent) oldComponent).clone();
+					((UpdatableTextComponent) updatedComponent).update((UpdatableTextComponent) newComponent);
+					newStyle.set(i, updatedComponent);
+					updated = true;
+					break;
+				}
+			}
+			if (!updated) {
+				newStyle.add(newComponent);
+			}
+		}
 		return newStyle;
 	}
 }
