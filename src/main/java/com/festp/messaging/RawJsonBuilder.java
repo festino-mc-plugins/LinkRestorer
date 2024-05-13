@@ -118,7 +118,7 @@ public class RawJsonBuilder
 	private CharSequence getLinkJson(Link link)
 	{
 		StringBuilder linkJson = new StringBuilder();
-		linkJson.append("clickEvent\":{\"action\":\"open_url\",\"value\":\"");
+		linkJson.append("\"clickEvent\":{\"action\":\"open_url\",\"value\":\"");
 		linkJson.append(link.getUrl());
 		linkJson.append("\"},");
 		return linkJson;
