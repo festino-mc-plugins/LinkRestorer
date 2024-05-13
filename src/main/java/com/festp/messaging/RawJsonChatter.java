@@ -20,6 +20,7 @@ import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.MentionedPlayer;
 import com.festp.styledmessage.components.TextComponent;
 import com.festp.styledmessage.components.TextStyle;
+import com.google.common.collect.Lists;
 
 public class RawJsonChatter implements Chatter
 {
@@ -41,7 +42,9 @@ public class RawJsonChatter implements Chatter
 	
 	public boolean sendFormatted(Collection<? extends Player> recipients, CommandSender sender, String message, String format, boolean sendToConsole)
 	{
-		StyledMessage styledMessage = builder.append(message, true).build();
+		builder.clear();
+		StyledMessage styledMessage = builder.append(message).build();
+		builder.clear();
 		if (!canSend(styledMessage))
 			return false;
 		
@@ -67,17 +70,17 @@ public class RawJsonChatter implements Chatter
 		{
 			int start = matcher.start();
 			int end = matcher.end();
-			builder.append(format.substring(prevEnd, start), false);
+			builder.appendSplitting(format.substring(prevEnd, start));
 
 			String placeholder = format.substring(start, end);
 			if (placeholder.equals(PLACEHOLDER_NAME))
-				builder.append(getSender(sender, false));
+				appendSender(builder, sender, false);
 			if (placeholder.equals(PLACEHOLDER_MESSAGE))
-				builder.append(message, true);
+				builder.append(message);
 
 			prevEnd = end;
 		}
-		builder.append(format.substring(prevEnd), false);
+		builder.appendSplitting(format.substring(prevEnd));
 
 		RawJsonBuilder jsonBuilder = new RawJsonBuilder(config.getBuilderSettings());
 		jsonBuilder.appendStyledMessage(builder.build());
@@ -88,28 +91,10 @@ public class RawJsonChatter implements Chatter
 		return true;
 	}
 	
-	private StyledMessage getSender(CommandSender sender, boolean stripColors)
-	{
-		String name;
-		if (stripColors)
-			name = sender.getName();
-		else
-			name = getDisplayName(sender);
-
-		StyledMessage styledMessage = builder.append(name, false).build();
-		if (sender instanceof Player) {
-			MentionedPlayer playerComponent = new MentionedPlayer((Player) sender, ChatColor.stripColor(name));
-			for (SingleStyleMessage part : styledMessage.getStyledParts())
-			{
-				part.getComponents().add(playerComponent);
-			}
-		}
-		return styledMessage;
-	}
-	
 	public boolean sendWhisperMessage(CommandSender sender, Player[] recipients, String message)
 	{
-		StyledMessage styledMessage = builder.append(message, true).build();
+		builder.clear();
+		StyledMessage styledMessage = builder.append(message).build();
 		if (!canSend(styledMessage))
 			return false;
 		
@@ -122,7 +107,9 @@ public class RawJsonChatter implements Chatter
 		CharSequence messageJson = messageBuilder.toCharSequence();
 
 		RawJsonBuilder nameFromBuilder = new RawJsonBuilder(config.getBuilderSettings());
-		nameFromBuilder.appendStyledMessage(getSender(sender, true));
+		builder.clear();
+		appendSender(builder, sender, true);
+		nameFromBuilder.appendStyledMessage(builder.build());
 		CharSequence nameFromJson = nameFromBuilder.toCharSequence();
 		
 		for (Player recipient : recipients)
@@ -130,7 +117,9 @@ public class RawJsonChatter implements Chatter
 			if (sender instanceof Player)
 			{
 				RawJsonBuilder nameToBuilder = new RawJsonBuilder(config.getBuilderSettings());
-				nameToBuilder.appendStyledMessage(getSender(recipient, true));
+				builder.clear();
+				appendSender(builder, recipient, true);
+				nameToBuilder.appendStyledMessage(builder.build());
 				CharSequence nameToJson = nameFromBuilder.toCharSequence();
 				
 				RawJsonBuilder from = new RawJsonBuilder(config.getBuilderSettings());
@@ -147,7 +136,7 @@ public class RawJsonChatter implements Chatter
 	
 	public boolean sendOnlyLinks(CommandSender sender, Player[] recipients, String message)
 	{
-		StyledMessage styledMessage = builder.append(message, true).build();
+		StyledMessage styledMessage = builder.append(message).build();
 		if (!canSend(styledMessage))
 			return false;
 		
@@ -169,7 +158,23 @@ public class RawJsonChatter implements Chatter
 		return true;
 	}
 	
-	public static String getDisplayName(CommandSender sender)
+	private static void appendSender(StyledMessageBuilder builder, CommandSender sender, boolean stripColors)
+	{
+		String name;
+		if (stripColors)
+			name = sender.getName();
+		else
+			name = getDisplayName(sender);
+
+		if (sender instanceof Player) {
+			MentionedPlayer playerComponent = new MentionedPlayer((Player) sender, ChatColor.stripColor(name));
+			builder.appendSplitting(name, Lists.newArrayList(playerComponent));
+		} else {
+			builder.appendSplitting(name);
+		}
+	}
+	
+	private static String getDisplayName(CommandSender sender)
 	{
 		if (sender instanceof Player)
 			return ((Player)sender).getDisplayName();
@@ -179,7 +184,7 @@ public class RawJsonChatter implements Chatter
 	}
 
 	
-	private List<Link> getLinks(StyledMessage styledMessage)
+	private static List<Link> getLinks(StyledMessage styledMessage)
 	{
 		List<Link> links = new ArrayList<>();
 		for (SingleStyleMessage part : styledMessage.getStyledParts())
@@ -190,7 +195,7 @@ public class RawJsonChatter implements Chatter
 		return links;
 	}
 	
-	private boolean canSend(StyledMessage styledMessage)
+	private static boolean canSend(StyledMessage styledMessage)
 	{
 		if (styledMessage == null)
 			return false;

@@ -1,5 +1,6 @@
 package com.festp.styledmessage;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.festp.parsing.ComponentParser;
@@ -36,14 +37,29 @@ public class StyledMessageBuilder {
 		startStyle = Lists.newArrayList();
 	}
 	
-	/** Does not change start style for next appends */
-	public StyledMessageBuilder append(StyledMessage message)
+	public StyledMessageBuilder appendSplitting(String text)
 	{
-		styledMessage.addAll(message.getStyledParts());
+		append(text, false);
+		return this;
+	}
+	
+	public StyledMessageBuilder appendSplitting(String text, Collection<TextComponent> additionalComponents)
+	{
+		int startLength = styledMessage.getStyledParts().size();
+		append(text, false);
+		int endLength = styledMessage.getStyledParts().size();
+		for (int i = startLength; i < endLength; i++) {
+			styledMessage.getStyledParts().get(i).getComponents().addAll(additionalComponents);
+		}
 		return this;
 	}
 
-	public StyledMessageBuilder append(String text, boolean useSplittingParsers)
+	public StyledMessageBuilder append(String text)
+	{
+		return append(text, true);
+	}
+	
+	private StyledMessageBuilder append(String text, boolean useSplittingParsers)
 	{
 		ClosableStyledMessage closableMessage = new ClosableStyledMessage(Lists.newArrayList(new SingleStyleMessage(text, startStyle)));
 		
