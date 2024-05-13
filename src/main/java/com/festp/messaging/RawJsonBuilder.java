@@ -7,6 +7,7 @@ import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.MentionedPlayer;
 import com.festp.styledmessage.components.TextComponent;
 import com.festp.styledmessage.components.TextStyle;
+import com.festp.utils.LinkUtils;
 import com.google.common.collect.Lists;
 
 public class RawJsonBuilder
@@ -111,9 +112,10 @@ public class RawJsonBuilder
 	
 	private CharSequence getLinkJson(Link link)
 	{
+		String encodedUrl = LinkUtils.applyBrowserEncoding(link.getUrl());
 		StringBuilder linkJson = new StringBuilder();
 		linkJson.append("\"clickEvent\":{\"action\":\"open_url\",\"value\":\"");
-		linkJson.append(link.getUrl());
+		linkJson.append(encodedUrl);
 		linkJson.append("\"},");
 		return linkJson;
 	}

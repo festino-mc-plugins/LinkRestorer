@@ -1,7 +1,5 @@
 package com.festp.styledmessage.components;
 
-import com.festp.utils.LinkUtils;
-
 public class Link implements TextComponent
 {
 	private final String url;
@@ -12,6 +10,6 @@ public class Link implements TextComponent
 	}
 
 	public String getUrl() {
-		return LinkUtils.applyBrowserEncoding(this.url); // TODO move encoding to the presentation level
+		return url;
 	}
 }
