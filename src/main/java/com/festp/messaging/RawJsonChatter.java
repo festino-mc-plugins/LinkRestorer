@@ -136,6 +136,7 @@ public class RawJsonChatter implements Chatter
 	
 	public boolean sendOnlyLinks(CommandSender sender, Player[] recipients, String message)
 	{
+		builder.clear();
 		StyledMessage styledMessage = builder.append(message).build();
 		if (!canSend(styledMessage))
 			return false;
@@ -186,11 +187,17 @@ public class RawJsonChatter implements Chatter
 	
 	private static List<Link> getLinks(StyledMessage styledMessage)
 	{
-		List<Link> links = new ArrayList<>();
+		List<Link> links = Lists.newArrayList();
+		List<String> urls = Lists.newArrayList();
 		for (SingleStyleMessage part : styledMessage.getStyledParts())
 			for (TextComponent component : part.getComponents())
-				if (component instanceof Link)
-					links.add((Link)component);
+				if (component instanceof Link) {
+					Link link = (Link) component;
+					if (!urls.contains(link.getUrl())) {
+						links.add(link);
+						urls.add(link.getUrl());
+					}
+				}
 		
 		return links;
 	}

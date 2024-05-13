@@ -7,11 +7,11 @@ import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.MentionedPlayer;
 import com.festp.styledmessage.components.TextComponent;
 import com.festp.styledmessage.components.TextStyle;
+import com.google.common.collect.Lists;
 
 public class RawJsonBuilder
 {
 	private final RawJsonBuilderSettings settings;
-	private final TextStyle baseTextStyle;
 	private StringBuilder command;
 
 	public RawJsonBuilder(RawJsonBuilderSettings settings)
@@ -22,7 +22,6 @@ public class RawJsonBuilder
 	public RawJsonBuilder(RawJsonBuilderSettings settings, TextStyle baseTextStyle)
 	{
 		this.settings = settings;
-		this.baseTextStyle = baseTextStyle;
 		command = new StringBuilder();
 		command.append("{").append(baseTextStyle.getFullJson()).append("\"text\":\"\"},");
 	}
@@ -72,23 +71,19 @@ public class RawJsonBuilder
 	
 	public void appendJoinedLinks(Iterable<Link> links, TextStyle style, String sep)
 	{
-		// TODO create StyledMessage and use appendStyledMessage
 		boolean isFirst = true;
-		CharSequence wrappedSep = getWrapped(style.getCodes() + sep, style.getJson());
+		StyledMessage styledMessage = new StyledMessage();
 		for (Link link : links)
 		{
 			if (isFirst) {
 				isFirst = false;
 			}
 			else {
-				command.append(wrappedSep);
+				styledMessage.addAll(Lists.newArrayList(new SingleStyleMessage(sep, Lists.newArrayList())));
 			}
-			StringBuilder text = new StringBuilder();
-			StringBuilder extraJson = new StringBuilder();
-			appendTextStyle(text, extraJson, style);
-			appendLink(text, extraJson, link);
-			tryWrap(text, extraJson);
+			styledMessage.addAll(Lists.newArrayList(new SingleStyleMessage(link.getUrl(), Lists.newArrayList(link))));
 		}
+		appendStyledMessage(styledMessage);
 	}
 	
 	/** Check for more info: <a>https://minecraft.fandom.com/wiki/Raw_JSON_text_format#Translated_Text</a> */
@@ -161,13 +156,8 @@ public class RawJsonBuilder
 	
 	private void tryWrap(CharSequence str, CharSequence extraJson)
 	{
-		if (str.length() > 0)
-			command.append(getWrapped(str, extraJson));
-	}
-	
-	private void wrap(CharSequence text,  CharSequence extraJson)
-	{
-		command.append(getWrapped(text, extraJson));
+		if (str.length() == 0) return;
+		command.append(getWrapped(str, extraJson));
 	}
 	
 	private CharSequence getWrapped(CharSequence text, CharSequence extraJson)
