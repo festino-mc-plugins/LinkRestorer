@@ -12,12 +12,12 @@ import com.google.common.collect.Lists;
 public class LinkParser implements ComponentParser {
 	// TODO check telegram desktop code
 	// TextWithTags Ui::InputField::getTextWithTags, getTextWithTagsPart, getTextPart...
-
-	public static final String DEFAULT_PROTOCOL = "https://";
 	private static final String LINK_REGEX = "(((?:https?):\\/\\/)?(?:(?:[-a-z0-9_а-яА-Я]{1,}\\.){1,}([a-z0-9а-яА-Я]{1,}).*?(?=[\\.\\?!,;:]?(?:[" + String.valueOf(org.bukkit.ChatColor.COLOR_CHAR) + " \\n]|$))))";
 	private static final Pattern PATTERN = Pattern.compile(LINK_REGEX, Pattern.CASE_INSENSITIVE);
 	private static final int SCHEME_GROUP_INDEX = 2;
 	private static final int TLD_GROUP_INDEX = 3;
+	
+	public static final String DEFAULT_PROTOCOL = "https://";
 
 	@Override
 	public List<SingleStyleSubstring> getComponents(String message) {
@@ -25,29 +25,29 @@ public class LinkParser implements ComponentParser {
 		Matcher matcher = PATTERN.matcher(message);
 
 		int prevEnd = 0;
-		List<SingleStyleSubstring> links = new ArrayList<>();
+		List<SingleStyleSubstring> substrings = new ArrayList<>();
 		while (matcher.find())
 		{
 			int linkStart = matcher.start();
 			int linkEnd = matcher.end();
 			if (prevEnd < linkStart)
-				links.add(new SingleStyleSubstring(prevEnd, linkStart, emptyStyle));
+				substrings.add(new SingleStyleSubstring(prevEnd, linkStart, emptyStyle));
 			
-			Link link = TryParseLink(message, matcher);
+			Link link = tryParseLink(message, matcher);
 			if (link == null)
-				links.add(new SingleStyleSubstring(linkStart, linkEnd, emptyStyle));
+				substrings.add(new SingleStyleSubstring(linkStart, linkEnd, emptyStyle));
 			else
-				links.add(new SingleStyleSubstring(linkStart, linkEnd, Lists.newArrayList(link)));
+				substrings.add(new SingleStyleSubstring(linkStart, linkEnd, Lists.newArrayList(link)));
 			
 			prevEnd = linkEnd;
 		}
 		if (prevEnd < message.length())
-			links.add(new SingleStyleSubstring(prevEnd, message.length(), emptyStyle));
+			substrings.add(new SingleStyleSubstring(prevEnd, message.length(), emptyStyle));
 		
-		return links;
+		return substrings;
 	}
 	
-	private static Link TryParseLink(String message, Matcher matcher)
+	private static Link tryParseLink(String message, Matcher matcher)
 	{
 		int tldStart = matcher.start(TLD_GROUP_INDEX);
 		int tldEnd = matcher.end(TLD_GROUP_INDEX);
