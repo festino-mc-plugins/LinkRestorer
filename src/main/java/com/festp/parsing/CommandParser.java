@@ -30,11 +30,20 @@ public class CommandParser implements ComponentParser
 			if (prevEnd < start)
 				substrings.add(new SingleStyleSubstring(prevEnd, start, emptyStyle));
 			
-			SingleStyleSubstring substring = getSubstring(message, matcher);
-			if (substring == null)
+			Command command = tryParseCommand(message, matcher);
+			if (command == null) {
 				substrings.add(new SingleStyleSubstring(start, end, emptyStyle));
-			else
-				substrings.add(substring);
+			}
+			else {
+				if (message.charAt(start) != '/') {
+					// remove dot if it has index 0, else add substring of single char
+					if (message.charAt(start) != '.' || start != 0) {
+						substrings.add(new SingleStyleSubstring(start, start + 1, emptyStyle));
+					}
+					start++;
+				}
+				substrings.add(new SingleStyleSubstring(start, end, Lists.newArrayList(command)));
+			}
 			
 			prevEnd = end;
 		}
@@ -44,19 +53,10 @@ public class CommandParser implements ComponentParser
 		return substrings;
 	}
 
-	private static SingleStyleSubstring getSubstring(String message, Matcher matcher)
-	{
-		Command command = tryParseCommand(message, matcher);
-		if (command == null) return null;
-
-		int start = matcher.start(COMMAND_GROUP_INDEX);
-		int end = matcher.end(COMMAND_GROUP_INDEX);
-		return new SingleStyleSubstring(start, end, Lists.newArrayList(command));
-	}
-
 	private static Command tryParseCommand(String message, Matcher matcher)
 	{
 		String command = message.substring(matcher.start(COMMAND_GROUP_INDEX), matcher.end(COMMAND_GROUP_INDEX));
+		// check if command is registered
 		return new Command(command);
 	}
 }
