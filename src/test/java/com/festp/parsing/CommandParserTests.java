@@ -88,6 +88,19 @@ class CommandParserTests extends SingleStyleSubstringHelpers
 		assertCommand(substrings.get(4), 15, 24, command_2);
 		assertPlain(substrings.get(5), 24, 25);
 	}
+
+	@Test
+	void parse_FailValidation() {
+		String command = "/help";
+		String text = "use " + command + " :)";
+
+		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(false)).getComponents(text);
+
+		Assertions.assertEquals(3, substrings.size());
+		assertPlain(substrings.get(0), 0, 3);
+		assertPlain(substrings.get(1), 3, 9);
+		assertPlain(substrings.get(2), 9, 12);
+	}
 	
 	private CommandValidator getValidator(boolean value)
 	{
