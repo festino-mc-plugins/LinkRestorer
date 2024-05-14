@@ -3,6 +3,7 @@ package com.festp.parsing;
 import org.bukkit.ChatColor;
 import org.junit.jupiter.api.Assertions;
 
+import com.festp.styledmessage.components.Command;
 import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.TextStyle;
 
@@ -29,6 +30,21 @@ class SingleStyleSubstringHelpers
 		Assertions.assertEquals(endIndex, substring.endIndex);
 		Assertions.assertEquals(1, substring.components.size());
 		Assertions.assertTrue(substring.components.get(0) instanceof Link);
+	}
+	
+	public static void assertCommand(SingleStyleSubstring substring, int beginIndex, int endIndex, String command)
+	{
+		assertCommand(substring, beginIndex, endIndex);
+		Command commandComponent = (Command) substring.components.get(0);
+		Assertions.assertEquals(command, commandComponent.getCommand());
+	}
+	
+	public static void assertCommand(SingleStyleSubstring substring, int beginIndex, int endIndex)
+	{
+		Assertions.assertEquals(beginIndex, substring.beginIndex);
+		Assertions.assertEquals(endIndex, substring.endIndex);
+		Assertions.assertEquals(1, substring.components.size());
+		Assertions.assertTrue(substring.components.get(0) instanceof Command);
 	}
 
 	public static void assertColor(SingleStyleSubstring substring, int beginIndex, int endIndex, ChatColor chatColor)
