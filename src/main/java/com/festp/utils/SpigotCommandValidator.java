@@ -26,7 +26,6 @@ public class SpigotCommandValidator implements CommandValidator
 		HashSet<String> commandsAndAliases = new HashSet<>();
 		for (HelpTopic topic : Bukkit.getServer().getHelpMap().getHelpTopics()) {
             String fullText = topic.getFullText(Bukkit.getConsoleSender());
-			//System.out.println(topic.getName() + ": " + fullText);
 			if (topic.getName().startsWith("/"))
 				commandsAndAliases.add(topic.getName().substring(1));
 
@@ -36,7 +35,6 @@ public class SpigotCommandValidator implements CommandValidator
                 int index = text[0].indexOf('/');
                 if (index >= 0)
                 {
-        			//System.out.println(text[0]);
                     String aliasFor = text[0].substring(index + 1);
                     commandsAndAliases.add(aliasFor);
                 }
