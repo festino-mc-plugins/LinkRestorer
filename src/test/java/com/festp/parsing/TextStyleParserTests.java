@@ -6,9 +6,8 @@ import org.bukkit.ChatColor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.festp.styledmessage.components.TextStyle;
-
-class TextStyleParserTests {
+class TextStyleParserTests extends SingleStyleSubstringHelpers
+{
 	@Test
 	void parse_Empty() {
 		TextStyleParser parser = new TextStyleParser();
@@ -66,24 +65,5 @@ class TextStyleParserTests {
 		Assertions.assertEquals(2, substrings.size());
 		assertColor(substrings.get(0), 0, 4, ChatColor.RESET);
 		assertColor(substrings.get(1), 6, 6, ChatColor.RED);
-	}
-
-	private static void assertColor(SingleStyleSubstring substring, int beginIndex, int endIndex, ChatColor chatColor)
-	{
-		assertColor(substring, beginIndex, endIndex, chatColor.toString());
-	}
-
-	private static void assertColor(SingleStyleSubstring substring, int beginIndex, int endIndex, String color)
-	{
-		assertColor(substring, beginIndex, endIndex, new TextStyle().update(color));
-	}
-	
-	private static void assertColor(SingleStyleSubstring substring, int beginIndex, int endIndex, TextStyle expectedStyle)
-	{
-		Assertions.assertEquals(beginIndex, substring.beginIndex);
-		Assertions.assertEquals(endIndex, substring.endIndex);
-		Assertions.assertEquals(1, substring.components.size());
-		TextStyle style = (TextStyle) substring.components.get(0);
-		Assertions.assertEquals(expectedStyle.getFullJson(), style.getFullJson());
 	}
 }

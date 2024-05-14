@@ -7,19 +7,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import com.festp.styledmessage.components.Link;
-
-public class LinkParserTests {
-
+class LinkParserTests extends SingleStyleSubstringHelpers
+{
 	@ParameterizedTest
 	@ValueSource(strings = {"simple text", "o.o", "T.T"})
 	void parseNoLinks(String text) {
 		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(text);
 		
 		Assertions.assertEquals(1, substrings.size());
-		Assertions.assertEquals(0, substrings.get(0).beginIndex);
-		Assertions.assertEquals(text.length(), substrings.get(0).endIndex);
-		Assertions.assertEquals(0, substrings.get(0).components.size());
+		assertPlain(substrings.get(0), 0, text.length());
 	}
 
 	@Test
@@ -150,27 +146,5 @@ public class LinkParserTests {
 		
 		Assertions.assertEquals(1, substrings.size());
 		assertPlain(substrings.get(0), 0, url.length());
-	}
-	
-	private static void assertPlain(SingleStyleSubstring substring, int beginIndex, int endIndex)
-	{
-		Assertions.assertEquals(beginIndex, substring.beginIndex);
-		Assertions.assertEquals(endIndex, substring.endIndex);
-		Assertions.assertEquals(0, substring.components.size());
-	}
-	
-	private static void assertLink(SingleStyleSubstring substring, int beginIndex, int endIndex, String url)
-	{
-		assertLink(substring, beginIndex, endIndex);
-		Link link = (Link) substring.components.get(0);
-		Assertions.assertEquals(url, link.getUrl());
-	}
-	
-	private static void assertLink(SingleStyleSubstring substring, int beginIndex, int endIndex)
-	{
-		Assertions.assertEquals(beginIndex, substring.beginIndex);
-		Assertions.assertEquals(endIndex, substring.endIndex);
-		Assertions.assertEquals(1, substring.components.size());
-		Assertions.assertTrue(substring.components.get(0) instanceof Link);
 	}
 }
