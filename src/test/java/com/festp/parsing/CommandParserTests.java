@@ -6,13 +6,16 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
+
+import com.festp.utils.CommandValidator;
 
 class CommandParserTests extends SingleStyleSubstringHelpers
 {
 	@ParameterizedTest
 	@ValueSource(strings = {"simple text", "a/b", ":/"})
 	void parseNoCommands(String text) {
-		List<SingleStyleSubstring> substrings = new CommandParser().getComponents(text);
+		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true)).getComponents(text);
 		
 		Assertions.assertEquals(1, substrings.size());
 		assertPlain(substrings.get(0), 0, text.length());
@@ -23,7 +26,7 @@ class CommandParserTests extends SingleStyleSubstringHelpers
 		String command = "/help";
 		String text = command;
 
-		List<SingleStyleSubstring> substrings = new CommandParser().getComponents(text);
+		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true)).getComponents(text);
 		
 		Assertions.assertEquals(1, substrings.size());
 		assertCommand(substrings.get(0), 0, command.length(), command);
@@ -34,7 +37,7 @@ class CommandParserTests extends SingleStyleSubstringHelpers
 		String command = "/help";
 		String text = "." + command + " :)";
 
-		List<SingleStyleSubstring> substrings = new CommandParser().getComponents(text);
+		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true)).getComponents(text);
 		
 		Assertions.assertEquals(2, substrings.size());
 		assertCommand(substrings.get(0), 1, 6, command);
@@ -46,7 +49,7 @@ class CommandParserTests extends SingleStyleSubstringHelpers
 		String command = "/help";
 		String text = ".." + command + " :)";
 
-		List<SingleStyleSubstring> substrings = new CommandParser().getComponents(text);
+		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true)).getComponents(text);
 		
 		Assertions.assertEquals(4, substrings.size());
 		assertPlain(substrings.get(0), 0, 1);
@@ -60,7 +63,7 @@ class CommandParserTests extends SingleStyleSubstringHelpers
 		String command = "/help";
 		String text = "use " + command + " :)";
 
-		List<SingleStyleSubstring> substrings = new CommandParser().getComponents(text);
+		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true)).getComponents(text);
 		
 		Assertions.assertEquals(4, substrings.size());
 		assertPlain(substrings.get(0), 0, 3);
@@ -75,7 +78,7 @@ class CommandParserTests extends SingleStyleSubstringHelpers
 		String command_2 = "/command2";
 		String text = "!" + command_1 + " and " + command_2 + "!";
 
-		List<SingleStyleSubstring> substrings = new CommandParser().getComponents(text);
+		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true)).getComponents(text);
 		
 		Assertions.assertEquals(6, substrings.size());
 		assertPlain(substrings.get(0), 0, 1);
@@ -84,5 +87,12 @@ class CommandParserTests extends SingleStyleSubstringHelpers
 		assertPlain(substrings.get(3), 14, 15);
 		assertCommand(substrings.get(4), 15, 24, command_2);
 		assertPlain(substrings.get(5), 24, 25);
+	}
+	
+	private CommandValidator getValidator(boolean value)
+	{
+		CommandValidator validatorMock = Mockito.mock(CommandValidator.class);
+		Mockito.when(validatorMock.commandExists(Mockito.anyString())).thenReturn(value);
+		return validatorMock;
 	}
 }

@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import com.festp.styledmessage.components.Command;
 import com.festp.styledmessage.components.TextComponent;
+import com.festp.utils.CommandValidator;
 import com.google.common.collect.Lists;
 
 public class CommandParser implements ComponentParser
@@ -15,7 +16,13 @@ public class CommandParser implements ComponentParser
 	private static final String COMMAND_REGEX = "(?:[" + COMMAND_SEPARATORS + "]|^)(\\/[^" + COMMAND_SEPARATORS + "]{1,})";
 	private static final Pattern PATTERN = Pattern.compile(COMMAND_REGEX, Pattern.CASE_INSENSITIVE);
 	private static final int COMMAND_GROUP_INDEX = 1;
+	
+	private final CommandValidator commandValidator;
 
+	public CommandParser(CommandValidator commandValidator) {
+		this.commandValidator = commandValidator;
+	}
+	
 	@Override
 	public List<SingleStyleSubstring> getComponents(String message) {
 		List<TextComponent> emptyStyle = Lists.newArrayList();
@@ -53,10 +60,12 @@ public class CommandParser implements ComponentParser
 		return substrings;
 	}
 
-	private static Command tryParseCommand(String message, Matcher matcher)
+	private Command tryParseCommand(String message, Matcher matcher)
 	{
 		String command = message.substring(matcher.start(COMMAND_GROUP_INDEX), matcher.end(COMMAND_GROUP_INDEX));
-		// check if command is registered
+		if (!commandValidator.commandExists(command))
+			return null;
+		
 		return new Command(command);
 	}
 }

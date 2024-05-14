@@ -20,6 +20,7 @@ import com.festp.parsing.ComponentParser;
 import com.festp.parsing.LinkParser;
 import com.festp.parsing.TextStyleParser;
 import com.festp.styledmessage.StyledMessageBuilder;
+import com.festp.utils.SpigotCommandValidator;
 import com.google.common.collect.Lists;
 
 public class Main extends JavaPlugin
@@ -33,7 +34,7 @@ public class Main extends JavaPlugin
 		config.load();
 
 		ComponentParser[] globalParsers = new ComponentParser[] { new TextStyleParser() };
-		ComponentParser[] splittingParsers = new ComponentParser[] { new LinkParser(), new CommandParser() };
+		ComponentParser[] splittingParsers = new ComponentParser[] { new LinkParser(), new CommandParser(new SpigotCommandValidator()) };
 		StyledMessageBuilder styledMessageBuilder = new StyledMessageBuilder(Lists.newArrayList(globalParsers), Lists.newArrayList(splittingParsers));
 		MessageSender messageSender = new SpigotMessageSender(this, config);
 		Chatter chatter = new RawJsonChatter(config, styledMessageBuilder, messageSender);
