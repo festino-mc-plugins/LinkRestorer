@@ -4,6 +4,7 @@ import org.bukkit.ChatColor;
 import org.junit.jupiter.api.Assertions;
 
 import com.festp.styledmessage.components.Command;
+import com.festp.styledmessage.components.CopyableText;
 import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.TextStyle;
 
@@ -45,6 +46,21 @@ class SingleStyleSubstringHelpers
 		Assertions.assertEquals(endIndex, substring.endIndex);
 		Assertions.assertEquals(1, substring.components.size());
 		Assertions.assertTrue(substring.components.get(0) instanceof Command);
+	}
+	
+	public static void assertCopyable(SingleStyleSubstring substring, int beginIndex, int endIndex, String copyableText)
+	{
+		assertCopyable(substring, beginIndex, endIndex);
+		CopyableText copyableComponent = (CopyableText) substring.components.get(0);
+		Assertions.assertEquals(copyableText, copyableComponent.getText());
+	}
+	
+	public static void assertCopyable(SingleStyleSubstring substring, int beginIndex, int endIndex)
+	{
+		Assertions.assertEquals(beginIndex, substring.beginIndex);
+		Assertions.assertEquals(endIndex, substring.endIndex);
+		Assertions.assertEquals(1, substring.components.size());
+		Assertions.assertTrue(substring.components.get(0) instanceof CopyableText);
 	}
 
 	public static void assertColor(SingleStyleSubstring substring, int beginIndex, int endIndex, ChatColor chatColor)

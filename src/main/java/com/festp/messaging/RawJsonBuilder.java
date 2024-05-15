@@ -4,6 +4,7 @@ import org.bukkit.ChatColor;
 import com.festp.styledmessage.SingleStyleMessage;
 import com.festp.styledmessage.StyledMessage;
 import com.festp.styledmessage.components.Command;
+import com.festp.styledmessage.components.CopyableText;
 import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.MentionedPlayer;
 import com.festp.styledmessage.components.TextComponent;
@@ -64,6 +65,10 @@ public class RawJsonBuilder
 				else if (component instanceof Command)
 				{
 					appendCommand(text, extraJson, (Command) component);
+				}
+				else if (component instanceof CopyableText)
+				{
+					appendCopyableText(text, extraJson, (CopyableText) component);
 				}
 				else if (component instanceof MentionedPlayer)
 				{
@@ -154,9 +159,27 @@ public class RawJsonBuilder
 	}
 	
 	private String getCommandJson(Command command) {
-		StringBuilder eventsJson = new StringBuilder()
-				.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"Copy command\"},")
-				.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"" + command.getCommand() + "\"},");
+		String tooltip = "Copy command";
+		StringBuilder eventsJson = new StringBuilder();
+		eventsJson.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"" + command.getCommand() + "\"},");
+		if (!tooltip.isEmpty())
+			eventsJson.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"" + tooltip + "\"},");
+		
+		return eventsJson.toString();
+	}
+	
+	private void appendCopyableText(StringBuilder text, StringBuilder json, CopyableText copyableText) {
+		text.append(ChatColor.UNDERLINE);
+		json.append(getCopyableTextJson(copyableText));
+	}
+	
+	private String getCopyableTextJson(CopyableText copyableText) {
+		String tooltip = "Copy text";
+		StringBuilder eventsJson = new StringBuilder();
+		eventsJson.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"" + copyableText.getText() + "\"},");
+		if (!tooltip.isEmpty())
+			eventsJson.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"" + tooltip + "\"},");
+		
 		return eventsJson.toString();
 	}
 

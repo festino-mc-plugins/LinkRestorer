@@ -15,7 +15,6 @@ import com.festp.config.Config;
 import com.festp.styledmessage.SingleStyleMessage;
 import com.festp.styledmessage.StyledMessage;
 import com.festp.styledmessage.StyledMessageBuilder;
-import com.festp.styledmessage.components.Command;
 import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.MentionedPlayer;
 import com.festp.styledmessage.components.TextComponent;
@@ -209,7 +208,7 @@ public class RawJsonChatter implements Chatter
 		
 		for (SingleStyleMessage part : styledMessage.getStyledParts())
 			for (TextComponent component : part.getComponents())
-				if (component instanceof Link || component instanceof Command)
+				if (!(component instanceof TextStyle))
 					return true;
 		
 		return false;

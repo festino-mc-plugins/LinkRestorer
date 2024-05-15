@@ -17,6 +17,7 @@ import com.festp.messaging.RawJsonChatter;
 import com.festp.messaging.SpigotMessageSender;
 import com.festp.parsing.CommandParser;
 import com.festp.parsing.ComponentParser;
+import com.festp.parsing.CopyableTextParser;
 import com.festp.parsing.LinkParser;
 import com.festp.parsing.TextStyleParser;
 import com.festp.styledmessage.StyledMessageBuilder;
@@ -33,8 +34,12 @@ public class Main extends JavaPlugin
 		Config config = new Config(this, lang);
 		config.load();
 
-		ComponentParser[] globalParsers = new ComponentParser[] { new TextStyleParser() };
-		ComponentParser[] splittingParsers = new ComponentParser[] { new LinkParser(), new CommandParser(new SpigotCommandValidator()) };
+		ComponentParser[] globalParsers = new ComponentParser[] {
+				new TextStyleParser() };
+		ComponentParser[] splittingParsers = new ComponentParser[] {
+				new CopyableTextParser(),
+				new LinkParser(),
+				new CommandParser(new SpigotCommandValidator()) };
 		StyledMessageBuilder styledMessageBuilder = new StyledMessageBuilder(Lists.newArrayList(globalParsers), Lists.newArrayList(splittingParsers));
 		MessageSender messageSender = new SpigotMessageSender(this, config);
 		Chatter chatter = new RawJsonChatter(config, styledMessageBuilder, messageSender);
