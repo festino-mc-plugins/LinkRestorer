@@ -57,6 +57,17 @@ public class CommandParser implements ComponentParser
 		if (prevEnd < message.length())
 			substrings.add(new SingleStyleSubstring(prevEnd, message.length(), emptyStyle));
 		
+		for (int i = substrings.size() - 1; i > 0; i--)
+		{
+			SingleStyleSubstring substring = substrings.get(i - 1);
+			SingleStyleSubstring nextSubstring = substrings.get(i);
+			if (substring.endIndex == nextSubstring.beginIndex && substring.components == nextSubstring.components)
+			{
+				substrings.remove(i);
+				substrings.remove(i - 1);
+				substrings.add(i - 1, new SingleStyleSubstring(substring.beginIndex, nextSubstring.endIndex, emptyStyle));
+			}
+		}
 		return substrings;
 	}
 

@@ -51,11 +51,10 @@ class CommandParserTests extends SingleStyleSubstringHelpers
 
 		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true)).getComponents(text);
 		
-		Assertions.assertEquals(4, substrings.size());
-		assertPlain(substrings.get(0), 0, 1);
-		assertPlain(substrings.get(1), 1, 2);
-		assertCommand(substrings.get(2), 2, 7, command);
-		assertPlain(substrings.get(3), 7, 10);
+		Assertions.assertEquals(3, substrings.size());
+		assertPlain(substrings.get(0), 0, 2);
+		assertCommand(substrings.get(1), 2, 7, command);
+		assertPlain(substrings.get(2), 7, 10);
 	}
 
 	@Test
@@ -65,11 +64,10 @@ class CommandParserTests extends SingleStyleSubstringHelpers
 
 		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true)).getComponents(text);
 		
-		Assertions.assertEquals(4, substrings.size());
-		assertPlain(substrings.get(0), 0, 3);
-		assertPlain(substrings.get(1), 3, 4);
-		assertCommand(substrings.get(2), 4, 9, command);
-		assertPlain(substrings.get(3), 9, 12);
+		Assertions.assertEquals(3, substrings.size());
+		assertPlain(substrings.get(0), 0, 4);
+		assertCommand(substrings.get(1), 4, 9, command);
+		assertPlain(substrings.get(2), 9, 12);
 	}
 
 	@Test
@@ -80,13 +78,12 @@ class CommandParserTests extends SingleStyleSubstringHelpers
 
 		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true)).getComponents(text);
 		
-		Assertions.assertEquals(6, substrings.size());
+		Assertions.assertEquals(5, substrings.size());
 		assertPlain(substrings.get(0), 0, 1);
 		assertCommand(substrings.get(1), 1, 10, command_1);
-		assertPlain(substrings.get(2), 10, 14);
-		assertPlain(substrings.get(3), 14, 15);
-		assertCommand(substrings.get(4), 15, 24, command_2);
-		assertPlain(substrings.get(5), 24, 25);
+		assertPlain(substrings.get(2), 10, 15);
+		assertCommand(substrings.get(3), 15, 24, command_2);
+		assertPlain(substrings.get(4), 24, 25);
 	}
 
 	@Test
@@ -96,10 +93,8 @@ class CommandParserTests extends SingleStyleSubstringHelpers
 
 		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(false)).getComponents(text);
 
-		Assertions.assertEquals(3, substrings.size());
-		assertPlain(substrings.get(0), 0, 3);
-		assertPlain(substrings.get(1), 3, 9);
-		assertPlain(substrings.get(2), 9, 12);
+		Assertions.assertEquals(1, substrings.size());
+		assertPlain(substrings.get(0), 0, 12);
 	}
 	
 	private CommandValidator getValidator(boolean value)
