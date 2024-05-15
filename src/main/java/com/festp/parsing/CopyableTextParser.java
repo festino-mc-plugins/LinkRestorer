@@ -11,15 +11,24 @@ import com.google.common.collect.Lists;
 
 public class CopyableTextParser implements ComponentParser
 {
-	// negative lookahead may be a bad choice
-	private static final String COPYABLE_TEXT_REGEX = ",,((?:(?!,,).)*),,";
-	private static final Pattern PATTERN = Pattern.compile(COPYABLE_TEXT_REGEX);
+	private final Pattern pattern;
 	private static final int COPYABLE_TEXT_INDEX = 1;
+	
+	public CopyableTextParser(String beginQuotes, String endQuotes) {
+		if (beginQuotes.isEmpty()) beginQuotes = ",,";
+		if (endQuotes.isEmpty()) endQuotes = ",,";
+
+		beginQuotes = Pattern.quote(beginQuotes);
+		endQuotes = Pattern.quote(endQuotes);
+		// negative lookahead may be a bad choice
+		String copyableTextRegex = beginQuotes + "((?:(?!" + endQuotes + ").)*)" + endQuotes;
+		pattern = Pattern.compile(copyableTextRegex);
+	}
 	
 	@Override
 	public List<SingleStyleSubstring> getComponents(String message) {
 		List<TextComponent> emptyStyle = Lists.newArrayList();
-		Matcher matcher = PATTERN.matcher(message);
+		Matcher matcher = pattern.matcher(message);
 
 		int prevEnd = 0;
 		List<SingleStyleSubstring> substrings = new ArrayList<>();

@@ -13,7 +13,7 @@ class CopyableTextParserTests extends SingleStyleSubstringHelpers
 	@ValueSource(strings = {"test", "a, b", "a ,, b", ",,a,b,"})
 	void parse_NoCopyable(String text)
 	{
-		List<SingleStyleSubstring> substrings = new CopyableTextParser().getComponents(text);
+		List<SingleStyleSubstring> substrings = new CopyableTextParser(",,", ",,").getComponents(text);
 
 		Assertions.assertEquals(1, substrings.size());
 		assertPlain(substrings.get(0), 0, text.length());
@@ -25,7 +25,19 @@ class CopyableTextParserTests extends SingleStyleSubstringHelpers
 		String copyable = "abc";
 		String text = ",," + copyable + ",,";
 		
-		List<SingleStyleSubstring> substrings = new CopyableTextParser().getComponents(text);
+		List<SingleStyleSubstring> substrings = new CopyableTextParser(",,", ",,").getComponents(text);
+
+		Assertions.assertEquals(1, substrings.size());
+		assertCopyable(substrings.get(0), 2, text.length() - 2, copyable);
+	}
+	
+	@Test
+	void parse_SingleCopyable_RegexEscaping()
+	{
+		String copyable = "abc";
+		String text = ".." + copyable + "??";
+		
+		List<SingleStyleSubstring> substrings = new CopyableTextParser("..", "??").getComponents(text);
 
 		Assertions.assertEquals(1, substrings.size());
 		assertCopyable(substrings.get(0), 2, text.length() - 2, copyable);
@@ -38,7 +50,7 @@ class CopyableTextParserTests extends SingleStyleSubstringHelpers
 		String copyable2 = "def";
 		String text = "See ,," + copyable1 + ",, or ,," + copyable2 + ",,.";
 		
-		List<SingleStyleSubstring> substrings = new CopyableTextParser().getComponents(text);
+		List<SingleStyleSubstring> substrings = new CopyableTextParser(",,", ",,").getComponents(text);
 
 		int copyable1_start = text.indexOf(copyable1);
 		int copyable2_start = text.indexOf(copyable2);

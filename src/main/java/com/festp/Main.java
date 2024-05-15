@@ -37,7 +37,7 @@ public class Main extends JavaPlugin
 		ComponentParser[] globalParsers = new ComponentParser[] {
 				new TextStyleParser() };
 		ComponentParser[] splittingParsers = new ComponentParser[] {
-				new CopyableTextParser(),
+				new CopyableTextParser(",,", ",,"),
 				new LinkParser(),
 				new CommandParser(new SpigotCommandValidator()) };
 		StyledMessageBuilder styledMessageBuilder = new StyledMessageBuilder(Lists.newArrayList(globalParsers), Lists.newArrayList(splittingParsers));
