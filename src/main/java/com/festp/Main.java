@@ -1,12 +1,14 @@
 package com.festp;
 
 import java.io.File;
+import java.util.List;
 
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.festp.commands.LinksCommand;
 import com.festp.config.Config;
+import com.festp.config.Config.Key;
 import com.festp.config.LangConfig;
 import com.festp.handlers.ChatHandler;
 import com.festp.handlers.SmallCommandsHandler;
@@ -34,13 +36,15 @@ public class Main extends JavaPlugin
 		Config config = new Config(this, lang);
 		config.load();
 
-		ComponentParser[] globalParsers = new ComponentParser[] {
-				new TextStyleParser() };
-		ComponentParser[] splittingParsers = new ComponentParser[] {
-				new CopyableTextParser(",,", ",,"),
-				new LinkParser(),
-				new CommandParser(new SpigotCommandValidator()) };
-		StyledMessageBuilder styledMessageBuilder = new StyledMessageBuilder(Lists.newArrayList(globalParsers), Lists.newArrayList(splittingParsers));
+		List<ComponentParser> globalParsers = Lists.newArrayList(new TextStyleParser());
+		List<ComponentParser> splittingParsers = Lists.newArrayList();
+		if (config.get(Key.ENABLE_COPYABLE_TEXT, false))
+			splittingParsers.add(new CopyableTextParser(config.get(Key.COPYABLE_TEXT_BEGIN_QUOTES), config.get(Key.COPYABLE_TEXT_END_QUOTES)));
+		if (config.get(Key.ENABLE_LINKS, false))
+			splittingParsers.add(new LinkParser());
+		if (config.get(Key.ENABLE_COMMANDS, false))
+			splittingParsers.add(new CommandParser(new SpigotCommandValidator(), config.get(Key.COMMANDS_REMOVE_STARTING_DOT, true)));
+		StyledMessageBuilder styledMessageBuilder = new StyledMessageBuilder(globalParsers, splittingParsers);
 		MessageSender messageSender = new SpigotMessageSender(this, config);
 		Chatter chatter = new RawJsonChatter(config, styledMessageBuilder, messageSender);
 

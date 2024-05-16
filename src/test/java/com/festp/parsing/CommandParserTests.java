@@ -15,7 +15,7 @@ class CommandParserTests extends SingleStyleSubstringHelpers
 	@ParameterizedTest
 	@ValueSource(strings = {"simple text", "a/b", ":/"})
 	void parseNoCommands(String text) {
-		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true)).getComponents(text);
+		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true), true).getComponents(text);
 		
 		Assertions.assertEquals(1, substrings.size());
 		assertPlain(substrings.get(0), 0, text.length());
@@ -26,18 +26,18 @@ class CommandParserTests extends SingleStyleSubstringHelpers
 		String command = "/help";
 		String text = command;
 
-		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true)).getComponents(text);
+		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true), true).getComponents(text);
 		
 		Assertions.assertEquals(1, substrings.size());
 		assertCommand(substrings.get(0), 0, command.length(), command);
 	}
 
 	@Test
-	void parse_SingleCommand_DotCommandAtStart() {
+	void parse_DotCommand_RemoveDot() {
 		String command = "/help";
 		String text = "." + command + " :)";
 
-		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true)).getComponents(text);
+		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true), true).getComponents(text);
 		
 		Assertions.assertEquals(2, substrings.size());
 		assertCommand(substrings.get(0), 1, 6, command);
@@ -45,11 +45,24 @@ class CommandParserTests extends SingleStyleSubstringHelpers
 	}
 
 	@Test
-	void parse_SingleCommand_DotCommand() {
+	void parse_DotCommand_RemoveDotDisabled() {
+		String command = "/help";
+		String text = "." + command + " :)";
+
+		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true), false).getComponents(text);
+		
+		Assertions.assertEquals(3, substrings.size());
+		assertPlain(substrings.get(0), 0, 1);
+		assertCommand(substrings.get(1), 1, 6, command);
+		assertPlain(substrings.get(2), 6, 9);
+	}
+
+	@Test
+	void parse_DotCommand_NotStart() {
 		String command = "/help";
 		String text = ".." + command + " :)";
 
-		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true)).getComponents(text);
+		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true), true).getComponents(text);
 		
 		Assertions.assertEquals(3, substrings.size());
 		assertPlain(substrings.get(0), 0, 2);
@@ -62,7 +75,7 @@ class CommandParserTests extends SingleStyleSubstringHelpers
 		String command = "/help";
 		String text = "use " + command + " :)";
 
-		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true)).getComponents(text);
+		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true), true).getComponents(text);
 		
 		Assertions.assertEquals(3, substrings.size());
 		assertPlain(substrings.get(0), 0, 4);
@@ -76,7 +89,7 @@ class CommandParserTests extends SingleStyleSubstringHelpers
 		String command_2 = "/command2";
 		String text = "!" + command_1 + " and " + command_2 + "!";
 
-		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true)).getComponents(text);
+		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(true), true).getComponents(text);
 		
 		Assertions.assertEquals(5, substrings.size());
 		assertPlain(substrings.get(0), 0, 1);
@@ -91,7 +104,7 @@ class CommandParserTests extends SingleStyleSubstringHelpers
 		String command = "/help";
 		String text = "use " + command + " :)";
 
-		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(false)).getComponents(text);
+		List<SingleStyleSubstring> substrings = new CommandParser(getValidator(false), true).getComponents(text);
 
 		Assertions.assertEquals(1, substrings.size());
 		assertPlain(substrings.get(0), 0, 12);

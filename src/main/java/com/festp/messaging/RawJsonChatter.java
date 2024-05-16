@@ -81,7 +81,7 @@ public class RawJsonChatter implements Chatter
 		}
 		builder.appendSplitting(format.substring(prevEnd));
 
-		RawJsonBuilder jsonBuilder = new RawJsonBuilder(config.getBuilderSettings());
+		RawJsonBuilder jsonBuilder = newRawJsonBuilder();
 		jsonBuilder.appendStyledMessage(builder.build());
 		String rawJson = jsonBuilder.toString();
 		for (Player p : recipients) {
@@ -101,11 +101,11 @@ public class RawJsonChatter implements Chatter
 		String toStr = "commands.message.display.incoming"; // "%s whispers to you: %s"
 		
 		TextStyle style = new TextStyle().update(WHISPER_STYLE_CODES);
-		RawJsonBuilder messageBuilder = new RawJsonBuilder(config.getBuilderSettings());
+		RawJsonBuilder messageBuilder = newRawJsonBuilder();
 		messageBuilder.appendStyledMessage(styledMessage);
 		CharSequence messageJson = messageBuilder.toCharSequence();
 
-		RawJsonBuilder nameFromBuilder = new RawJsonBuilder(config.getBuilderSettings());
+		RawJsonBuilder nameFromBuilder = newRawJsonBuilder();
 		builder.clear();
 		appendSender(builder, sender, true);
 		nameFromBuilder.appendStyledMessage(builder.build());
@@ -115,18 +115,18 @@ public class RawJsonChatter implements Chatter
 		{
 			if (sender instanceof Player)
 			{
-				RawJsonBuilder nameToBuilder = new RawJsonBuilder(config.getBuilderSettings());
+				RawJsonBuilder nameToBuilder = newRawJsonBuilder();
 				builder.clear();
 				appendSender(builder, recipient, true);
 				nameToBuilder.appendStyledMessage(builder.build());
 				CharSequence nameToJson = nameFromBuilder.toCharSequence();
 				
-				RawJsonBuilder from = new RawJsonBuilder(config.getBuilderSettings());
+				RawJsonBuilder from = newRawJsonBuilder();
 				from.appendTranslated(fromStr, new CharSequence[] { nameToJson, messageJson }, style);
 				messageSender.sendRawJson((Player)sender, from.toString());
 			}
 			
-			RawJsonBuilder to = new RawJsonBuilder(config.getBuilderSettings());
+			RawJsonBuilder to = newRawJsonBuilder();
 			to.appendTranslated(toStr, new CharSequence[] { nameFromJson, messageJson }, style);
 			messageSender.sendRawJson(recipient, to.toString());
 		}
@@ -141,7 +141,7 @@ public class RawJsonChatter implements Chatter
 			return false;
 		
 		Iterable<Link> links = getLinks(styledMessage);
-		RawJsonBuilder builder = new RawJsonBuilder(config.getBuilderSettings());
+		RawJsonBuilder builder = newRawJsonBuilder();
 		TextStyle style = new TextStyle().update(WHISPER_STYLE_CODES);
 		builder.appendJoinedLinks(links, style, ", ");
 		String linkCommand = builder.toString();
@@ -156,6 +156,11 @@ public class RawJsonChatter implements Chatter
 			messageSender.sendRawJson(recipient, linkCommand);
 		}
 		return true;
+	}
+	
+	private RawJsonBuilder newRawJsonBuilder()
+	{
+		return new RawJsonBuilder(config.getDisplaySettings());
 	}
 	
 	private static void appendSender(StyledMessageBuilder builder, CommandSender sender, boolean stripColors)

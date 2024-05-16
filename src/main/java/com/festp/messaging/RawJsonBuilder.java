@@ -14,15 +14,15 @@ import com.google.common.collect.Lists;
 
 public class RawJsonBuilder
 {
-	private final RawJsonBuilderSettings settings;
+	private final DisplaySettings settings;
 	private StringBuilder command;
 
-	public RawJsonBuilder(RawJsonBuilderSettings settings)
+	public RawJsonBuilder(DisplaySettings settings)
 	{
 		this(settings, new TextStyle());
 	}
 	
-	public RawJsonBuilder(RawJsonBuilderSettings settings, TextStyle baseTextStyle)
+	public RawJsonBuilder(DisplaySettings settings, TextStyle baseTextStyle)
 	{
 		this.settings = settings;
 		command = new StringBuilder();
@@ -138,47 +138,47 @@ public class RawJsonBuilder
 	
 	private void appendLink(StringBuilder text, StringBuilder json, Link link)
 	{
-		if (settings.isLinkUnderlined)
+		if (settings.underlineLinks)
 			text.append(ChatColor.UNDERLINE);
 		json.append(getLinkJson(link));
 	}
 	
 	private CharSequence getLinkJson(Link link)
 	{
+		String tooltip = settings.tooltipLinks;
 		String encodedUrl = LinkUtils.applyBrowserEncoding(link.getUrl());
-		StringBuilder linkJson = new StringBuilder();
-		linkJson.append("\"clickEvent\":{\"action\":\"open_url\",\"value\":\"");
-		linkJson.append(encodedUrl);
-		linkJson.append("\"},");
-		return linkJson;
+		StringBuilder eventsJson = new StringBuilder();
+		eventsJson.append("\"clickEvent\":{\"action\":\"open_url\",\"value\":\"")
+		          .append(encodedUrl)
+		          .append("\"},");
+		if (!tooltip.isEmpty())
+			eventsJson.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"")
+			          .append(tooltip)
+			          .append("\"},");
+		return eventsJson;
 	}
 	
 	private void appendCommand(StringBuilder text, StringBuilder json, Command command) {
-		text.append(ChatColor.UNDERLINE);
-		json.append(getCommandJson(command));
-	}
-	
-	private String getCommandJson(Command command) {
-		String tooltip = "Copy command";
-		StringBuilder eventsJson = new StringBuilder();
-		eventsJson.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"" + command.getCommand() + "\"},");
-		if (!tooltip.isEmpty())
-			eventsJson.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"" + tooltip + "\"},");
-		
-		return eventsJson.toString();
+		if (settings.underlineCommands)
+			text.append(ChatColor.UNDERLINE);
+		json.append(getSuggestCommandJson(command.getCommand(), settings.tooltipCommands));
 	}
 	
 	private void appendCopyableText(StringBuilder text, StringBuilder json, CopyableText copyableText) {
-		text.append(ChatColor.UNDERLINE);
-		json.append(getCopyableTextJson(copyableText));
+		if (settings.underlineCopyableText)
+			text.append(ChatColor.UNDERLINE);
+		json.append(getSuggestCommandJson(copyableText.getText(), settings.tooltipCopyableText));
 	}
 	
-	private String getCopyableTextJson(CopyableText copyableText) {
-		String tooltip = "Copy text";
+	private static String getSuggestCommandJson(String command, String tooltip) {
 		StringBuilder eventsJson = new StringBuilder();
-		eventsJson.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"" + copyableText.getText() + "\"},");
+		eventsJson.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"")
+		          .append(command)
+		          .append("\"},");
 		if (!tooltip.isEmpty())
-			eventsJson.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"" + tooltip + "\"},");
+			eventsJson.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"")
+			          .append(tooltip)
+			          .append("\"},");
 		
 		return eventsJson.toString();
 	}

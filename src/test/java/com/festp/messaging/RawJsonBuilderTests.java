@@ -15,7 +15,7 @@ class RawJsonBuilderTests {
 			"https://www.лекарство.net,https://www.%D0%BB%D0%B5%D0%BA%D0%B0%D1%80%D1%81%D1%82%D0%B2%D0%BE.net"
 			}, delimiter = ',')
 	void appendJoinedLinks_ApplyUrlEncoding(String url, String expectedUrl) {
-		RawJsonBuilder builder = new RawJsonBuilder(new RawJsonBuilderSettings(false));
+		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings(false, false, false, "", "", ""));
 		Link link = new Link(url);
 		
 		builder.appendJoinedLinks(Lists.newArrayList(link), new TextStyle(), "");

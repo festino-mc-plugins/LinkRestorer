@@ -42,7 +42,7 @@ public class WhisperHandler implements Listener
 	{
 		if (!config.get(Config.Key.LISTEN_TO_WHISPER, true))
 			return;
-		if (event.isCancelled() && !config.get(Config.Key.WHISPER_NEW_MESSAGE, false))
+		if (event.isCancelled() && !config.get(Config.Key.WHISPER_SEPARATE_MESSAGE, false))
 			return;
 
 		String cmd = CommandUtils.getCommand(command);
@@ -64,7 +64,7 @@ public class WhisperHandler implements Listener
 		if (message == "")
 			return;
 		
-		if (!config.get(Config.Key.WHISPER_NEW_MESSAGE, false))
+		if (!config.get(Config.Key.WHISPER_SEPARATE_MESSAGE, false))
 		{
 			boolean sent = chatter.sendWhisperMessage(sender, recipients, message);
 			if (sent)

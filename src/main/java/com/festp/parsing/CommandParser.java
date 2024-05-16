@@ -18,9 +18,11 @@ public class CommandParser implements ComponentParser
 	private static final int COMMAND_GROUP_INDEX = 1;
 	
 	private final CommandValidator commandValidator;
+	private final boolean removeStartingDot;
 
-	public CommandParser(CommandValidator commandValidator) {
+	public CommandParser(CommandValidator commandValidator, boolean removeStartingDot) {
 		this.commandValidator = commandValidator;
+		this.removeStartingDot = removeStartingDot;
 	}
 	
 	@Override
@@ -44,7 +46,7 @@ public class CommandParser implements ComponentParser
 			else {
 				if (message.charAt(start) != '/') {
 					// remove dot if it has index 0, else add substring of single char
-					if (message.charAt(start) != '.' || start != 0) {
+					if (!removeStartingDot || message.charAt(start) != '.' || start != 0) {
 						substrings.add(new SingleStyleSubstring(start, start + 1, emptyStyle));
 					}
 					start++;
