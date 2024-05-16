@@ -76,7 +76,7 @@ public class RawJsonBuilder
 				}
 			}
 			text.append(part.getText());
-			tryWrap(text, extraJson);
+			tryWrap(text.toString(), extraJson);
 		}
 	}
 	
@@ -196,19 +196,23 @@ public class RawJsonBuilder
 			command.deleteCharAt(index);
 	}
 	
-	private void tryWrap(CharSequence str, CharSequence extraJson)
+	private void tryWrap(String str, CharSequence extraJson)
 	{
 		if (str.length() == 0) return;
 		command.append(getWrapped(str, extraJson));
 	}
 	
-	private CharSequence getWrapped(CharSequence text, CharSequence extraJson)
+	private static String escapeQuotes(String s) {
+		return s.replace("\"", "\\\"");
+	}
+	
+	private static CharSequence getWrapped(String text, CharSequence extraJson)
 	{
 		StringBuilder builder = new StringBuilder();
 		builder.append("{");
 		builder.append(extraJson);
 		builder.append("\"text\":\"");
-		builder.append(text);
+		builder.append(escapeQuotes(text));
 		builder.append("\"},");
 		return builder;
 	}

@@ -1,9 +1,11 @@
 package com.festp.messaging;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import com.festp.styledmessage.StyledMessage;
 import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.TextStyle;
 import com.google.common.collect.Lists;
@@ -22,6 +24,17 @@ class RawJsonBuilderTests {
 		String json = builder.toString();
 		
 		String expectedJson = "[{\"text\":\"\"},{\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + expectedUrl + "\"},\"text\":\"" + url + "\"}]";
+		Assertions.assertEquals(expectedJson, json);
+	}
+	
+	@Test
+	void appendStyledMessage_EscapesQuotes() {
+		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings(false, false, false, "", "", ""));
+		
+		builder.appendStyledMessage(new StyledMessage("\"quotes\""));
+		String json = builder.toString();
+		
+		String expectedJson = "[{\"text\":\"\"},{\"text\":\"\\\"quotes\\\"\"}]";
 		Assertions.assertEquals(expectedJson, json);
 	}
 }
