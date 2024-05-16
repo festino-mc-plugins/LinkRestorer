@@ -10,7 +10,7 @@ import org.mockito.Mockito;
 
 import com.festp.styledmessage.SingleStyleMessage;
 import com.festp.styledmessage.StyledMessage;
-import com.festp.styledmessage.StyledMessageBuilder;
+import com.festp.styledmessage.TheStyledMessageBuilder;
 import com.festp.styledmessage.components.TextComponent;
 import com.google.common.collect.Lists;
 
@@ -18,7 +18,7 @@ class StyledMessageBuilderTests
 {
 	@Test
 	public void buildEmptyString_WhenZeroAppends() {
-		StyledMessageBuilder parser = new StyledMessageBuilder(Lists.newArrayList(), Lists.newArrayList());
+		TheStyledMessageBuilder parser = new TheStyledMessageBuilder(Lists.newArrayList(), Lists.newArrayList());
 		
 		StyledMessage styledMessage = parser.build();
 		
@@ -31,7 +31,7 @@ class StyledMessageBuilderTests
 	@Test
 	public void build_WhenZeroParsers() {
 		String message = "hi";
-		StyledMessageBuilder parser = new StyledMessageBuilder(Lists.newArrayList(), Lists.newArrayList());
+		TheStyledMessageBuilder parser = new TheStyledMessageBuilder(Lists.newArrayList(), Lists.newArrayList());
 		
 		parser.append(message);
 		StyledMessage styledMessage = parser.build();
@@ -51,7 +51,7 @@ class StyledMessageBuilderTests
 					new SingleStyleSubstring(2, 7, Lists.newArrayList()),
 					new SingleStyleSubstring(8, 9, Lists.newArrayList())
 				));
-		StyledMessageBuilder parser = new StyledMessageBuilder(Lists.newArrayList(parserMock), Lists.newArrayList());
+		TheStyledMessageBuilder parser = new TheStyledMessageBuilder(Lists.newArrayList(parserMock), Lists.newArrayList());
 		
 		parser.append(message);
 		StyledMessage styledMessage = parser.build();
@@ -76,7 +76,7 @@ class StyledMessageBuilderTests
 		List<ComponentParser> parsers = Lists.newArrayList(parserMock_1, parserMock_2);
 		List<ComponentParser> globalParsers = isSplitting ? Lists.newArrayList() : parsers;
 		List<ComponentParser> splittingParsers =  isSplitting ? parsers : Lists.newArrayList();
-		StyledMessageBuilder parser = new StyledMessageBuilder(globalParsers, splittingParsers);
+		TheStyledMessageBuilder parser = new TheStyledMessageBuilder(globalParsers, splittingParsers);
 		
 		parser.append(message);
 
@@ -99,7 +99,7 @@ class StyledMessageBuilderTests
 				));
 		List<ComponentParser> globalParsers = isSplitting ? Lists.newArrayList() : Lists.newArrayList(parserMock);
 		List<ComponentParser> splittingParsers = isSplitting ? Lists.newArrayList(parserMock) : Lists.newArrayList();
-		StyledMessageBuilder parser = new StyledMessageBuilder(globalParsers, splittingParsers);
+		TheStyledMessageBuilder parser = new TheStyledMessageBuilder(globalParsers, splittingParsers);
 		String message1 = "abcd";
 		String message2 = "abc";
 		String message3 = "ab";

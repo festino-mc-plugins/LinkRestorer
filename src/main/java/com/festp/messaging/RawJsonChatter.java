@@ -15,6 +15,7 @@ import com.festp.config.Config;
 import com.festp.styledmessage.SingleStyleMessage;
 import com.festp.styledmessage.StyledMessage;
 import com.festp.styledmessage.StyledMessageBuilder;
+import com.festp.styledmessage.StyledMessageBuilderFactory;
 import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.MentionedPlayer;
 import com.festp.styledmessage.components.TextComponent;
@@ -29,21 +30,20 @@ public class RawJsonChatter implements Chatter
 	private static final String WHISPER_STYLE_CODES = ChatColor.GRAY.toString() + ChatColor.ITALIC.toString();
 	
 	private final Config config;
-	private final StyledMessageBuilder builder;
+	private final StyledMessageBuilderFactory factory;
 	private final MessageSender messageSender;
 
-	public RawJsonChatter(Config config, StyledMessageBuilder builder, MessageSender messageSender)
+	public RawJsonChatter(Config config, StyledMessageBuilderFactory factory, MessageSender messageSender)
 	{
 		this.config = config;
-		this.builder = builder;
+		this.factory = factory;
 		this.messageSender = messageSender;
 	}
 	
 	public boolean sendFormatted(Collection<? extends Player> recipients, CommandSender sender, String message, String format, boolean sendToConsole)
 	{
-		builder.clear();
+		StyledMessageBuilder builder = factory.create();
 		StyledMessage styledMessage = builder.append(message).build();
-		builder.clear();
 		if (!canSend(styledMessage))
 			return false;
 		
@@ -62,6 +62,7 @@ public class RawJsonChatter implements Chatter
 			recipients = Bukkit.getOnlinePlayers();
 		}
 		
+		builder.clear();
 		Pattern pattern = Pattern.compile("[%][\\d][$][s]", Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(format);
 		int prevEnd = 0;
@@ -92,7 +93,7 @@ public class RawJsonChatter implements Chatter
 	
 	public boolean sendWhisperMessage(CommandSender sender, Player[] recipients, String message)
 	{
-		builder.clear();
+		StyledMessageBuilder builder = factory.create();
 		StyledMessage styledMessage = builder.append(message).build();
 		if (!canSend(styledMessage))
 			return false;
@@ -135,16 +136,16 @@ public class RawJsonChatter implements Chatter
 	
 	public boolean sendOnlyLinks(CommandSender sender, Player[] recipients, String message)
 	{
-		builder.clear();
+		StyledMessageBuilder builder = factory.create();
 		StyledMessage styledMessage = builder.append(message).build();
 		if (!canSend(styledMessage))
 			return false;
 		
 		Iterable<Link> links = getLinks(styledMessage);
-		RawJsonBuilder builder = newRawJsonBuilder();
+		RawJsonBuilder jsonBuilder = newRawJsonBuilder();
 		TextStyle style = new TextStyle().update(WHISPER_STYLE_CODES);
-		builder.appendJoinedLinks(links, style, ", ");
-		String linkCommand = builder.toString();
+		jsonBuilder.appendJoinedLinks(links, style, ", ");
+		String linkCommand = jsonBuilder.toString();
 		
 		if (sender instanceof Player)
 			messageSender.sendRawJson((Player)sender, linkCommand);
