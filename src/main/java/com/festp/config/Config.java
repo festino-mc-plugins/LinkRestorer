@@ -9,8 +9,8 @@ import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.festp.Logger;
+import com.festp.messaging.DisplaySettings;
 import com.festp.utils.FileUtils;
-import com.festp.utils.RawJsonBuilderSettings;
 
 public class Config implements IConfig
 {
@@ -24,8 +24,10 @@ public class Config implements IConfig
 		this.lang = lang;
 	}
 	
-	public RawJsonBuilderSettings getBuilderSettings() {
-		return new RawJsonBuilderSettings(get(Key.IS_LINK_UNDERLINED));
+	public DisplaySettings getDisplaySettings() {
+		return new DisplaySettings(
+				get(Key.UNDERLINE_LINKS), get(Key.UNDERLINE_COMMANDS), get(Key.UNDERLINE_COPYABLE_TEXT),
+				get(Key.TOOLTIP_LINKS), get(Key.TOOLTIP_COMMANDS), get(Key.TOOLTIP_COPYABLE_TEXT));
 	}
 	
 	public void load() {
@@ -110,10 +112,27 @@ public class Config implements IConfig
 	
 	
 	public enum Key implements IConfig.Key {
-		IS_LINK_UNDERLINED("underline-links", true),
+		LOG_DEBUG("log-debug-info", false),
+		
+		ENABLE_LINKS("enable-links", true),
+		ENABLE_COMMANDS("enable-commands", true),
+		ENABLE_COPYABLE_TEXT("enable-copyable-text", true),
+		
+		UNDERLINE_LINKS("underline-links", true),
+		UNDERLINE_COMMANDS("underline-commands", true),
+		UNDERLINE_COPYABLE_TEXT("underline-copyable-text", true),
+
+		TOOLTIP_LINKS("tooltip-links", ""),
+		TOOLTIP_COMMANDS("tooltip-commands", "Copy command"),
+		TOOLTIP_COPYABLE_TEXT("tooltip-copyable-text", "Copy text"),
+		
+		COMMANDS_REMOVE_STARTING_DOT("commands-remove-starting-dot", true),
+		
+		COPYABLE_TEXT_BEGIN_QUOTES("copyable-text-begin-quotes", ",,"),
+		COPYABLE_TEXT_END_QUOTES("copyable-text-end-quotes", ",,"),
+		
 		LISTEN_TO_WHISPER("do-whisper", true),
-		WHISPER_NEW_MESSAGE("whisper-new-message", false),
-		LOG_DEBUG("log-debug-info", false);
+		WHISPER_SEPARATE_MESSAGE("whisper-separate-message", false);
 		
 		private final String name;
 		private final Object defaultValue;

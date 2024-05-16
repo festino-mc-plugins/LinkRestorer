@@ -8,8 +8,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 
-import com.festp.Chatter;
-import com.festp.parsing.CommandUtils;
+import com.festp.messaging.Chatter;
+import com.festp.messaging.SpigotMessageSender;
 
 public class SmallCommandsHandler implements Listener
 {

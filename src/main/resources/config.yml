@@ -1,6 +1,26 @@
+log-debug-info: false
+
+enable-links: true
+enable-commands: true
+enable-copyable-text: true
+
 underline-links: true
+underline-commands: true
+underline-copyable-text: true
+
+# leave tooltip empty ('') to disable 
+tooltip-links: ''
+tooltip-commands: Copy command
+tooltip-copyable-text: Copy text
+
 # If disabled, the plugin will ignore whisper commands (/w, /msg, /tell)
 do-whisper: true
+
 # If disabled, the plugin will cancel the original message and send its own in vanilla format.
 # If enabled, the original message will remain unchanged, and the plugin will send bare links in a new message.
-whisper-new-message: false
+whisper-separate-message: false
+
+commands-remove-starting-dot: true
+
+copyable-text-begin-quotes: ',,'
+copyable-text-end-quotes: ',,'

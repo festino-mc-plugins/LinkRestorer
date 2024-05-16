@@ -5,44 +5,67 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LinkParser {
+import com.festp.styledmessage.components.Link;
+import com.festp.styledmessage.components.TextComponent;
+import com.google.common.collect.Lists;
+
+public class LinkParser implements ComponentParser {
 	// TODO check telegram desktop code
 	// TextWithTags Ui::InputField::getTextWithTags, getTextWithTagsPart, getTextPart...
-	
 	private static final String LINK_REGEX = "(((?:https?):\\/\\/)?(?:(?:[-a-z0-9_а-яА-Я]{1,}\\.){1,}([a-z0-9а-яА-Я]{1,}).*?(?=[\\.\\?!,;:]?(?:[" + String.valueOf(org.bukkit.ChatColor.COLOR_CHAR) + " \\n]|$))))";
 	private static final Pattern PATTERN = Pattern.compile(LINK_REGEX, Pattern.CASE_INSENSITIVE);
 	private static final int SCHEME_GROUP_INDEX = 2;
 	private static final int TLD_GROUP_INDEX = 3;
+	
+	public static final String DEFAULT_PROTOCOL = "https://";
 
-	/**@param message is a plain text 
-	 * @return <b>null</b> if no links found */
-	public static List<Link> getLinks(String message)
-	{
-		List<Link> links = new ArrayList<>();
-		
+	@Override
+	public List<SingleStyleSubstring> getComponents(String message) {
+		List<TextComponent> emptyStyle = Lists.newArrayList();
 		Matcher matcher = PATTERN.matcher(message);
+
+		int prevEnd = 0;
+		List<SingleStyleSubstring> substrings = new ArrayList<>();
 		while (matcher.find())
 		{
-			int tldStart = matcher.start(TLD_GROUP_INDEX);
-			int tldEnd = matcher.end(TLD_GROUP_INDEX);
-			String tld = message.substring(tldStart, tldEnd);
-			int domainsStart = matcher.end(SCHEME_GROUP_INDEX);
-			if (domainsStart < 0)
-				domainsStart = matcher.start();
-			if (hasNumber(tld)) {
-				if (!isValidIP(message, domainsStart, tldEnd))
-					continue;
-			}
-			else if (!isValidTLD(tld)) {
-				continue;
-			}
-
-			boolean hasProtocol = matcher.end(SCHEME_GROUP_INDEX) - matcher.start(SCHEME_GROUP_INDEX) > 0;
-			Link link = new Link(message, matcher.start(), matcher.end(), hasProtocol);
-			links.add(link);
+			int linkStart = matcher.start();
+			int linkEnd = matcher.end();
+			if (prevEnd < linkStart)
+				substrings.add(new SingleStyleSubstring(prevEnd, linkStart, emptyStyle));
+			
+			Link link = tryParseLink(message, matcher);
+			if (link == null)
+				substrings.add(new SingleStyleSubstring(linkStart, linkEnd, emptyStyle));
+			else
+				substrings.add(new SingleStyleSubstring(linkStart, linkEnd, Lists.newArrayList(link)));
+			
+			prevEnd = linkEnd;
 		}
+		if (prevEnd < message.length())
+			substrings.add(new SingleStyleSubstring(prevEnd, message.length(), emptyStyle));
 		
-		return links;
+		return substrings;
+	}
+	
+	private static Link tryParseLink(String message, Matcher matcher)
+	{
+		int tldStart = matcher.start(TLD_GROUP_INDEX);
+		int tldEnd = matcher.end(TLD_GROUP_INDEX);
+		String tld = message.substring(tldStart, tldEnd);
+		int domainsStart = matcher.end(SCHEME_GROUP_INDEX);
+		if (domainsStart < 0)
+			domainsStart = matcher.start();
+		if (hasNumber(tld)) {
+			if (!isValidIP(message, domainsStart, tldEnd))
+				return null;
+		}
+		else if (!isValidTLD(tld)) {
+			return null;
+		}
+
+		String url = message.substring(matcher.start(), matcher.end());
+		boolean hasProtocol = matcher.end(SCHEME_GROUP_INDEX) - matcher.start(SCHEME_GROUP_INDEX) > 0;
+		return new Link(hasProtocol ? url : DEFAULT_PROTOCOL + url);
 	}
 	
 	private static boolean isValidTLD(String tld) {

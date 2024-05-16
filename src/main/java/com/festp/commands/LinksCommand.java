@@ -16,6 +16,7 @@ public class LinksCommand implements CommandExecutor, TabCompleter
 	private static final String PERMISSION_CONFIGURE = "clickablelinks.configure";
 	public static final String COMMAND = "links";
 	private static final String SUBCOMMAND_RELOAD = "reload";
+	private static final String SUBCOMMAND_CONFIGURE = "config";
 	
 	Config config;
 	LangConfig lang;
@@ -38,35 +39,16 @@ public class LinksCommand implements CommandExecutor, TabCompleter
 			sender.sendMessage(lang.command_noArgs);
 			return false;
 		}
-		Config.Key key = null;
-		for (Config.Key k : Config.Key.values())
-			if (k.toString().equalsIgnoreCase(args[0])) {
-				key = k;
-				break;
-			}
-		if (key != null)
-		{
-			if (args.length == 1) {
-				sender.sendMessage(String.format(lang.command_getOk, key.toString(), config.get(key)));
-				return true;
-			}
-			Boolean val = tryParseBoolean(args[1]);
-			if (val == null) {
-				sender.sendMessage(String.format(lang.command_arg1_error, args[1]));
-				return false;
-			}
-			
-			config.set(key, val);
-			sender.sendMessage(String.format(lang.command_setOk, key.toString(), val));
-			
-			return true;
-		}
-		else if (args[0].equalsIgnoreCase(SUBCOMMAND_RELOAD))
+		if (args[0].equalsIgnoreCase(SUBCOMMAND_RELOAD))
 		{
 			config.load();
 			lang.load();
 			sender.sendMessage(lang.command_reloadOk);
 			return true;
+		}
+		else if (args[0].equalsIgnoreCase(SUBCOMMAND_CONFIGURE))
+		{
+			return OnConfigure(sender, args);
 		}
 		
 		sender.sendMessage(String.format(lang.command_arg0_error, args[0]));
@@ -88,30 +70,114 @@ public class LinksCommand implements CommandExecutor, TabCompleter
 			String arg = args[0].toLowerCase();
 			if (SUBCOMMAND_RELOAD.startsWith(arg))
 				options.add(SUBCOMMAND_RELOAD);
-			for (Config.Key k : Config.Key.values())
-				if (k.toString().startsWith(arg))
-					options.add(k.toString());
+			if (SUBCOMMAND_CONFIGURE.startsWith(arg))
+				options.add(SUBCOMMAND_CONFIGURE);
 		}
-		else if (args.length == 2)
+		else if (args.length >= 2)
 		{
-			String arg = args[0].toLowerCase();
-			boolean hasKey = false;
-			for (Config.Key k : Config.Key.values())
-				if (k.toString().equals(arg)) {
-					hasKey = true;
-					break;
-				}
-			if (hasKey)
+			if (args[0].equalsIgnoreCase(SUBCOMMAND_CONFIGURE))
 			{
-				options.add("true");
-				options.add("false");
+				onConfigureTabComplete(options, args);
 			}
 		}
 		return options;
 	}
 
+	private void onConfigureTabComplete(List<String> options, String[] args) {
+		String keyStr = args[1].toLowerCase();
+		if (args.length == 2) {
+			for (Config.Key k : Config.Key.values())
+				if (k.toString().startsWith(keyStr))
+					options.add(k.toString());
+			
+			return;
+		}
+		
+		Config.Key key = null;
+		for (Config.Key k : Config.Key.values())
+			if (k.toString().equalsIgnoreCase(keyStr)) {
+				key = k;
+				break;
+			}
+		System.out.println(key == null ? "null" : key.name());
+		if (key == null) return;
+		
+		if (key.getValueClass() == Boolean.class) {
+			options.add("true");
+			options.add("false");
+		}
+		else if (key.getValueClass() == String.class) {
+			String value = key.getDefault().toString();
+			value = value.contains(" ") ? "\"" + value + "\"" : value;
+			options.add(value);
+		}
+	}
 
-	private Boolean tryParseBoolean(String str) {
+	private boolean OnConfigure(CommandSender sender, String[] args)
+	{
+		String keyStr = args[1];
+		Config.Key key = null;
+		for (Config.Key k : Config.Key.values())
+			if (k.toString().equalsIgnoreCase(keyStr)) {
+				key = k;
+				break;
+			}
+		if (key == null)
+		{
+			sender.sendMessage(String.format(lang.command_configure_key_error, keyStr));
+			return false;
+		}
+		if (args.length == 2) {
+			sender.sendMessage(String.format(lang.command_getOk, key.toString(), getDisplayValue(key)));
+			return true;
+		}
+		
+		Object val = null;
+		if (key.getValueClass() == Boolean.class) val = tryParseBoolean(args[2]);
+		else if (key.getValueClass() == String.class) val = joinQuotedArgs(args, 2);
+		if (val == null) {
+			sender.sendMessage(String.format(lang.command_configure_value_error, args[2]));
+			return false;
+		}
+		
+		config.set(key, val);
+		sender.sendMessage(String.format(lang.command_setOk, key.toString(), getDisplayValue(key)));
+		
+		return true;
+	}
+	
+	private String getDisplayValue(Config.Key key)
+	{
+		String strValue = config.get(key).toString();
+		if (key.getValueClass() == String.class) return "\"" + strValue + "\"";
+		return strValue;
+	}
+	
+	private static String joinQuotedArgs(String[] args, int startIndex)
+	{
+		String stringVal = args[startIndex];
+		if (!stringVal.startsWith("\""))
+			return stringVal;
+		
+		stringVal = stringVal.substring(1);
+		if (stringVal.endsWith("\"")) {
+			stringVal = stringVal.substring(0, stringVal.length() - 1);
+			return stringVal;
+		}
+		
+		for (int i = startIndex + 1; i < args.length; i++)
+		{
+			stringVal += ' ';
+			if (args[i].endsWith("\"")) {
+				stringVal += args[i].substring(0, args[i].length() - 1);
+				return stringVal;
+			}
+			stringVal += args[i];
+		}
+		return null;
+	}
+
+	private static Boolean tryParseBoolean(String str) {
 		if (str.equalsIgnoreCase("true") || str.equalsIgnoreCase("1"))
 			return true;
 		if (str.equalsIgnoreCase("false") || str.equalsIgnoreCase("0"))

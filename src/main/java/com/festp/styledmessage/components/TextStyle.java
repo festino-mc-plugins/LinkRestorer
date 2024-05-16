@@ -1,8 +1,8 @@
-package com.festp.parsing;
+package com.festp.styledmessage.components;
 
 import org.bukkit.ChatColor;
 
-public class TextStyle implements Cloneable {
+public class TextStyle implements UpdatableTextComponent {
 	private String color = "";
 	private String style = "";
 	
@@ -14,6 +14,16 @@ public class TextStyle implements Cloneable {
 		copy.color = color;
 		copy.style = style;
 		return copy; 
+	}
+
+	/** @return the same TextStyle object for chaining */
+	public void update(UpdatableTextComponent other)
+	{
+		if (!(other instanceof TextStyle)) return;
+		
+		TextStyle otherStyle = (TextStyle) other;
+		update(otherStyle.getCodes());
+		if (otherStyle.isRgbColor()) color = otherStyle.color;
 	}
 
 	/** @return the same TextStyle object for chaining */
@@ -87,7 +97,7 @@ public class TextStyle implements Cloneable {
 				res.append("\"strikethrough\":\"true\",");
 			else if (c == ChatColor.MAGIC)
 				res.append("\"obfuscated\":\"true\",");
-			else {
+			else if (c != ChatColor.RESET && !isRgbColor()) {
 				res.append("\"color\":\"");
 				res.append(c.name().toLowerCase());
 				res.append("\",");

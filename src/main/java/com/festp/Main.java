@@ -11,6 +11,13 @@ import com.festp.config.LangConfig;
 import com.festp.handlers.ChatHandler;
 import com.festp.handlers.SmallCommandsHandler;
 import com.festp.handlers.WhisperHandler;
+import com.festp.messaging.Chatter;
+import com.festp.messaging.MessageSender;
+import com.festp.messaging.RawJsonChatter;
+import com.festp.messaging.SpigotMessageSender;
+import com.festp.styledmessage.StyledMessageBuilderFactory;
+import com.festp.styledmessage.TheStyledMessageBuilderFactory;
+import com.festp.utils.SpigotCommandValidator;
 
 public class Main extends JavaPlugin
 {
@@ -22,7 +29,9 @@ public class Main extends JavaPlugin
 		Config config = new Config(this, lang);
 		config.load();
 
-		Chatter chatter = new Chatter(this, config);
+		StyledMessageBuilderFactory factory = new TheStyledMessageBuilderFactory(config, new SpigotCommandValidator());
+		MessageSender messageSender = new SpigotMessageSender(this, config);
+		Chatter chatter = new RawJsonChatter(config, factory, messageSender);
 
 		PluginManager pm = getServer().getPluginManager();
 
