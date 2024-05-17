@@ -21,6 +21,8 @@ do-whisper: true
 whisper-separate-message: false
 
 commands-remove-starting-dot: true
+commands-run-on-click: false
 
 copyable-text-begin-quotes: ',,'
 copyable-text-end-quotes: ',,'
+copyable-text-only-commands: false
