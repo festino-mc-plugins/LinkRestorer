@@ -11,6 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
+import com.festp.Logger;
 import com.festp.config.Config;
 import com.festp.styledmessage.SingleStyleMessage;
 import com.festp.styledmessage.StyledMessage;
@@ -44,7 +45,7 @@ public class RawJsonChatter implements Chatter
 	{
 		StyledMessageBuilder builder = factory.create();
 		StyledMessage styledMessage = builder.append(message).build();
-		if (!canSend(styledMessage))
+		if (!canSend(styledMessage, message))
 			return false;
 		
 		if (sendToConsole)
@@ -95,7 +96,7 @@ public class RawJsonChatter implements Chatter
 	{
 		StyledMessageBuilder builder = factory.create();
 		StyledMessage styledMessage = builder.append(message).build();
-		if (!canSend(styledMessage))
+		if (!canSend(styledMessage, message))
 			return false;
 		
 		String fromStr = "commands.message.display.outgoing"; // "You whisper to %s: %s"
@@ -138,7 +139,7 @@ public class RawJsonChatter implements Chatter
 	{
 		StyledMessageBuilder builder = factory.create();
 		StyledMessage styledMessage = builder.append(message).build();
-		if (!canSend(styledMessage))
+		if (!canSend(styledMessage, message))
 			return false;
 		
 		Iterable<Link> links = getLinks(styledMessage);
@@ -207,7 +208,7 @@ public class RawJsonChatter implements Chatter
 		return links;
 	}
 	
-	private static boolean canSend(StyledMessage styledMessage)
+	private static boolean canSend(StyledMessage styledMessage, String originalText)
 	{
 		if (styledMessage == null)
 			return false;
@@ -216,6 +217,13 @@ public class RawJsonChatter implements Chatter
 			for (TextComponent component : part.getComponents())
 				if (!(component instanceof TextStyle))
 					return true;
+		
+		StringBuilder text = new StringBuilder();
+		for (SingleStyleMessage part : styledMessage.getStyledParts())
+			text.append(part.getText());
+		
+		if (!text.toString().equals(ChatColor.stripColor(originalText)))
+			return true;
 		
 		return false;
 	}
