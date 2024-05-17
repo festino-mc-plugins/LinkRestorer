@@ -222,8 +222,8 @@ public class RawJsonBuilder
 		command.append(getWrapped(str, extraJson));
 	}
 	
-	private static String escapeQuotes(String s) {
-		return s.replace("\"", "\\\"");
+	private static String escapeJsonString(String s) {
+		return s.replace("\\", "\\\\").replace("\"", "\\\"");
 	}
 	
 	private static CharSequence getWrapped(String text, CharSequence extraJson)
@@ -232,7 +232,7 @@ public class RawJsonBuilder
 		builder.append("{");
 		builder.append(extraJson);
 		builder.append("\"text\":\"");
-		builder.append(escapeQuotes(text));
+		builder.append(escapeJsonString(text));
 		builder.append("\"},");
 		return builder;
 	}
