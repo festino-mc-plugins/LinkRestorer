@@ -29,7 +29,7 @@ public class Main extends JavaPlugin
 		Config config = new Config(this, lang);
 		config.load();
 
-		StyledMessageBuilderFactory factory = new TheStyledMessageBuilderFactory(config, new SpigotCommandValidator());
+		StyledMessageBuilderFactory factory = new TheStyledMessageBuilderFactory(config, new SpigotCommandValidator(config));
 		MessageSender messageSender = new SpigotMessageSender(this, config);
 		Chatter chatter = new RawJsonChatter(config, factory, messageSender);
 

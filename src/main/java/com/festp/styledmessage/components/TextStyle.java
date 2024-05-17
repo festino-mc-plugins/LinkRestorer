@@ -80,7 +80,7 @@ public class TextStyle implements UpdatableTextComponent {
 
 	/** @return <b>"color":"gray","italic":"true",</b><br>
 	 * if object is TextSyle of ChatColor.GRAY.toString() + ChatColor.ITALIC.toString()*/
-	public Object getFullJson() {
+	public String getFullJson() {
 		String styleStr = getCodes();
 		StringBuilder res = new StringBuilder();
 		res.append(getJson());

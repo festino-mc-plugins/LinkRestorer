@@ -6,6 +6,8 @@ public class DisplaySettings
 	public final boolean underlineCommands;
 	public final boolean underlineCopyableText;
 
+	public final boolean runCommands;
+	
 	public final String tooltipLinks;
 	public final String tooltipCommands;
 	public final String tooltipCopyableText;
@@ -16,11 +18,13 @@ public class DisplaySettings
 			boolean underlineCopyableText,
 			String tooltipLinks,
 			String tooltipCommands,
-			String tooltipCopyableText)
+			String tooltipCopyableText,
+			boolean runCommands)
 	{
 		this.underlineLinks = underlineLinks;
 		this.underlineCommands = underlineCommands;
 		this.underlineCopyableText = underlineCopyableText;
+		this.runCommands = runCommands;
 		this.tooltipLinks = tooltipLinks;
 		this.tooltipCommands = tooltipCommands;
 		this.tooltipCopyableText = tooltipCopyableText;

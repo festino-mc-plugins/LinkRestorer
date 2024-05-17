@@ -25,17 +25,38 @@ public class TheStyledMessageBuilderFactory implements StyledMessageBuilderFacto
 	@Override
 	public StyledMessageBuilder create()
 	{
-		List<ComponentParser> globalParsers = Lists.newArrayList(new TextStyleParser());
+		List<ComponentParser> globalParsers = Lists.newArrayList(getTextStyleParser());
 		
 		List<ComponentParser> splittingParsers = Lists.newArrayList();
 		if (config.get(Key.ENABLE_COPYABLE_TEXT, false))
-			splittingParsers.add(new CopyableTextParser(config.get(Key.COPYABLE_TEXT_BEGIN_QUOTES), config.get(Key.COPYABLE_TEXT_END_QUOTES)));
+			splittingParsers.add(getCopyableTextParser());
 		if (config.get(Key.ENABLE_LINKS, false))
-			splittingParsers.add(new LinkParser());
+			splittingParsers.add(getLinkParser());
 		if (config.get(Key.ENABLE_COMMANDS, false))
-			splittingParsers.add(new CommandParser(commandValidator, config.get(Key.COMMANDS_REMOVE_STARTING_DOT, true)));
+			splittingParsers.add(getCommandParser());
 		
 		return new TheStyledMessageBuilder(globalParsers, splittingParsers);
 	}
-
+	
+	private ComponentParser getTextStyleParser()
+	{
+		return new TextStyleParser();
+	}
+	
+	private ComponentParser getCopyableTextParser()
+	{
+		return new CopyableTextParser(
+				config.get(Key.COPYABLE_TEXT_BEGIN_QUOTES), config.get(Key.COPYABLE_TEXT_END_QUOTES),
+				config.get(Key.COPYABLE_TEXT_ONLY_COMMANDS), commandValidator);
+	}
+	
+	private ComponentParser getLinkParser()
+	{
+		return new LinkParser();
+	}
+	
+	private ComponentParser getCommandParser()
+	{
+		return new CommandParser(commandValidator, config.get(Key.COMMANDS_REMOVE_STARTING_DOT, true));
+	}
 }

@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
+
+import com.festp.utils.CommandValidator;
 
 class CopyableTextParserTests extends SingleStyleSubstringHelpers
 {
@@ -13,7 +16,10 @@ class CopyableTextParserTests extends SingleStyleSubstringHelpers
 	@ValueSource(strings = {"test", "a, b", "a ,, b", ",,a,b,"})
 	void parse_NoCopyable(String text)
 	{
-		List<SingleStyleSubstring> substrings = new CopyableTextParser(",,", ",,").getComponents(text);
+		CommandValidator commandValidator = Mockito.mock(CommandValidator.class);
+		CopyableTextParser parser = new CopyableTextParser(",,", ",,", false, commandValidator);
+		
+		List<SingleStyleSubstring> substrings = parser.getComponents(text);
 
 		Assertions.assertEquals(1, substrings.size());
 		assertPlain(substrings.get(0), 0, text.length());
@@ -24,11 +30,48 @@ class CopyableTextParserTests extends SingleStyleSubstringHelpers
 	{
 		String copyable = "abc";
 		String text = ",," + copyable + ",,";
+		CommandValidator commandValidator = Mockito.mock(CommandValidator.class);
+		CopyableTextParser parser = new CopyableTextParser(",,", ",,", false, commandValidator);
 		
-		List<SingleStyleSubstring> substrings = new CopyableTextParser(",,", ",,").getComponents(text);
+		List<SingleStyleSubstring> substrings = parser.getComponents(text);
 
 		Assertions.assertEquals(1, substrings.size());
 		assertCopyable(substrings.get(0), 2, text.length() - 2, copyable);
+	}
+	
+	@Test
+	void parse_Command()
+	{
+		String copyable = "abc";
+		String text = ",," + copyable + ",,";
+		CommandValidator commandValidator = Mockito.mock(CommandValidator.class);
+		Mockito.when(commandValidator.commandExists(Mockito.anyString())).thenReturn(true);
+		CopyableTextParser parser = new CopyableTextParser(",,", ",,", false, commandValidator);
+		
+		List<SingleStyleSubstring> substrings = parser.getComponents(text);
+
+		Assertions.assertEquals(1, substrings.size());
+		assertCommand(substrings.get(0), 2, text.length() - 2, copyable);
+	}
+	
+	@Test
+	void parse_OnlyCommands()
+	{
+		String copyable = "abc";
+		String text = ",," + copyable + ",,";
+		CommandValidator commandValidator = Mockito.mock(CommandValidator.class);
+		Mockito.when(commandValidator.commandExists(Mockito.anyString())).thenReturn(true).thenReturn(false);
+		CopyableTextParser parser = new CopyableTextParser(",,", ",,", true, commandValidator);
+		
+		List<SingleStyleSubstring> substrings = parser.getComponents(text);
+
+		Assertions.assertEquals(1, substrings.size());
+		assertCommand(substrings.get(0), 2, text.length() - 2, copyable);
+
+		substrings = parser.getComponents(text);
+		
+		Assertions.assertEquals(1, substrings.size());
+		assertPlain(substrings.get(0), 2, text.length() - 2);
 	}
 	
 	@Test
@@ -36,8 +79,10 @@ class CopyableTextParserTests extends SingleStyleSubstringHelpers
 	{
 		String copyable = "abc";
 		String text = ".." + copyable + "??";
+		CommandValidator commandValidator = Mockito.mock(CommandValidator.class);
 		
-		List<SingleStyleSubstring> substrings = new CopyableTextParser("..", "??").getComponents(text);
+		CopyableTextParser parser = new CopyableTextParser("..", "??", false, commandValidator);
+		List<SingleStyleSubstring> substrings = parser.getComponents(text);
 
 		Assertions.assertEquals(1, substrings.size());
 		assertCopyable(substrings.get(0), 2, text.length() - 2, copyable);
@@ -49,8 +94,10 @@ class CopyableTextParserTests extends SingleStyleSubstringHelpers
 		String copyable1 = "abc";
 		String copyable2 = "def";
 		String text = "See ,," + copyable1 + ",, or ,," + copyable2 + ",,.";
+		CommandValidator commandValidator = Mockito.mock(CommandValidator.class);
+		CopyableTextParser parser = new CopyableTextParser(",,", ",,", false, commandValidator);
 		
-		List<SingleStyleSubstring> substrings = new CopyableTextParser(",,", ",,").getComponents(text);
+		List<SingleStyleSubstring> substrings = parser.getComponents(text);
 
 		int copyable1_start = text.indexOf(copyable1);
 		int copyable2_start = text.indexOf(copyable2);

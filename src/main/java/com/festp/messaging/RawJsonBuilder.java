@@ -124,11 +124,9 @@ public class RawJsonBuilder
 	{
 		String plainName = player.getName();
 		String uuid = player.getPlayer().getUniqueId().toString();
-		StringBuilder eventsJson = new StringBuilder()
-				.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"" + plainName + "\\nType: Player\\n" + uuid + "\"},")
-				.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/tell " + plainName + " \"},");
-		
-		json.append(eventsJson);
+		String tooltip = plainName + "\\nType: Player\\n" + uuid;
+		json.append(getSuggestCommandJson("/tell " + plainName + " "));
+		json.append(getShowTextJson(tooltip));
 	}
 	
 	private void appendTextStyle(StringBuilder text, StringBuilder json, TextStyle style) {
@@ -161,20 +159,42 @@ public class RawJsonBuilder
 	private void appendCommand(StringBuilder text, StringBuilder json, Command command) {
 		if (settings.underlineCommands)
 			text.append(ChatColor.UNDERLINE);
-		json.append(getSuggestCommandJson(command.getCommand(), settings.tooltipCommands));
+		
+		if (settings.runCommands)
+			json.append(getRunCommandJson(command.getCommand()));
+		else
+			json.append(getSuggestCommandJson(command.getCommand()));
+		
+		json.append(getShowTextJson(settings.tooltipCommands));
 	}
 	
 	private void appendCopyableText(StringBuilder text, StringBuilder json, CopyableText copyableText) {
 		if (settings.underlineCopyableText)
 			text.append(ChatColor.UNDERLINE);
-		json.append(getSuggestCommandJson(copyableText.getText(), settings.tooltipCopyableText));
+		json.append(getSuggestCommandJson(copyableText.getText()));
+		json.append(getShowTextJson(settings.tooltipCopyableText));
 	}
 	
-	private static String getSuggestCommandJson(String command, String tooltip) {
+	private static String getSuggestCommandJson(String command) {
 		StringBuilder eventsJson = new StringBuilder();
 		eventsJson.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"")
 		          .append(command)
 		          .append("\"},");
+		
+		return eventsJson.toString();
+	}
+	
+	private static String getRunCommandJson(String command) {
+		StringBuilder eventsJson = new StringBuilder();
+		eventsJson.append("\"clickEvent\":{\"action\":\"run_command\",\"value\":\"")
+		          .append(command)
+		          .append("\"},");
+		
+		return eventsJson.toString();
+	}
+	
+	private static String getShowTextJson(String tooltip) {
+		StringBuilder eventsJson = new StringBuilder();
 		if (!tooltip.isEmpty())
 			eventsJson.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"")
 			          .append(tooltip)

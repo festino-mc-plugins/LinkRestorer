@@ -99,7 +99,6 @@ public class LinksCommand implements CommandExecutor, TabCompleter
 				key = k;
 				break;
 			}
-		System.out.println(key == null ? "null" : key.name());
 		if (key == null) return;
 		
 		if (key.getValueClass() == Boolean.class) {
