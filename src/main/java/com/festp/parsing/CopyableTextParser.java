@@ -62,7 +62,7 @@ public class CopyableTextParser implements ComponentParser
 	
 	private TextComponent getComponent(String s)
 	{
-		if (s.startsWith("/") && commandValidator.commandExists(s.split(" ")[0])) {
+		if (commandValidator.commandExists(s.split(" ")[0])) {
 			return new Command(s);
 		}
 		if (onlyCommands) {
