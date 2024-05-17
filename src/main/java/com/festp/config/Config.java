@@ -27,7 +27,7 @@ public class Config implements IConfig
 	public DisplaySettings getDisplaySettings() {
 		return new DisplaySettings(
 				get(Key.UNDERLINE_LINKS), get(Key.UNDERLINE_COMMANDS), get(Key.UNDERLINE_COPYABLE_TEXT),
-				get(Key.TOOLTIP_LINKS), get(Key.TOOLTIP_COMMANDS), get(Key.TOOLTIP_COPYABLE_TEXT));
+				get(Key.TOOLTIP_LINKS), get(Key.TOOLTIP_COMMANDS), get(Key.TOOLTIP_COPYABLE_TEXT), get(Key.COMMANDS_RUN_ON_CLICK));
 	}
 	
 	public void load() {
@@ -127,6 +127,7 @@ public class Config implements IConfig
 		TOOLTIP_COPYABLE_TEXT("tooltip-copyable-text", "Copy text"),
 		
 		COMMANDS_REMOVE_STARTING_DOT("commands-remove-starting-dot", true),
+		COMMANDS_RUN_ON_CLICK("commands-run-on-click", false),
 		
 		COPYABLE_TEXT_BEGIN_QUOTES("copyable-text-begin-quotes", ",,"),
 		COPYABLE_TEXT_END_QUOTES("copyable-text-end-quotes", ",,"),

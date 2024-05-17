@@ -4,8 +4,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import com.festp.styledmessage.SingleStyleMessage;
 import com.festp.styledmessage.StyledMessage;
+import com.festp.styledmessage.components.Command;
 import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.TextStyle;
 import com.google.common.collect.Lists;
@@ -17,7 +20,7 @@ class RawJsonBuilderTests {
 			"https://www.лекарство.net,https://www.%D0%BB%D0%B5%D0%BA%D0%B0%D1%80%D1%81%D1%82%D0%B2%D0%BE.net"
 			}, delimiter = ',')
 	void appendJoinedLinks_ApplyUrlEncoding(String url, String expectedUrl) {
-		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings(false, false, false, "", "", ""));
+		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings(false, false, false, "", "", "", false));
 		Link link = new Link(url);
 		
 		builder.appendJoinedLinks(Lists.newArrayList(link), new TextStyle(), "");
@@ -29,12 +32,27 @@ class RawJsonBuilderTests {
 	
 	@Test
 	void appendStyledMessage_EscapesQuotes() {
-		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings(false, false, false, "", "", ""));
+		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings(false, false, false, "", "", "", false));
 		
 		builder.appendStyledMessage(new StyledMessage("\"quotes\""));
 		String json = builder.toString();
 		
 		String expectedJson = "[{\"text\":\"\"},{\"text\":\"\\\"quotes\\\"\"}]";
+		Assertions.assertEquals(expectedJson, json);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	void appendStyledMessage_CommandAction(boolean runCommands) {
+		String action = runCommands ? "run_command" : "suggest_command";
+		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings(false, false, false, "", "", "", runCommands));
+		String cmd = "/ping";
+		Command command = new Command(cmd);
+		
+		builder.appendStyledMessage(new StyledMessage(Lists.newArrayList(new SingleStyleMessage(cmd, Lists.newArrayList(command)))));
+		String json = builder.toString();
+		
+		String expectedJson = "[{\"text\":\"\"},{\"clickEvent\":{\"action\":\"" + action + "\",\"value\":\"" + cmd + "\"},\"text\":\"" + cmd + "\"}]";
 		Assertions.assertEquals(expectedJson, json);
 	}
 }
