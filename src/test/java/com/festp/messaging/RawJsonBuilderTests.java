@@ -31,13 +31,26 @@ class RawJsonBuilderTests {
 	}
 	
 	@Test
-	void appendStyledMessage_EscapesQuotes() {
+	void appendStyledMessage_EscapesQuotesAndCackSlashes() {
 		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings(false, false, false, "", "", "", false));
 		
-		builder.appendStyledMessage(new StyledMessage("\"quotes\""));
+		builder.appendStyledMessage(new StyledMessage("\\ and \""));
 		String json = builder.toString();
 		
-		String expectedJson = "[{\"text\":\"\"},{\"text\":\"\\\"quotes\\\"\"}]";
+		String expectedJson = "[{\"text\":\"\"},{\"text\":\"\\\\ and \\\"\"}]";
+		Assertions.assertEquals(expectedJson, json);
+	}
+	
+	@Test
+	void appendStyledMessage_EscapesQuotesAndCackSlashes_LinkUrl() {
+		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings(false, false, false, "", "", "", false));
+		
+		SingleStyleMessage styledPart = new SingleStyleMessage("a", Lists.newArrayList(new Link("\\\"")));
+		builder.appendStyledMessage(new StyledMessage(Lists.newArrayList(styledPart)));
+		String json = builder.toString();
+
+		String expectedUrl = "\\\\\\\""; // not "\\\\%22"
+		String expectedJson = "[{\"text\":\"\"},{\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + expectedUrl + "\"},\"text\":\"a\"}]";
 		Assertions.assertEquals(expectedJson, json);
 	}
 
