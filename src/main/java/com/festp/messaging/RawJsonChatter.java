@@ -11,7 +11,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
-import com.festp.Logger;
 import com.festp.config.Config;
 import com.festp.styledmessage.SingleStyleMessage;
 import com.festp.styledmessage.StyledMessage;
@@ -43,7 +42,7 @@ public class RawJsonChatter implements Chatter
 	
 	public boolean sendFormatted(Collection<? extends Player> recipients, CommandSender sender, String message, String format, boolean sendToConsole)
 	{
-		StyledMessageBuilder builder = factory.create();
+		StyledMessageBuilder builder = factory.create(sender);
 		StyledMessage styledMessage = builder.append(message).build();
 		if (!canSend(styledMessage, message))
 			return false;
@@ -94,7 +93,7 @@ public class RawJsonChatter implements Chatter
 	
 	public boolean sendWhisperMessage(CommandSender sender, Player[] recipients, String message)
 	{
-		StyledMessageBuilder builder = factory.create();
+		StyledMessageBuilder builder = factory.create(sender);
 		StyledMessage styledMessage = builder.append(message).build();
 		if (!canSend(styledMessage, message))
 			return false;
@@ -137,7 +136,7 @@ public class RawJsonChatter implements Chatter
 	
 	public boolean sendOnlyLinks(CommandSender sender, Player[] recipients, String message)
 	{
-		StyledMessageBuilder builder = factory.create();
+		StyledMessageBuilder builder = factory.create(sender);
 		StyledMessage styledMessage = builder.append(message).build();
 		if (!canSend(styledMessage, message))
 			return false;

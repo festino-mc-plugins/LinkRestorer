@@ -17,7 +17,7 @@ class CopyableTextParserTests extends SingleStyleSubstringHelpers
 	void parse_NoCopyable(String text)
 	{
 		CommandValidator commandValidator = Mockito.mock(CommandValidator.class);
-		CopyableTextParser parser = new CopyableTextParser(",,", ",,", false, commandValidator);
+		CopyableTextParser parser = new CopyableTextParser(",,", ",,", true, true, commandValidator);
 		
 		List<SingleStyleSubstring> substrings = parser.getComponents(text);
 
@@ -31,7 +31,7 @@ class CopyableTextParserTests extends SingleStyleSubstringHelpers
 		String copyable = "abc";
 		String text = ",," + copyable + ",,";
 		CommandValidator commandValidator = Mockito.mock(CommandValidator.class);
-		CopyableTextParser parser = new CopyableTextParser(",,", ",,", false, commandValidator);
+		CopyableTextParser parser = new CopyableTextParser(",,", ",,", true, true, commandValidator);
 		
 		List<SingleStyleSubstring> substrings = parser.getComponents(text);
 
@@ -46,7 +46,7 @@ class CopyableTextParserTests extends SingleStyleSubstringHelpers
 		String text = ",," + copyable + ",,";
 		CommandValidator commandValidator = Mockito.mock(CommandValidator.class);
 		Mockito.when(commandValidator.commandExists(Mockito.anyString())).thenReturn(true);
-		CopyableTextParser parser = new CopyableTextParser(",,", ",,", false, commandValidator);
+		CopyableTextParser parser = new CopyableTextParser(",,", ",,", true, true, commandValidator);
 		
 		List<SingleStyleSubstring> substrings = parser.getComponents(text);
 
@@ -61,7 +61,7 @@ class CopyableTextParserTests extends SingleStyleSubstringHelpers
 		String text = ",," + copyable + ",,";
 		CommandValidator commandValidator = Mockito.mock(CommandValidator.class);
 		Mockito.when(commandValidator.commandExists(Mockito.anyString())).thenReturn(true).thenReturn(false);
-		CopyableTextParser parser = new CopyableTextParser(",,", ",,", true, commandValidator);
+		CopyableTextParser parser = new CopyableTextParser(",,", ",,", true, false, commandValidator);
 		
 		List<SingleStyleSubstring> substrings = parser.getComponents(text);
 
@@ -81,7 +81,7 @@ class CopyableTextParserTests extends SingleStyleSubstringHelpers
 		String text = ".." + copyable + "??";
 		CommandValidator commandValidator = Mockito.mock(CommandValidator.class);
 		
-		CopyableTextParser parser = new CopyableTextParser("..", "??", false, commandValidator);
+		CopyableTextParser parser = new CopyableTextParser("..", "??", true, true, commandValidator);
 		List<SingleStyleSubstring> substrings = parser.getComponents(text);
 
 		Assertions.assertEquals(1, substrings.size());
@@ -95,7 +95,7 @@ class CopyableTextParserTests extends SingleStyleSubstringHelpers
 		String copyable2 = "def";
 		String text = "See ,," + copyable1 + ",, or ,," + copyable2 + ",,.";
 		CommandValidator commandValidator = Mockito.mock(CommandValidator.class);
-		CopyableTextParser parser = new CopyableTextParser(",,", ",,", false, commandValidator);
+		CopyableTextParser parser = new CopyableTextParser(",,", ",,", true, true, commandValidator);
 		
 		List<SingleStyleSubstring> substrings = parser.getComponents(text);
 
