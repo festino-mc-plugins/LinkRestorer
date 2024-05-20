@@ -147,11 +147,11 @@ public class RawJsonBuilder
 		String encodedUrl = LinkUtils.applyBrowserEncoding(link.getUrl());
 		StringBuilder eventsJson = new StringBuilder();
 		eventsJson.append("\"clickEvent\":{\"action\":\"open_url\",\"value\":\"")
-		          .append(encodedUrl)
+		          .append(escapeJsonString(encodedUrl))
 		          .append("\"},");
 		if (!tooltip.isEmpty())
 			eventsJson.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"")
-			          .append(tooltip)
+			          .append(escapeJsonString(tooltip))
 			          .append("\"},");
 		return eventsJson;
 	}
@@ -178,7 +178,7 @@ public class RawJsonBuilder
 	private static String getSuggestCommandJson(String command) {
 		StringBuilder eventsJson = new StringBuilder();
 		eventsJson.append("\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"")
-		          .append(command)
+		          .append(escapeJsonString(command))
 		          .append("\"},");
 		
 		return eventsJson.toString();
@@ -187,7 +187,7 @@ public class RawJsonBuilder
 	private static String getRunCommandJson(String command) {
 		StringBuilder eventsJson = new StringBuilder();
 		eventsJson.append("\"clickEvent\":{\"action\":\"run_command\",\"value\":\"")
-		          .append(command)
+		          .append(escapeJsonString(command))
 		          .append("\"},");
 		
 		return eventsJson.toString();
@@ -197,7 +197,7 @@ public class RawJsonBuilder
 		StringBuilder eventsJson = new StringBuilder();
 		if (!tooltip.isEmpty())
 			eventsJson.append("\"hoverEvent\":{\"action\":\"show_text\",\"value\":\"")
-			          .append(tooltip)
+			          .append(escapeJsonString(tooltip))
 			          .append("\"},");
 		
 		return eventsJson.toString();
@@ -222,8 +222,8 @@ public class RawJsonBuilder
 		command.append(getWrapped(str, extraJson));
 	}
 	
-	private static String escapeQuotes(String s) {
-		return s.replace("\"", "\\\"");
+	private static String escapeJsonString(String s) {
+		return s.replace("\\", "\\\\").replace("\"", "\\\"");
 	}
 	
 	private static CharSequence getWrapped(String text, CharSequence extraJson)
@@ -232,7 +232,7 @@ public class RawJsonBuilder
 		builder.append("{");
 		builder.append(extraJson);
 		builder.append("\"text\":\"");
-		builder.append(escapeQuotes(text));
+		builder.append(escapeJsonString(text));
 		builder.append("\"},");
 		return builder;
 	}

@@ -1,6 +1,5 @@
 package com.festp.handlers;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -13,8 +12,6 @@ import org.bukkit.event.server.ServerCommandEvent;
 import com.festp.Logger;
 import com.festp.config.Config;
 import com.festp.messaging.Chatter;
-import com.festp.messaging.SpigotMessageSender;
-import com.festp.styledmessage.components.TextStyle;
 
 public class WhisperHandler implements Listener
 {

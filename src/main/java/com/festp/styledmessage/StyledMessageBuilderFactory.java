@@ -1,6 +1,8 @@
 package com.festp.styledmessage;
 
+import org.bukkit.permissions.Permissible;
+
 public interface StyledMessageBuilderFactory
 {
-	public StyledMessageBuilder create();
+	public StyledMessageBuilder create(Permissible user);
 }

@@ -1,6 +1,6 @@
 api-version: 1.14
 name: ClickableLinks
-version: 2.0.1
+version: 2.0.2
 authors: [FEST_Channel, EvilGeniys]
 description: Bring clickable links to minecraft chat!
 website: https://github.com/festino-mc-plugins/ClickableLinks
@@ -18,5 +18,17 @@ permissions:
         children:
             clickablelinks.configure: true
     clickablelinks.configure:
-        description: Allows you to configure plugin behaviour.
+        description: Allows the player to configure plugin behaviour.
         default: op
+    clickablelinks.use.links:
+        description: Allows the player to make links clickable.
+        default: true
+    clickablelinks.use.iplinks:
+        description: Allows the player to make ip links clickable.
+        default: true
+    clickablelinks.use.commands:
+        description: Allows the player to make commands clickable.
+        default: true
+    clickablelinks.use.clickable:
+        description: Allows the player to make copyable text.
+        default: true

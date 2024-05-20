@@ -16,14 +16,18 @@ public class CopyableTextParser implements ComponentParser
 	private static final int COPYABLE_TEXT_INDEX = 1;
 	private final Pattern pattern;
 
-	private final boolean onlyCommands;
+	private final boolean useCommands;
+	private final boolean useCopyableText;
 	private final CommandValidator commandValidator;
 	
-	public CopyableTextParser(String beginQuotes, String endQuotes, boolean onlyCommands, CommandValidator commandValidator) {
+	public CopyableTextParser(String beginQuotes, String endQuotes, boolean useCommands, boolean useCopyableText, CommandValidator commandValidator) {
 		this.commandValidator = commandValidator;
-		this.onlyCommands = onlyCommands;
-		if (beginQuotes.isEmpty()) beginQuotes = ",,";
-		if (endQuotes.isEmpty()) endQuotes = ",,";
+		this.useCommands = useCommands;
+		this.useCopyableText = useCopyableText;
+		if (beginQuotes.isEmpty() || endQuotes.isEmpty()) {
+			pattern = null;
+			return;
+		}
 
 		beginQuotes = Pattern.quote(beginQuotes);
 		endQuotes = Pattern.quote(endQuotes);
@@ -34,6 +38,10 @@ public class CopyableTextParser implements ComponentParser
 	
 	@Override
 	public List<SingleStyleSubstring> getComponents(String message) {
+		if (pattern == null) {
+			return Lists.newArrayList(new SingleStyleSubstring(0, message.length(), Lists.newArrayList()));
+		}
+
 		List<TextComponent> emptyStyle = Lists.newArrayList();
 		Matcher matcher = pattern.matcher(message);
 
@@ -62,12 +70,12 @@ public class CopyableTextParser implements ComponentParser
 	
 	private TextComponent getComponent(String s)
 	{
-		if (commandValidator.commandExists(s.split(" ")[0])) {
+		if (useCommands && commandValidator.commandExists(s.split(" ")[0])) {
 			return new Command(s);
 		}
-		if (onlyCommands) {
-			return null;
+		if (useCopyableText) {
+			return new CopyableText(s);
 		}
-		return new CopyableText(s);
+		return null;
 	}
 }

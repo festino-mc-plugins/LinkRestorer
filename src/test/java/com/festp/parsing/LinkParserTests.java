@@ -12,7 +12,7 @@ class LinkParserTests extends SingleStyleSubstringHelpers
 	@ParameterizedTest
 	@ValueSource(strings = {"simple text", "o.o", "T.T"})
 	void parseNoLinks(String text) {
-		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(text);
+		List<SingleStyleSubstring> substrings = new LinkParser(true, true).getComponents(text);
 		
 		Assertions.assertEquals(1, substrings.size());
 		assertPlain(substrings.get(0), 0, text.length());
@@ -23,7 +23,7 @@ class LinkParserTests extends SingleStyleSubstringHelpers
 		String url = "http://www.example.com";
 		String text = url;
 
-		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(text);
+		List<SingleStyleSubstring> substrings = new LinkParser(true, true).getComponents(text);
 		
 		Assertions.assertEquals(1, substrings.size());
 		assertLink(substrings.get(0), 0, url.length(), url);
@@ -34,7 +34,7 @@ class LinkParserTests extends SingleStyleSubstringHelpers
 		String url = "http://www.example.com";
 		String text = url + ".";
 
-		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(text);
+		List<SingleStyleSubstring> substrings = new LinkParser(true, true).getComponents(text);
 
 		Assertions.assertEquals(2, substrings.size());
 		assertLink(substrings.get(0), 0, url.length(), url);
@@ -46,7 +46,7 @@ class LinkParserTests extends SingleStyleSubstringHelpers
 		String url = "http://www.example.com";
 		String text = "see " + url;
 
-		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(text);
+		List<SingleStyleSubstring> substrings = new LinkParser(true, true).getComponents(text);
 
 		Assertions.assertEquals(2, substrings.size());
 		assertPlain(substrings.get(0), 0, 4);
@@ -58,7 +58,7 @@ class LinkParserTests extends SingleStyleSubstringHelpers
 		String url = "http://www.example.com";
 		String text = "link -> " + url + " <- !!!";
 
-		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(text);
+		List<SingleStyleSubstring> substrings = new LinkParser(true, true).getComponents(text);
 
 		Assertions.assertEquals(3, substrings.size());
 		assertPlain(substrings.get(0), 0, 8);
@@ -71,7 +71,7 @@ class LinkParserTests extends SingleStyleSubstringHelpers
 			"www.example.com",
 			"example.com"})
 	void parseProtocolless(String text) {
-		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(text);
+		List<SingleStyleSubstring> substrings = new LinkParser(true, true).getComponents(text);
 
 		Assertions.assertEquals(1, substrings.size());
 		assertLink(substrings.get(0), 0, text.length(), "https://" + text);
@@ -85,7 +85,7 @@ class LinkParserTests extends SingleStyleSubstringHelpers
 		int start_1 = message.indexOf(url_1);
 		int start_2 = message.indexOf(url_2);
 		
-		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(message);
+		List<SingleStyleSubstring> substrings = new LinkParser(true, true).getComponents(message);
 
 		Assertions.assertEquals(5, substrings.size());
 		assertPlain(substrings.get(0), 0, start_1);
@@ -100,7 +100,7 @@ class LinkParserTests extends SingleStyleSubstringHelpers
 		//String url = "a http://username:password@example.com:8080/test?param=value&p=1#anchor a";
 		String url = "http://example.com:8080/test?param=value&p=1#anchor";
 
-		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(url);
+		List<SingleStyleSubstring> substrings = new LinkParser(true, true).getComponents(url);
 
 		Assertions.assertEquals(1, substrings.size());
 		assertLink(substrings.get(0), 0, url.length(), url);
@@ -111,7 +111,7 @@ class LinkParserTests extends SingleStyleSubstringHelpers
 			"https://www.лекарство.net/",
 			"https://example.com/初音ミク"})
 	void parseNonLatin(String url) {
-		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(url);
+		List<SingleStyleSubstring> substrings = new LinkParser(true, true).getComponents(url);
 
 		Assertions.assertEquals(1, substrings.size());
 		assertLink(substrings.get(0), 0, url.length());
@@ -119,7 +119,7 @@ class LinkParserTests extends SingleStyleSubstringHelpers
 
 	@Test
 	void parseIPv4() {
-		LinkParser linkParser = new LinkParser();
+		LinkParser linkParser = new LinkParser(true, true);
 		String url = "127.0.0.1";
 		
 		List<SingleStyleSubstring> substrings = linkParser.getComponents(url);
@@ -142,7 +142,7 @@ class LinkParserTests extends SingleStyleSubstringHelpers
 			"1.0..1",
 			"127.0.FF.01"})
 	void parseInvalidIPv4(String url) {
-		List<SingleStyleSubstring> substrings = new LinkParser().getComponents(url);
+		List<SingleStyleSubstring> substrings = new LinkParser(true, true).getComponents(url);
 		
 		Assertions.assertEquals(1, substrings.size());
 		assertPlain(substrings.get(0), 0, url.length());
