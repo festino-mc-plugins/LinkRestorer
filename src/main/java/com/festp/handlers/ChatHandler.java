@@ -6,7 +6,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import com.festp.messaging.Chatter;
-import com.festp.messaging.SpigotMessageSender;
 
 public class ChatHandler implements Listener
 {
