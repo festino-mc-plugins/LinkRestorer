@@ -27,7 +27,8 @@ public class Config implements IConfig
 	public DisplaySettings getDisplaySettings() {
 		return new DisplaySettings(
 				get(Key.UNDERLINE_LINKS), get(Key.UNDERLINE_COMMANDS), get(Key.UNDERLINE_COPYABLE_TEXT),
-				get(Key.TOOLTIP_LINKS), get(Key.TOOLTIP_COMMANDS), get(Key.TOOLTIP_COPYABLE_TEXT), get(Key.COMMANDS_RUN_ON_CLICK));
+				get(Key.TOOLTIP_LINKS), get(Key.TOOLTIP_COMMANDS), get(Key.TOOLTIP_COPYABLE_TEXT),
+				get(Key.COMMANDS_RUN_ON_CLICK));
 	}
 	
 	public void load() {
@@ -115,6 +116,7 @@ public class Config implements IConfig
 		LOG_DEBUG("log-debug-info", false),
 		
 		ENABLE_LINKS("enable-links", true),
+		ENABLE_IP_LINKS("enable-ip-links", true),
 		ENABLE_COMMANDS("enable-commands", true),
 		ENABLE_COPYABLE_TEXT("enable-copyable-text", true),
 		

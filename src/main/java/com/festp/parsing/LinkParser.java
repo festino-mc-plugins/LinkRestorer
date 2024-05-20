@@ -18,6 +18,14 @@ public class LinkParser implements ComponentParser {
 	private static final int TLD_GROUP_INDEX = 3;
 	
 	public static final String DEFAULT_PROTOCOL = "https://";
+	
+	public final boolean useLinks;
+	public final boolean useIps;
+
+	public LinkParser(boolean useLinks, boolean useIps) {
+		this.useLinks = useLinks;
+		this.useIps = useIps;
+	}
 
 	@Override
 	public List<SingleStyleSubstring> getComponents(String message) {
@@ -47,7 +55,7 @@ public class LinkParser implements ComponentParser {
 		return substrings;
 	}
 	
-	private static Link tryParseLink(String message, Matcher matcher)
+	private Link tryParseLink(String message, Matcher matcher)
 	{
 		int tldStart = matcher.start(TLD_GROUP_INDEX);
 		int tldEnd = matcher.end(TLD_GROUP_INDEX);
@@ -56,10 +64,10 @@ public class LinkParser implements ComponentParser {
 		if (domainsStart < 0)
 			domainsStart = matcher.start();
 		if (hasNumber(tld)) {
-			if (!isValidIP(message, domainsStart, tldEnd))
+			if (!useIps || !isValidIP(message, domainsStart, tldEnd))
 				return null;
 		}
-		else if (!isValidTLD(tld)) {
+		else if (!useLinks || !isValidTLD(tld)) {
 			return null;
 		}
 

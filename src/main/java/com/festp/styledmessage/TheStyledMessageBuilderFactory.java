@@ -17,6 +17,7 @@ import com.google.common.collect.Lists;
 public class TheStyledMessageBuilderFactory implements StyledMessageBuilderFactory
 {
 	private static final String PERMISSION_LINKS = "clickablelinks.use.links";
+	private static final String PERMISSION_IP_LINKS = "clickablelinks.use.iplinks";
 	private static final String PERMISSION_COMMANDS = "clickablelinks.use.commands";
 	private static final String PERMISSION_COPYABLE_TEXT = "clickablelinks.use.copyable";
 	
@@ -32,6 +33,7 @@ public class TheStyledMessageBuilderFactory implements StyledMessageBuilderFacto
 	public StyledMessageBuilder create(Permissible user)
 	{
 		boolean useLinks = config.get(Key.ENABLE_LINKS, false) && user.hasPermission(PERMISSION_LINKS);
+		boolean useIpLinks = config.get(Key.ENABLE_IP_LINKS, false) && user.hasPermission(PERMISSION_IP_LINKS);
 		boolean useCommands = config.get(Key.ENABLE_COMMANDS, false) && user.hasPermission(PERMISSION_COMMANDS);
 		boolean useCopyableText = config.get(Key.ENABLE_COPYABLE_TEXT, false) && user.hasPermission(PERMISSION_COPYABLE_TEXT);
 		List<ComponentParser> globalParsers = Lists.newArrayList(getTextStyleParser());
@@ -39,8 +41,8 @@ public class TheStyledMessageBuilderFactory implements StyledMessageBuilderFacto
 		List<ComponentParser> splittingParsers = Lists.newArrayList();
 		if (useCommands || useCopyableText)
 			splittingParsers.add(getCopyableTextParser(useCommands, useCopyableText));
-		if (useLinks)
-			splittingParsers.add(getLinkParser());
+		if (useLinks || useIpLinks)
+			splittingParsers.add(getLinkParser(useLinks, useIpLinks));
 		if (useCommands)
 			splittingParsers.add(getCommandParser());
 		
@@ -59,9 +61,9 @@ public class TheStyledMessageBuilderFactory implements StyledMessageBuilderFacto
 				useCommands, useCopyableText, commandValidator);
 	}
 	
-	private ComponentParser getLinkParser()
+	private ComponentParser getLinkParser(boolean useLinks, boolean useIpLinks)
 	{
-		return new LinkParser();
+		return new LinkParser(useLinks, useIpLinks);
 	}
 	
 	private ComponentParser getCommandParser()

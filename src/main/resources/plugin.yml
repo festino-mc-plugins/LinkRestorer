@@ -23,6 +23,9 @@ permissions:
     clickablelinks.use.links:
         description: Allows the player to make links clickable.
         default: true
+    clickablelinks.use.iplinks:
+        description: Allows the player to make ip links clickable.
+        default: true
     clickablelinks.use.commands:
         description: Allows the player to make commands clickable.
         default: true
