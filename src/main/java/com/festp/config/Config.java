@@ -131,7 +131,6 @@ public class Config implements IConfig
 		
 		COPYABLE_TEXT_BEGIN_QUOTES("copyable-text-begin-quotes", ",,"),
 		COPYABLE_TEXT_END_QUOTES("copyable-text-end-quotes", ",,"),
-		COPYABLE_TEXT_ONLY_COMMANDS("copyable-text-only-commands", false),
 		
 		LISTEN_TO_WHISPER("do-whisper", true),
 		WHISPER_SEPARATE_MESSAGE("whisper-separate-message", false);
