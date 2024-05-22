@@ -97,7 +97,7 @@ class LinkParserTests extends SingleStyleSubstringHelpers
 
 	@Test
 	void parseComplexLink() {
-		//String url = "a http://username:password@example.com:8080/test?param=value&p=1#anchor a";
+		// won't support "http://username:password@example.com:8080/test?param=value&p=1#anchor";
 		String url = "http://example.com:8080/test?param=value&p=1#anchor";
 
 		List<SingleStyleSubstring> substrings = new LinkParser(true, true).getComponents(url);
