@@ -20,7 +20,7 @@ class RawJsonBuilderTests {
 			"https://www.лекарство.net,https://www.%D0%BB%D0%B5%D0%BA%D0%B0%D1%80%D1%81%D1%82%D0%B2%D0%BE.net"
 			}, delimiter = ',')
 	void appendJoinedLinks_ApplyUrlEncoding(String url, String expectedUrl) {
-		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings(false, false, false, "", "", "", false));
+		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings("%s", "%s", "%s", "", "", "", false));
 		Link link = new Link(url);
 		
 		builder.appendJoinedLinks(Lists.newArrayList(link), new TextStyle(), "");
@@ -32,7 +32,7 @@ class RawJsonBuilderTests {
 	
 	@Test
 	void appendStyledMessage_EscapesQuotesAndCackSlashes() {
-		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings(false, false, false, "", "", "", false));
+		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings("%s", "%s", "%s", "", "", "", false));
 		
 		builder.appendStyledMessage(new StyledMessage("\\ and \""));
 		String json = builder.toString();
@@ -43,7 +43,7 @@ class RawJsonBuilderTests {
 	
 	@Test
 	void appendStyledMessage_EscapesQuotesAndCackSlashes_LinkUrl() {
-		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings(false, false, false, "", "", "", false));
+		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings("%s", "%s", "%s", "", "", "", false));
 		
 		SingleStyleMessage styledPart = new SingleStyleMessage("a", Lists.newArrayList(new Link("\\\"")));
 		builder.appendStyledMessage(new StyledMessage(Lists.newArrayList(styledPart)));
@@ -58,7 +58,7 @@ class RawJsonBuilderTests {
 	@ValueSource(booleans = {false, true})
 	void appendStyledMessage_CommandAction(boolean runCommands) {
 		String action = runCommands ? "run_command" : "suggest_command";
-		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings(false, false, false, "", "", "", runCommands));
+		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings("%s", "%s", "%s", "", "", "", runCommands));
 		String cmd = "/ping";
 		Command command = new Command(cmd);
 		
