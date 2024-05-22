@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -26,8 +27,12 @@ public class Config implements IConfig
 	
 	public DisplaySettings getDisplaySettings() {
 		return new DisplaySettings(
-				get(Key.UNDERLINE_LINKS), get(Key.UNDERLINE_COMMANDS), get(Key.UNDERLINE_COPYABLE_TEXT),
-				get(Key.TOOLTIP_LINKS), get(Key.TOOLTIP_COMMANDS), get(Key.TOOLTIP_COPYABLE_TEXT),
+				applyColorChar(get(Key.FORMAT_LINKS)),
+				applyColorChar(get(Key.FORMAT_COMMANDS)),
+				applyColorChar(get(Key.FORMAT_COPYABLE_TEXT)),
+				applyColorChar(get(Key.TOOLTIP_LINKS)),
+				applyColorChar(get(Key.TOOLTIP_COMMANDS)),
+				applyColorChar(get(Key.TOOLTIP_COPYABLE_TEXT)),
 				get(Key.COMMANDS_RUN_ON_CLICK));
 	}
 	
@@ -110,8 +115,14 @@ public class Config implements IConfig
 		applyDefault(key.toString(), key.getDefault());
 	}
 	
+	private static String applyColorChar(String s)
+	{
+		return s.replace('&', ChatColor.COLOR_CHAR)
+				.replace(String.valueOf(new char[] { ChatColor.COLOR_CHAR, ChatColor.COLOR_CHAR }), "&");
+	}
 	
-	
+
+	private static final String UNDERLINE_FORMAT = "&" + ChatColor.UNDERLINE.toString().charAt(1) + "%s";
 	public enum Key implements IConfig.Key {
 		LOG_DEBUG("log-debug-info", false),
 		
@@ -120,9 +131,9 @@ public class Config implements IConfig
 		ENABLE_COMMANDS("enable-commands", true),
 		ENABLE_COPYABLE_TEXT("enable-copyable-text", true),
 		
-		UNDERLINE_LINKS("underline-links", true),
-		UNDERLINE_COMMANDS("underline-commands", true),
-		UNDERLINE_COPYABLE_TEXT("underline-copyable-text", true),
+		FORMAT_LINKS("format-links", UNDERLINE_FORMAT),
+		FORMAT_COMMANDS("format-commands", UNDERLINE_FORMAT),
+		FORMAT_COPYABLE_TEXT("format-copyable-text", UNDERLINE_FORMAT),
 
 		TOOLTIP_LINKS("tooltip-links", ""),
 		TOOLTIP_COMMANDS("tooltip-commands", "Copy command"),
@@ -136,7 +147,7 @@ public class Config implements IConfig
 		
 		LISTEN_TO_WHISPER("do-whisper", true),
 		WHISPER_SEPARATE_MESSAGE("whisper-separate-message", false);
-		
+
 		private final String name;
 		private final Object defaultValue;
 

@@ -1,12 +1,13 @@
 log-debug-info: false
 
 enable-links: true
+enable-ip-links: true
 enable-commands: true
 enable-copyable-text: true
 
-underline-links: true
-underline-commands: true
-underline-copyable-text: true
+format-links: '&n%s'
+format-commands: '&n%s'
+format-copyable-text: '&n%s'
 
 # leave tooltip empty ('') to disable 
 tooltip-links: ''

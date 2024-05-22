@@ -18,10 +18,11 @@ public class ChatHandler implements Listener
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void OnChat(AsyncPlayerChatEvent event)
 	{
-		String message = event.getMessage();
-
-		boolean sent = chatter.sendFormatted(event.getRecipients(), event.getPlayer(), message, event.getFormat(), true);
+		if (event.isCancelled())
+			return;
+		
+		boolean sent = chatter.sendFormatted(event.getRecipients(), event.getPlayer(), event.getMessage(), event.getFormat(), true);
 		if (sent)
-			event.setCancelled(true);
+			event.getRecipients().clear();
 	}
 }

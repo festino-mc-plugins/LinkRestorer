@@ -2,9 +2,9 @@ package com.festp.messaging;
 
 public class DisplaySettings
 {
-	public final boolean underlineLinks;
-	public final boolean underlineCommands;
-	public final boolean underlineCopyableText;
+	public final String formatLinks;
+	public final String formatCommands;
+	public final String formatCopyableText;
 
 	public final boolean runCommands;
 	
@@ -13,17 +13,17 @@ public class DisplaySettings
 	public final String tooltipCopyableText;
 	
 	public DisplaySettings(
-			boolean underlineLinks,
-			boolean underlineCommands,
-			boolean underlineCopyableText,
+			String formatLinks,
+			String formatCommands,
+			String formatCopyableText,
 			String tooltipLinks,
 			String tooltipCommands,
 			String tooltipCopyableText,
 			boolean runCommands)
 	{
-		this.underlineLinks = underlineLinks;
-		this.underlineCommands = underlineCommands;
-		this.underlineCopyableText = underlineCopyableText;
+		this.formatLinks = formatLinks;
+		this.formatCommands = formatCommands;
+		this.formatCopyableText = formatCopyableText;
 		this.runCommands = runCommands;
 		this.tooltipLinks = tooltipLinks;
 		this.tooltipCommands = tooltipCommands;

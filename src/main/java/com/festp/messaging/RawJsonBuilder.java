@@ -1,6 +1,7 @@
 package com.festp.messaging;
 
-import org.bukkit.ChatColor;
+import java.util.List;
+
 import com.festp.styledmessage.SingleStyleMessage;
 import com.festp.styledmessage.StyledMessage;
 import com.festp.styledmessage.components.Command;
@@ -50,33 +51,39 @@ public class RawJsonBuilder
 	{
 		for (SingleStyleMessage part : styledMessage.getStyledParts())
 		{
-			StringBuilder text = new StringBuilder();
-			StringBuilder extraJson = new StringBuilder();
-			for (TextComponent component : part.getComponents())
+			List<TextComponent> components = part.getComponents();
+			String text = part.getText();
+			StringBuilder json = new StringBuilder();
+			// add the last components first (otherwise TextStyle may rewrite Link codes)
+			for (int i = components.size() - 1; i >= 0; i--)
 			{
+				TextComponent component = components.get(i);
 				if (component instanceof TextStyle)
 				{
-					appendTextStyle(text, extraJson, (TextStyle) component);
+					appendTextStyle(json, (TextStyle) component);
+					text = ((TextStyle) component).getCodes() + text;
 				}
 				else if (component instanceof Link)
 				{
-					appendLink(text, extraJson, (Link) component);
+					appendLink(json, (Link) component);
+					text = String.format(settings.formatLinks, text);
 				}
 				else if (component instanceof Command)
 				{
-					appendCommand(text, extraJson, (Command) component);
+					appendCommand(json, (Command) component);
+					text = String.format(settings.formatCommands, text);
 				}
 				else if (component instanceof CopyableText)
 				{
-					appendCopyableText(text, extraJson, (CopyableText) component);
+					appendCopyableText(json, (CopyableText) component);
+					text = String.format(settings.formatCopyableText, text);
 				}
 				else if (component instanceof MentionedPlayer)
 				{
-					appendPlayer(text, extraJson, (MentionedPlayer) component);
+					appendPlayer(json, (MentionedPlayer) component);
 				}
 			}
-			text.append(part.getText());
-			tryWrap(text.toString(), extraJson);
+			tryWrap(text, json);
 		}
 	}
 	
@@ -120,7 +127,7 @@ public class RawJsonBuilder
 		command.append("]},");
 	}
 	
-	private void appendPlayer(StringBuilder text, StringBuilder json, MentionedPlayer player)
+	private void appendPlayer(StringBuilder json, MentionedPlayer player)
 	{
 		String plainName = player.getName();
 		String uuid = player.getPlayer().getUniqueId().toString();
@@ -129,15 +136,12 @@ public class RawJsonBuilder
 		json.append(getShowTextJson(tooltip));
 	}
 	
-	private void appendTextStyle(StringBuilder text, StringBuilder json, TextStyle style) {
-		text.append(style.getCodes());
+	private void appendTextStyle(StringBuilder json, TextStyle style) {
 		json.append(style.getJson());
 	}
 	
-	private void appendLink(StringBuilder text, StringBuilder json, Link link)
+	private void appendLink(StringBuilder json, Link link)
 	{
-		if (settings.underlineLinks)
-			text.append(ChatColor.UNDERLINE);
 		json.append(getLinkJson(link));
 	}
 	
@@ -156,10 +160,7 @@ public class RawJsonBuilder
 		return eventsJson;
 	}
 	
-	private void appendCommand(StringBuilder text, StringBuilder json, Command command) {
-		if (settings.underlineCommands)
-			text.append(ChatColor.UNDERLINE);
-		
+	private void appendCommand(StringBuilder json, Command command) {
 		if (settings.runCommands)
 			json.append(getRunCommandJson(command.getCommand()));
 		else
@@ -168,9 +169,7 @@ public class RawJsonBuilder
 		json.append(getShowTextJson(settings.tooltipCommands));
 	}
 	
-	private void appendCopyableText(StringBuilder text, StringBuilder json, CopyableText copyableText) {
-		if (settings.underlineCopyableText)
-			text.append(ChatColor.UNDERLINE);
+	private void appendCopyableText(StringBuilder json, CopyableText copyableText) {
 		json.append(getSuggestCommandJson(copyableText.getText()));
 		json.append(getShowTextJson(settings.tooltipCopyableText));
 	}

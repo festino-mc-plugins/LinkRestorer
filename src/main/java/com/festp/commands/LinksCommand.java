@@ -106,9 +106,11 @@ public class LinksCommand implements CommandExecutor, TabCompleter
 			options.add("false");
 		}
 		else if (key.getValueClass() == String.class) {
-			String value = key.getDefault().toString();
-			value = value.contains(" ") ? "\"" + value + "\"" : value;
-			options.add(value);
+			String defaultValue = key.getDefault().toString();
+			defaultValue = defaultValue.contains(" ") ? "\"" + defaultValue + "\"" : defaultValue;
+			options.add(defaultValue);
+			String emptyValue = defaultValue.contains("%s") ? "%s" : "\"\"";
+			options.add(emptyValue);
 		}
 	}
 
