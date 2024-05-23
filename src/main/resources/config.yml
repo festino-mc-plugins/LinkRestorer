@@ -26,4 +26,3 @@ commands-run-on-click: false
 
 copyable-text-begin-quotes: ',,'
 copyable-text-end-quotes: ',,'
-copyable-text-only-commands: false
