@@ -29,6 +29,6 @@ permissions:
     clickablelinks.use.commands:
         description: Allows the player to make commands clickable.
         default: true
-    clickablelinks.use.clickable:
+    clickablelinks.use.copyable:
         description: Allows the player to make copyable text.
         default: true
