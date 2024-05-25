@@ -1,12 +1,8 @@
----
 name: Bug report
 about: Tell about a bug or issue you may have identified
 title: Provide a general summary of the issue
 labels: bug
 assignees: ''
-
----
-
 body:
   - type: input
     id: core-version
