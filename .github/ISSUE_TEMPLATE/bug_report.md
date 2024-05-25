@@ -7,25 +7,25 @@ assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
-
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
-
-**Expected behavior**
-A clear and concise description of what you expected to happen.
-
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
-
-**Environment**
- - Server version: [e.g. 3871-Spigot-d2eba2c-3f9263b]
- - ClickableLinks version [e.g. v2.0.3]
-
-**Additional context**
-For example, a list of other plugins and their settings that are relevant to the issue.
+body:
+  - type: input
+    id: core-version
+    attributes:
+      label: What version of Bukkit are you using?
+      placeholder: "e.g. 3871-Spigot-d2eba2c-3f9263b"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: What version of Bukkit are you using?
+      placeholder: "e.g. ClickableLinks v2.0.3"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Describe the issue
+      description: Provide a summary of the issue and what you expected to happen, including specific (minimal) steps to reproduce. For example, a list of other plugins and their settings that are relevant to the issue.
+    validations:
+      required: true
