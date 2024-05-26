@@ -75,13 +75,53 @@ class CopyableTextParserTests extends SingleStyleSubstringHelpers
 	}
 	
 	@Test
-	void parse_SingleCopyable_RegexEscaping()
+	void parse_RegexEscaping()
 	{
 		String copyable = "abc";
 		String text = ".." + copyable + "??";
 		CommandValidator commandValidator = Mockito.mock(CommandValidator.class);
 		
 		CopyableTextParser parser = new CopyableTextParser("..", "??", true, true, commandValidator);
+		List<SingleStyleSubstring> substrings = parser.getComponents(text);
+
+		Assertions.assertEquals(1, substrings.size());
+		assertCopyable(substrings.get(0), 2, text.length() - 2, copyable);
+	}
+	
+	@Test
+	void parse_QuotedBeginQuotes()
+	{
+		String text = "....??";
+		CommandValidator commandValidator = Mockito.mock(CommandValidator.class);
+		
+		CopyableTextParser parser = new CopyableTextParser("..", "??", true, true, commandValidator);
+		List<SingleStyleSubstring> substrings = parser.getComponents(text);
+
+		Assertions.assertEquals(1, substrings.size());
+		assertCopyable(substrings.get(0), 2, text.length() - 2, "..");
+	}
+	
+	@Test
+	void parse_QuotedEndQuotes()
+	{
+		String text = "..????";
+		CommandValidator commandValidator = Mockito.mock(CommandValidator.class);
+		
+		CopyableTextParser parser = new CopyableTextParser("..", "??", true, true, commandValidator);
+		List<SingleStyleSubstring> substrings = parser.getComponents(text);
+
+		Assertions.assertEquals(1, substrings.size());
+		assertCopyable(substrings.get(0), 2, text.length() - 2, "??");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {",,", ",, ", " ,,"})
+	void parse_QuotedQuotes(String copyable)
+	{
+		String text = ",," + copyable + ",,";
+		CommandValidator commandValidator = Mockito.mock(CommandValidator.class);
+		
+		CopyableTextParser parser = new CopyableTextParser(",,", ",,", true, true, commandValidator);
 		List<SingleStyleSubstring> substrings = parser.getComponents(text);
 
 		Assertions.assertEquals(1, substrings.size());

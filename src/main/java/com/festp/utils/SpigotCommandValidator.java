@@ -29,7 +29,7 @@ public class SpigotCommandValidator implements CommandValidator
 				Logger.info("Found commands: " + String.join(", ", commands));
 		}
 		
-		if (command.charAt(0) != '/') return false;
+		if (!command.startsWith("/")) return false;
         return commands.contains(command.substring(1));
 	}
 
