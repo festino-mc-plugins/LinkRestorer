@@ -70,7 +70,9 @@ public class CopyableTextParser implements ComponentParser
 	
 	private TextComponent getComponent(String s)
 	{
-		if (useCommands && commandValidator.commandExists(s.split(" ")[0])) {
+		int spaceIndex = s.indexOf(' ');
+		String firstPart = spaceIndex < 0 ? s : s.substring(0, spaceIndex);
+		if (useCommands && commandValidator.commandExists(firstPart)) {
 			return new Command(s);
 		}
 		if (useCopyableText) {
