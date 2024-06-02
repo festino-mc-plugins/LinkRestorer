@@ -129,6 +129,7 @@ public class Config implements IConfig
 	private static final String UNDERLINE_FORMAT = "&" + ChatColor.UNDERLINE.toString().charAt(1) + "%s";
 	public enum Key implements IConfig.Key {
 		LOG_DEBUG("log-debug-info", false),
+		MODIFY_PACKETS("modify-packets", false),
 		
 		ENABLE_LINKS("enable-links", true),
 		ENABLE_IP_LINKS("enable-ip-links", true),

@@ -6,6 +6,7 @@ description: Bring clickable links to minecraft chat!
 website: https://github.com/festino-mc-plugins/ClickableLinks
 
 main: com.festp.Main
+softdepend: [ ProtocolLib ]
 
 commands:
          links:
