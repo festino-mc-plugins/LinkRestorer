@@ -131,7 +131,7 @@ public class RawJsonBuilder
 	{
 		String plainName = player.getName();
 		String uuid = player.getPlayer().getUniqueId().toString();
-		String tooltip = plainName + "\\nType: Player\\n" + uuid;
+		String tooltip = plainName + "\nType: Player\n" + uuid;
 		json.append(getSuggestCommandJson("/tell " + plainName + " "));
 		json.append(getShowTextJson(tooltip));
 	}
@@ -222,7 +222,7 @@ public class RawJsonBuilder
 	}
 	
 	private static String escapeJsonString(String s) {
-		return s.replace("\\", "\\\\").replace("\"", "\\\"");
+		return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
 	}
 	
 	private static CharSequence getWrapped(String text, CharSequence extraJson)
