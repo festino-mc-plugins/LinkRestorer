@@ -5,6 +5,8 @@ import java.util.Collection;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import net.md_5.bungee.api.chat.BaseComponent;
+
 public interface Chatter
 {
 	/**
@@ -32,4 +34,6 @@ public interface Chatter
 	public boolean sendWhisperMessage(CommandSender sender, Player[] recipients, String message);
 	
 	public boolean sendOnlyLinks(CommandSender sender, Player[] recipients, String message);
+
+	public boolean sendIntercepted(Player recipient, BaseComponent[] components);
 }

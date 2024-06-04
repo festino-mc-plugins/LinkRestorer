@@ -3,6 +3,7 @@ package com.festp.handlers;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import com.festp.Logger;
 import com.festp.config.Config;
@@ -24,8 +25,11 @@ public class ChatListenerManager implements ListenerManager, ConfigListener
 	private final ChatHandler chatHandler;
 	private final SmallCommandsHandler smallHandler;
 	private final WhisperHandler whisperHandler;
+	
 	/** equals null if could not access ProtocolLib */
 	private final ChatPacketListener packetListener;
+	private final MemoryChatHandler memoryChatHandler;
+	private BukkitTask clearMessageInfoTask;
 	
 	private boolean listenPackets;
 	
@@ -43,42 +47,60 @@ public class ChatListenerManager implements ListenerManager, ConfigListener
 		smallHandler = new SmallCommandsHandler(chatter);
 		whisperHandler = new WhisperHandler(chatter, config);
 		
-		if (plugin.getServer().getPluginManager().isPluginEnabled("ProtocolLib"))
-			packetListener = new ChatPacketListener(plugin, chatter);
-		else
+		if (plugin.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
+			memoryChatHandler = new MemoryChatHandler();
+			packetListener = new ChatPacketListener(plugin, chatter, memoryChatHandler);
+			clearMessageInfoTask = null;
+		}
+		else {
+			memoryChatHandler = null;
 			packetListener = null;
+			clearMessageInfoTask = null;
+		}
 	}
 	
 	public void register()
 	{
+		PluginManager pm = plugin.getServer().getPluginManager();
+		pm.registerEvents(smallHandler, plugin);
+		pm.registerEvents(whisperHandler, plugin);
+		
 		if (listenPackets)
 		{
 			if (packetListener != null) {
-				Logger.info("Registering ProtocolLib listeners...");
+				Logger.info("Registering ProtocolLib chat listeners...");
 				packetListener.register();
+				pm.registerEvents(memoryChatHandler, plugin);
+				clearMessageInfoTask = plugin.getServer().getScheduler().runTaskTimer(plugin, new Runnable() {
+					@Override
+					public void run() {
+						memoryChatHandler.onTick();
+					}
+				}, 0, 1);
 			} else {
 				Logger.warning("Could not find ProtocolLib plugin, chat messages will not be affected.");
 			}
 			return;
 		}
 
-		Logger.info("Registering Spigot listeners...");
-		PluginManager pm = plugin.getServer().getPluginManager();
-		pm.registerEvents(smallHandler, plugin);
-		pm.registerEvents(whisperHandler, plugin);
+		Logger.info("Registering Spigot chat listener...");
 		pm.registerEvents(chatHandler, plugin);
 	}
 	
 	public void unregister()
 	{
-		if (listenPackets)
-		{
-			if (packetListener != null) packetListener.unregister();
-			return;
-		}
-		
 		HandlerList.unregisterAll(smallHandler);
 		HandlerList.unregisterAll(whisperHandler);
+		
+		if (listenPackets)
+		{
+			if (packetListener != null) {
+				packetListener.unregister();
+				HandlerList.unregisterAll(memoryChatHandler);
+				if (clearMessageInfoTask != null) plugin.getServer().getScheduler().cancelTask(clearMessageInfoTask.getTaskId());
+			}
+			return;
+		}
 		HandlerList.unregisterAll(chatHandler);
 	}
 	

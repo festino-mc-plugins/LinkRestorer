@@ -22,6 +22,8 @@ import com.festp.styledmessage.components.TextComponent;
 import com.festp.styledmessage.components.TextStyle;
 import com.google.common.collect.Lists;
 
+import net.md_5.bungee.api.chat.BaseComponent;
+
 public class RawJsonChatter implements Chatter
 {
 	private static final String PLACEHOLDER_NAME = "%1$s";
@@ -55,7 +57,7 @@ public class RawJsonChatter implements Chatter
 		
 		// check if actually no recipients
 		if (recipients != null && recipients.isEmpty() || Bukkit.getOnlinePlayers().size() == 0)
-			return true;
+			return false;
 		
 		if (recipients == null)
 		{
@@ -88,6 +90,15 @@ public class RawJsonChatter implements Chatter
 		for (Player p : recipients) {
 			messageSender.sendRawJson(p, rawJson);
 		}
+		return true;
+	}
+
+	public boolean sendIntercepted(Player recipient, BaseComponent[] components)
+	{
+		// parse styled message
+		// try merge events (our have less priority)
+		// send only if any event has changed
+		// messageTemplate, messageContent
 		return true;
 	}
 	
