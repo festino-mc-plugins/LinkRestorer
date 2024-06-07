@@ -27,13 +27,13 @@ public interface Chatter
 	 * @param recipients is <i>null</i> if all the players will get the message; console will always get the message
 	 * @param sender is message sender
 	 * @param message is full message containing link(s)
-	 * @param format use "%1$s" for the sender name and "%2$s" for the message, i.e. "<%1$s> %2$s"
+	 * @param format use "%1$s" for the sender name and "%2$s" for the message, e.g. "<%1$s> %2$s"
 	 * @param link is the first link found*/
-	public boolean sendFormatted(Collection<? extends Player> recipients, CommandSender sender, String message, String format, boolean sendToConsole);
+	public boolean sendFormatted(CommandSender sender, Collection<? extends Player> recipients, String message, String format, boolean sendToConsole);
 
 	public boolean sendWhisperMessage(CommandSender sender, Player[] recipients, String message);
 	
 	public boolean sendOnlyLinks(CommandSender sender, Player[] recipients, String message);
 
-	public boolean sendIntercepted(Player recipient, BaseComponent[] components);
+	public boolean sendIntercepted(CommandSender sender, Player recipient, Iterable<BaseComponent> formatComponents, Iterable<Integer> messagePositions, Iterable<BaseComponent> message);
 }

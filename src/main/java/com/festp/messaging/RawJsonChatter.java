@@ -42,7 +42,7 @@ public class RawJsonChatter implements Chatter
 		this.messageSender = messageSender;
 	}
 	
-	public boolean sendFormatted(Collection<? extends Player> recipients, CommandSender sender, String message, String format, boolean sendToConsole)
+	public boolean sendFormatted(CommandSender sender, Collection<? extends Player> recipients, String message, String format, boolean sendToConsole)
 	{
 		StyledMessageBuilder builder = factory.create(sender);
 		StyledMessage styledMessage = builder.append(message).build();
@@ -93,12 +93,16 @@ public class RawJsonChatter implements Chatter
 		return true;
 	}
 
-	public boolean sendIntercepted(Player recipient, BaseComponent[] components)
+	public boolean sendIntercepted(
+			CommandSender sender,
+			Player recipient,
+			Iterable<BaseComponent> formatComponents,
+			Iterable<Integer> messagePositions,
+			Iterable<BaseComponent> message)
 	{
 		// parse styled message
 		// try merge events (our have less priority)
 		// send only if any event has changed
-		// messageTemplate, messageContent
 		return true;
 	}
 	

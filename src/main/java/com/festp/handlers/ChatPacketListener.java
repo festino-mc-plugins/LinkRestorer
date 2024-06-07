@@ -1,6 +1,7 @@
 package com.festp.handlers;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -80,7 +81,7 @@ public class ChatPacketListener extends PacketAdapter
 			e.printStackTrace();
 		}*/
 		
-		boolean sent = chatter.sendFormatted(Lists.newArrayList(event.getPlayer()), Bukkit.getPlayer(senderUuid), messageContent, "<%1$s> %2$s", false);
+		boolean sent = chatter.sendFormatted(Bukkit.getPlayer(senderUuid), Lists.newArrayList(event.getPlayer()), messageContent, "<%1$s> %2$s", false);
 		if (sent)
 			event.setCancelled(true);
     }
@@ -97,8 +98,17 @@ public class ChatPacketListener extends PacketAdapter
 		MessageInfo messageInfo = tryGetMessageInfo(legacy);
 		if (messageInfo == null || !messageInfo.recipients.contains(event.getPlayer()))
 			return;
+
+		List<BaseComponent> messageComponents = Lists.newArrayList();
+		// find first message content matching in components (strip colors just in case)
+		// add its components
 		
-		boolean sent = chatter.sendIntercepted(event.getPlayer(), components);
+		List<Integer> messagePositions = Lists.newArrayList();
+		List<BaseComponent> formatComponents = Lists.newArrayList();
+		// find all occurrences of message content
+		// cut it, but remember indices to insert it back
+		
+		boolean sent = chatter.sendIntercepted(messageInfo.sender, event.getPlayer(), formatComponents, messagePositions, messageComponents);
 		if (sent)
 			event.setCancelled(true);
 	}
@@ -107,10 +117,8 @@ public class ChatPacketListener extends PacketAdapter
 	{
 		String colorlessMessage = ChatColor.stripColor(message);
 		MessageInfo[] recentMessages = messageInfoProvider.getRecentMessages();
-		System.out.println("Message count: " + recentMessages.length);
 		for (MessageInfo messageInfo : recentMessages)
 		{
-			System.out.println("[MessageInfo] " + messageInfo.sender.getDisplayName() + ": " + messageInfo.content);
 			if (!colorlessMessage.contains(ChatColor.stripColor(messageInfo.content))) continue;
 			if (!colorlessMessage.contains(ChatColor.stripColor(messageInfo.sender.getDisplayName()))) continue;
 			return messageInfo;

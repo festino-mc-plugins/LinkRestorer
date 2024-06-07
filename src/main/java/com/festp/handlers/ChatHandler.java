@@ -21,7 +21,7 @@ public class ChatHandler implements Listener
 		if (event.isCancelled())
 			return;
 		
-		boolean sent = chatter.sendFormatted(event.getRecipients(), event.getPlayer(), event.getMessage(), event.getFormat(), true);
+		boolean sent = chatter.sendFormatted(event.getPlayer(), event.getRecipients(), event.getMessage(), event.getFormat(), true);
 		if (sent)
 			event.getRecipients().clear();
 	}

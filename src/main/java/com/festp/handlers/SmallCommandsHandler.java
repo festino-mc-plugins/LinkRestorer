@@ -51,7 +51,7 @@ public class SmallCommandsHandler implements Listener
 		if (message == "")
 			return;
 		
-		boolean sent = chatter.sendFormatted(null, sender, message, "* %1$s %2$s", false);
+		boolean sent = chatter.sendFormatted(sender, null, message, "* %1$s %2$s", false);
 		if (sent)
 			event.setCancelled(true);
 	}
@@ -61,7 +61,7 @@ public class SmallCommandsHandler implements Listener
 		if (message == "")
 			return;
 
-		boolean sent = chatter.sendFormatted(null, sender, message, "[%1$s] %2$s", false);
+		boolean sent = chatter.sendFormatted(sender, null, message, "[%1$s] %2$s", false);
 		if (sent)
 			event.setCancelled(true);
 	}
