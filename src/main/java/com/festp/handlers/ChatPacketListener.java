@@ -1,6 +1,7 @@
 package com.festp.handlers;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,6 +20,7 @@ import com.google.common.collect.Lists;
 
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder.FormatRetention;
 import net.md_5.bungee.chat.ComponentSerializer;
 
 public class ChatPacketListener extends PacketAdapter
@@ -117,127 +119,197 @@ public class ChatPacketListener extends PacketAdapter
 
 	private ParseResult tryParse(MessageInfo messageInfo, BaseComponent[] components)
 	{
+		// assumption: sender name could not be a parsable component (no need to distinguish between sender and content)
+		// assumption: format has only one content specifier
 		String colorlessMessage = BaseComponent.toPlainText(components);
 		String colorlessSender = ChatColor.stripColor(messageInfo.sender.getDisplayName());
-		String colorlessContent = ChatColor.stripColor(messageInfo.content);
 		if (!colorlessMessage.contains(colorlessSender))
 			return null;
-		
+
+		String colorlessContent = ChatColor.stripColor(messageInfo.content);
 		if (!colorlessMessage.contains(colorlessContent))
 			return null;
 
-		List<Integer> potentialPositions = Lists.newArrayList();
-		int start = colorlessMessage.indexOf(colorlessContent);
-		while (start >= 0)
-		{
-			potentialPositions.add(start);
-			start = colorlessMessage.indexOf(colorlessContent, start + 1);
-		}
-		if (potentialPositions.isEmpty())
+		// BaseComponents have tree structure
+		BaseComponent[] flatComponents = flattenComponents(components);
+		ComponentSubstringData substringData = getSubstringData(flatComponents, colorlessContent);
+		if (substringData == null)
 			return null;
 
-		// BaseComponent can contain BaseComponents...
-		BaseComponent[] flattenComponents = components;
-
-		int componentStart = 0;
-		int positionIndex = 0;
-		start = potentialPositions.get(positionIndex);
 		List<BaseComponent> formatComponents = Lists.newArrayList();
 		List<BaseComponent> messageComponents = Lists.newArrayList();
 		List<Integer> messagePositions = Lists.newArrayList();
+		for (int i = 0; i < substringData.startComponentIndex; i++)
+			formatComponents.add(flatComponents[i]);
+		
+		if (substringData.startInnerIndex == 0) {
+			messageComponents.add(flatComponents[substringData.startComponentIndex]);
+		}
+		else {
+			TextComponent formatComponent = (TextComponent) flatComponents[substringData.startComponentIndex];
+			String componentText = formatComponent.getText();
+			TextComponent messageComponent = formatComponent.duplicate();
+			formatComponent.setText(componentText.substring(0, substringData.startInnerIndex));
+			messageComponent.setText(componentText.substring(substringData.startInnerIndex));
+			formatComponents.add(formatComponent);
+			messageComponents.add(messageComponent);
+		}
+		
+		messagePositions.add(formatComponents.size());
+
+		for (int i = substringData.startComponentIndex + 1; i < substringData.endComponentIndex; i++)
+			messageComponents.add(flatComponents[i]);
+
+		if (substringData.endInnerIndex == flatComponents[substringData.endComponentIndex].toPlainText().length()) {
+			messageComponents.add(flatComponents[substringData.startComponentIndex]);
+		}
+		else {
+			TextComponent formatComponent = (TextComponent) flatComponents[substringData.startComponentIndex];
+			String componentText = formatComponent.getText();
+			TextComponent messageComponent = formatComponent.duplicate();
+			messageComponent.setText(componentText.substring(0, substringData.startInnerIndex));
+			formatComponent.setText(componentText.substring(substringData.startInnerIndex));
+			formatComponents.add(formatComponent);
+			messageComponents.add(messageComponent);
+		}
+
+		for (int i = substringData.endComponentIndex + 1; i < flatComponents.length; i++)
+			formatComponents.add(flatComponents[i]);
+		
+		return new ParseResult(messageInfo, formatComponents, messageComponents, messagePositions);
+	}
+	
+	private BaseComponent[] flattenComponents(BaseComponent[] components)
+	{
+		List<BaseComponent> result = Lists.newArrayList();
+		for (BaseComponent component : components)
+			for (BaseComponent newComponent : flattenComponent(component, new TextComponent()))
+				result.add(newComponent);
+		
+		return result.toArray(new BaseComponent[0]);
+	}
+	
+	private Collection<? extends BaseComponent> flattenComponent(BaseComponent component, BaseComponent parentFormatting)
+	{
+		BaseComponent componentCopy = component.duplicate();
+		// TODO test formatting identity
+		componentCopy.copyFormatting(parentFormatting, FormatRetention.ALL, true);
+		componentCopy.copyFormatting(component, FormatRetention.ALL, false);
+		
+		Field extraField;
+		try {
+			extraField = BaseComponent.class.getDeclaredField("extra");
+			extraField.setAccessible(true);
+		} catch (NoSuchFieldException | SecurityException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		// componentCopy.setExtra(Lists.newArrayList());
+		// Invalid chat component: Unexpected empty array of components
+		try {
+			extraField.set(componentCopy, null);
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			e.printStackTrace();
+			return null;
+		}
+		List<BaseComponent> result = Lists.newArrayList(componentCopy);
+		if (component.getExtra() == null)
+			return result;
+		
+		for (BaseComponent extra : component.getExtra())
+			result.addAll(flattenComponent(extra, componentCopy));
+
+		return result;
+	}
+	
+	private ComponentSubstringData getSubstringData(BaseComponent[] flattenComponents, String substring)
+	{
+		// TODO color codes...
+		// merge plain text from consecutive TextComponents
+		// checking if plain text contains substring
+		int startComponentIndex = -1;
+		int startInnerIndex = -1;
+		int endComponentIndex = -1;
+		int endInnerIndex = -1;
 		for (int i = 0; i < flattenComponents.length; i++)
 		{
-			BaseComponent component = flattenComponents[i];
-			String componentText = component.toPlainText();
-			int componentLength = componentText.length();
-			int componentEnd = componentStart + componentLength;
-			if (componentEnd < start) {
-				componentStart = componentEnd;
+			if (!(flattenComponents[i] instanceof TextComponent)) {
 				continue;
 			}
 			
-			// check if current component is valid beginning
-			while (componentStart <= start && start < componentEnd)
-			{
-				boolean isValid = component instanceof TextComponent;
-				int sumLength = componentEnd - start;
-				for (int j = i + 1; j < flattenComponents.length && sumLength < colorlessContent.length() && isValid; j++)
-				{
-					if (!(flattenComponents[j] instanceof TextComponent)) {
-						isValid = false;
-						break;
-					}
-					sumLength += flattenComponents[j].toPlainText().length();
+			StringBuilder text = new StringBuilder();
+			while (i < flattenComponents.length && flattenComponents[i] instanceof TextComponent) {
+				String componentText = flattenComponents[i].toPlainText();
+				text.append(componentText);
+				int startIndex = text.indexOf(substring);
+				if (startIndex >= 0) {
+					endComponentIndex = i;
+					endInnerIndex = componentText.length() - (text.length() - (startIndex + substring.length()));
+					break;
 				}
-				if (!isValid)
-				{
-					positionIndex++;
-					if (positionIndex < potentialPositions.size()) {
-						start = potentialPositions.get(positionIndex);
-					}
-					else {
-						start = colorlessMessage.length();
-					}
-				}
+				i++;
 			}
-			
-			// add format component
-			if (componentStart < start)
+			if (endComponentIndex >= 0)
 			{
-				TextComponent newComponent;
-				int textEnd = Math.min(componentLength, start - componentStart);
-				if (textEnd == componentLength) {
-					newComponent = (TextComponent) component;
+				int remainingLength = substring.length() - endInnerIndex;
+				if (remainingLength <= 0) {
+					startComponentIndex = i;
+					startInnerIndex = -remainingLength;
 				}
 				else {
-					String newText = componentText.substring(0, textEnd);
-					newComponent = ((TextComponent) component).duplicate();
-					newComponent.setText(newText);
+					while (i >= 0) {
+						i--;
+						int componentLength = flattenComponents[i].toPlainText().length();
+						remainingLength -= componentLength;
+						if (remainingLength <= 0) {
+							startComponentIndex = i;
+							startInnerIndex = -remainingLength;
+							break;
+						}
+					}
 				}
-				formatComponents.add(newComponent);
+				break;
 			}
-			if (componentStart <= start && start < componentEnd) // TODO test < or <=
-			{
-				messagePositions.add(formatComponents.size());
-			}
-			
-			int end = start + colorlessContent.length();
-			int textStart = Math.max(0, start - componentStart);
-			int textEnd = Math.min(componentLength, end - componentStart);
-			TextComponent newComponent;
-			if (textStart == 0 && textEnd == componentLength) {
-				newComponent = (TextComponent) component;
-			}
-			else {
-				String newText = componentText.substring(textStart, textEnd);
-				newComponent = ((TextComponent) component).duplicate();
-				newComponent.setText(newText);
-			}
-			messageComponents.add(newComponent);
-
-			componentStart = componentEnd;
 		}
+		if (startComponentIndex < 0)
+			return null;
 		
-		return new ParseResult(messageInfo, formatComponents, messageComponents, messagePositions);
+		return new ComponentSubstringData(startComponentIndex, startInnerIndex, endComponentIndex, endInnerIndex);
 	}
 	
 	private static class ParseResult
 	{
 		public final MessageInfo messageInfo;
-		public final Iterable<BaseComponent> formatComponents;
-		public final Iterable<BaseComponent> messageComponents;
-		public final Iterable<Integer> messagePositions;
+		public final Collection<? extends BaseComponent> formatComponents;
+		public final Collection<? extends BaseComponent> messageComponents;
+		public final Collection<? extends Integer> messagePositions;
 		
 		public ParseResult(
 				MessageInfo messageInfo,
-				Iterable<BaseComponent> formatComponents,
-				Iterable<BaseComponent> messageComponents,
-				Iterable<Integer> messagePositions)
+				Collection<? extends BaseComponent> formatComponents,
+				Collection<? extends BaseComponent> messageComponents,
+				Collection<? extends Integer> messagePositions)
 		{
 			this.messageInfo = messageInfo;
 			this.formatComponents = formatComponents;
 			this.messageComponents = messageComponents;
 			this.messagePositions = messagePositions;
+		}
+	}
+	
+	private static class ComponentSubstringData
+	{
+		public final int startComponentIndex;
+		public final int startInnerIndex;
+		public final int endComponentIndex;
+		public final int endInnerIndex;
+		
+		public ComponentSubstringData(int startComponentIndex, int startInnerIndex,int endComponentIndex, int endInnerIndex) {
+			this.startComponentIndex = startComponentIndex;
+			this.startInnerIndex = startInnerIndex;
+			this.endComponentIndex = endComponentIndex;
+			this.endInnerIndex = endInnerIndex;
 		}
 	}
 }
