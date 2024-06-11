@@ -18,6 +18,7 @@ import com.festp.messaging.Chatter;
 import com.google.common.collect.Lists;
 
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
 
 public class ChatPacketListener extends PacketAdapter
@@ -92,37 +93,151 @@ public class ChatPacketListener extends PacketAdapter
     		return;
     	
     	String rawJson = event.getPacket().getStrings().read(0);
-		BaseComponent[] components = ComponentSerializer.parse(rawJson);
-
-		String legacy = BaseComponent.toLegacyText(components);
-		MessageInfo messageInfo = tryGetMessageInfo(legacy);
-		if (messageInfo == null || !messageInfo.recipients.contains(event.getPlayer()))
-			return;
-
-		List<BaseComponent> messageComponents = Lists.newArrayList();
-		// find first message content matching in components (strip colors just in case)
-		// add its components
+    	ParseResult parseResult = parseMessage(rawJson);
+    	if (parseResult == null)
+    		return;
 		
-		List<Integer> messagePositions = Lists.newArrayList();
-		List<BaseComponent> formatComponents = Lists.newArrayList();
-		// find all occurrences of message content
-		// cut it, but remember indices to insert it back
-		
-		boolean sent = chatter.sendIntercepted(messageInfo.sender, event.getPlayer(), formatComponents, messagePositions, messageComponents);
+		boolean sent = chatter.sendIntercepted(parseResult.messageInfo.sender, event.getPlayer(),
+											   parseResult.formatComponents, parseResult.messagePositions, parseResult.messageComponents);
 		if (sent)
 			event.setCancelled(true);
 	}
-
-	private MessageInfo tryGetMessageInfo(String message)
-	{
-		String colorlessMessage = ChatColor.stripColor(message);
-		MessageInfo[] recentMessages = messageInfoProvider.getRecentMessages();
-		for (MessageInfo messageInfo : recentMessages)
+	
+	private ParseResult parseMessage(String rawJson)
+	{ 
+		BaseComponent[] components = ComponentSerializer.parse(rawJson);
+		for (MessageInfo messageInfo : messageInfoProvider.getRecentMessages())
 		{
-			if (!colorlessMessage.contains(ChatColor.stripColor(messageInfo.content))) continue;
-			if (!colorlessMessage.contains(ChatColor.stripColor(messageInfo.sender.getDisplayName()))) continue;
-			return messageInfo;
+			ParseResult result = tryParse(messageInfo, components);
+			if (result != null)
+				return result;
 		}
 		return null;
+	}
+
+	private ParseResult tryParse(MessageInfo messageInfo, BaseComponent[] components)
+	{
+		String colorlessMessage = BaseComponent.toPlainText(components);
+		String colorlessSender = ChatColor.stripColor(messageInfo.sender.getDisplayName());
+		String colorlessContent = ChatColor.stripColor(messageInfo.content);
+		if (!colorlessMessage.contains(colorlessSender))
+			return null;
+		
+		if (!colorlessMessage.contains(colorlessContent))
+			return null;
+
+		List<Integer> potentialPositions = Lists.newArrayList();
+		int start = colorlessMessage.indexOf(colorlessContent);
+		while (start >= 0)
+		{
+			potentialPositions.add(start);
+			start = colorlessMessage.indexOf(colorlessContent, start + 1);
+		}
+		if (potentialPositions.isEmpty())
+			return null;
+
+		// BaseComponent can contain BaseComponents...
+		BaseComponent[] flattenComponents = components;
+
+		int componentStart = 0;
+		int positionIndex = 0;
+		start = potentialPositions.get(positionIndex);
+		List<BaseComponent> formatComponents = Lists.newArrayList();
+		List<BaseComponent> messageComponents = Lists.newArrayList();
+		List<Integer> messagePositions = Lists.newArrayList();
+		for (int i = 0; i < flattenComponents.length; i++)
+		{
+			BaseComponent component = flattenComponents[i];
+			String componentText = component.toPlainText();
+			int componentLength = componentText.length();
+			int componentEnd = componentStart + componentLength;
+			if (componentEnd < start) {
+				componentStart = componentEnd;
+				continue;
+			}
+			
+			// check if current component is valid beginning
+			while (componentStart <= start && start < componentEnd)
+			{
+				boolean isValid = component instanceof TextComponent;
+				int sumLength = componentEnd - start;
+				for (int j = i + 1; j < flattenComponents.length && sumLength < colorlessContent.length() && isValid; j++)
+				{
+					if (!(flattenComponents[j] instanceof TextComponent)) {
+						isValid = false;
+						break;
+					}
+					sumLength += flattenComponents[j].toPlainText().length();
+				}
+				if (!isValid)
+				{
+					positionIndex++;
+					if (positionIndex < potentialPositions.size()) {
+						start = potentialPositions.get(positionIndex);
+					}
+					else {
+						start = colorlessMessage.length();
+					}
+				}
+			}
+			
+			// add format component
+			if (componentStart < start)
+			{
+				TextComponent newComponent;
+				int textEnd = Math.min(componentLength, start - componentStart);
+				if (textEnd == componentLength) {
+					newComponent = (TextComponent) component;
+				}
+				else {
+					String newText = componentText.substring(0, textEnd);
+					newComponent = ((TextComponent) component).duplicate();
+					newComponent.setText(newText);
+				}
+				formatComponents.add(newComponent);
+			}
+			if (componentStart <= start && start < componentEnd) // TODO test < or <=
+			{
+				messagePositions.add(formatComponents.size());
+			}
+			
+			int end = start + colorlessContent.length();
+			int textStart = Math.max(0, start - componentStart);
+			int textEnd = Math.min(componentLength, end - componentStart);
+			TextComponent newComponent;
+			if (textStart == 0 && textEnd == componentLength) {
+				newComponent = (TextComponent) component;
+			}
+			else {
+				String newText = componentText.substring(textStart, textEnd);
+				newComponent = ((TextComponent) component).duplicate();
+				newComponent.setText(newText);
+			}
+			messageComponents.add(newComponent);
+
+			componentStart = componentEnd;
+		}
+		
+		return new ParseResult(messageInfo, formatComponents, messageComponents, messagePositions);
+	}
+	
+	private static class ParseResult
+	{
+		public final MessageInfo messageInfo;
+		public final Iterable<BaseComponent> formatComponents;
+		public final Iterable<BaseComponent> messageComponents;
+		public final Iterable<Integer> messagePositions;
+		
+		public ParseResult(
+				MessageInfo messageInfo,
+				Iterable<BaseComponent> formatComponents,
+				Iterable<BaseComponent> messageComponents,
+				Iterable<Integer> messagePositions)
+		{
+			this.messageInfo = messageInfo;
+			this.formatComponents = formatComponents;
+			this.messageComponents = messageComponents;
+			this.messagePositions = messagePositions;
+		}
 	}
 }
