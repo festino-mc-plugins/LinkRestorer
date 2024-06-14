@@ -65,6 +65,7 @@ public class ChatPacketListener extends PacketAdapter
 			// according to https://www.wiki.vg/Protocol#Player_Chat_Message
 			// a is String message, b is Instant timestamp, c is long salt, d is LastSeenMessages
 	        Object signedMessageBody = event.getPacket().getModifier().readSafely(3);
+			// TODO optimize reflection
 			Field contentField = signedMessageBody.getClass().getDeclaredField("a");
 			contentField.setAccessible(true);
 	    	messageContent = contentField.get(signedMessageBody).toString();
@@ -117,7 +118,7 @@ public class ChatPacketListener extends PacketAdapter
 		return null;
 	}
 
-	private ParseResult tryParse(MessageInfo messageInfo, BaseComponent[] components)
+	private static ParseResult tryParse(MessageInfo messageInfo, BaseComponent[] components)
 	{
 		// assumption: sender name could not be a parsable component (no need to distinguish between sender and content)
 		// assumption: format has only one content specifier
@@ -136,41 +137,28 @@ public class ChatPacketListener extends PacketAdapter
 		if (substringData == null)
 			return null;
 
+		int messageComponentLength = flatComponents[substringData.startComponentIndex].toPlainText().length();
 		List<BaseComponent> formatComponents = Lists.newArrayList();
 		List<BaseComponent> messageComponents = Lists.newArrayList();
 		List<Integer> messagePositions = Lists.newArrayList();
 		for (int i = 0; i < substringData.startComponentIndex; i++)
 			formatComponents.add(flatComponents[i]);
 		
-		if (substringData.startInnerIndex == 0) {
-			messageComponents.add(flatComponents[substringData.startComponentIndex]);
-		}
-		else {
-			TextComponent formatComponent = (TextComponent) flatComponents[substringData.startComponentIndex];
-			String componentText = formatComponent.getText();
-			TextComponent messageComponent = formatComponent.duplicate();
-			formatComponent.setText(componentText.substring(0, substringData.startInnerIndex));
-			messageComponent.setText(componentText.substring(substringData.startInnerIndex));
-			formatComponents.add(formatComponent);
-			messageComponents.add(messageComponent);
-		}
+		splitComponent(flatComponents[substringData.startComponentIndex], substringData.startInnerIndex, formatComponents, messageComponents);
 		
 		messagePositions.add(formatComponents.size());
 
 		for (int i = substringData.startComponentIndex + 1; i < substringData.endComponentIndex; i++)
 			messageComponents.add(flatComponents[i]);
 
-		if (substringData.endInnerIndex == flatComponents[substringData.endComponentIndex].toPlainText().length()) {
-			messageComponents.add(flatComponents[substringData.startComponentIndex]);
+		if (substringData.startComponentIndex == substringData.endComponentIndex) {
+			BaseComponent componentPart = messageComponents.remove(messageComponents.size() - 1);
+			// component text could be prefixed by color codes
+			int index = componentPart.toPlainText().length() - (messageComponentLength - substringData.endInnerIndex);
+			splitComponent(componentPart, index, messageComponents, formatComponents);
 		}
 		else {
-			TextComponent formatComponent = (TextComponent) flatComponents[substringData.startComponentIndex];
-			String componentText = formatComponent.getText();
-			TextComponent messageComponent = formatComponent.duplicate();
-			messageComponent.setText(componentText.substring(0, substringData.startInnerIndex));
-			formatComponent.setText(componentText.substring(substringData.startInnerIndex));
-			formatComponents.add(formatComponent);
-			messageComponents.add(messageComponent);
+			splitComponent(flatComponents[substringData.endComponentIndex], substringData.endInnerIndex, messageComponents, formatComponents);
 		}
 
 		for (int i = substringData.endComponentIndex + 1; i < flatComponents.length; i++)
@@ -179,7 +167,40 @@ public class ChatPacketListener extends PacketAdapter
 		return new ParseResult(messageInfo, formatComponents, messageComponents, messagePositions);
 	}
 	
-	private BaseComponent[] flattenComponents(BaseComponent[] components)
+	private static void splitComponent(BaseComponent component, int index, List<BaseComponent> left, List<BaseComponent> right)
+	{
+		if (index == 0) {
+			right.add(component);
+		}
+		else if (index == component.toPlainText().length()) {
+			left.add(component);
+		}
+		else {
+			TextComponent leftComponent = (TextComponent) component;
+			String componentText = leftComponent.getText();
+			String leftText = componentText.substring(0, index);
+			leftComponent.setText(leftText);
+			left.add(leftComponent);
+			
+			TextComponent rightComponent = leftComponent.duplicate();
+			StringBuilder colorCodes = new StringBuilder();
+			for (int i = 0; i < leftText.length(); i++)
+			{
+				if (leftText.charAt(i) == ChatColor.COLOR_CHAR) {
+					colorCodes.append(leftText.charAt(i));
+					i++;
+					if (i < leftText.length())
+						colorCodes.append(leftText.charAt(i));
+					
+					continue;
+				}
+			}
+			rightComponent.setText(colorCodes + componentText.substring(index));
+			right.add(rightComponent);
+		}
+	}
+	
+	private static BaseComponent[] flattenComponents(BaseComponent[] components)
 	{
 		List<BaseComponent> result = Lists.newArrayList();
 		for (BaseComponent component : components)
@@ -189,30 +210,14 @@ public class ChatPacketListener extends PacketAdapter
 		return result.toArray(new BaseComponent[0]);
 	}
 	
-	private Collection<? extends BaseComponent> flattenComponent(BaseComponent component, BaseComponent parentFormatting)
+	private static Collection<? extends BaseComponent> flattenComponent(BaseComponent component, BaseComponent parentFormatting)
 	{
 		BaseComponent componentCopy = component.duplicate();
-		// TODO test formatting identity
+		// TODO test identity of formatting
 		componentCopy.copyFormatting(parentFormatting, FormatRetention.ALL, true);
 		componentCopy.copyFormatting(component, FormatRetention.ALL, false);
-		
-		Field extraField;
-		try {
-			extraField = BaseComponent.class.getDeclaredField("extra");
-			extraField.setAccessible(true);
-		} catch (NoSuchFieldException | SecurityException e) {
-			e.printStackTrace();
-			return null;
-		}
+		resetExtra(componentCopy);
 
-		// componentCopy.setExtra(Lists.newArrayList());
-		// Invalid chat component: Unexpected empty array of components
-		try {
-			extraField.set(componentCopy, null);
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			e.printStackTrace();
-			return null;
-		}
 		List<BaseComponent> result = Lists.newArrayList(componentCopy);
 		if (component.getExtra() == null)
 			return result;
@@ -223,15 +228,39 @@ public class ChatPacketListener extends PacketAdapter
 		return result;
 	}
 	
-	private ComponentSubstringData getSubstringData(BaseComponent[] flattenComponents, String substring)
+	private static void resetExtra(BaseComponent component)
 	{
-		// TODO color codes...
+		// could not just
+		// 1. componentCopy.setExtra(Lists.newArrayList());
+		// causes Invalid chat component: Unexpected empty array of components
+		// 2. componentCopy.setExtra(null);
+		// throws NullPointerException
+		// TODO optimize reflection
+		Field extraField;
+		try {
+			extraField = BaseComponent.class.getDeclaredField("extra");
+			extraField.setAccessible(true);
+		} catch (NoSuchFieldException | SecurityException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		try {
+			extraField.set(component, null);
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static ComponentSubstringData getSubstringData(BaseComponent[] flattenComponents, String colorlessSubstring)
+	{
 		// merge plain text from consecutive TextComponents
 		// checking if plain text contains substring
 		int startComponentIndex = -1;
 		int startInnerIndex = -1;
 		int endComponentIndex = -1;
 		int endInnerIndex = -1;
+		int substringLength = 0;
 		for (int i = 0; i < flattenComponents.length; i++)
 		{
 			if (!(flattenComponents[i] instanceof TextComponent)) {
@@ -242,17 +271,18 @@ public class ChatPacketListener extends PacketAdapter
 			while (i < flattenComponents.length && flattenComponents[i] instanceof TextComponent) {
 				String componentText = flattenComponents[i].toPlainText();
 				text.append(componentText);
-				int startIndex = text.indexOf(substring);
-				if (startIndex >= 0) {
+				SubstringBounds substringBounds = indexOfColorCoded(text.toString(), colorlessSubstring);
+				if (substringBounds != null) {
 					endComponentIndex = i;
-					endInnerIndex = componentText.length() - (text.length() - (startIndex + substring.length()));
+					endInnerIndex = componentText.length() - (text.length() - substringBounds.end);
+					substringLength = substringBounds.end - substringBounds.begin;
 					break;
 				}
 				i++;
 			}
 			if (endComponentIndex >= 0)
 			{
-				int remainingLength = substring.length() - endInnerIndex;
+				int remainingLength = substringLength - endInnerIndex;
 				if (remainingLength <= 0) {
 					startComponentIndex = i;
 					startInnerIndex = -remainingLength;
@@ -278,6 +308,39 @@ public class ChatPacketListener extends PacketAdapter
 		return new ComponentSubstringData(startComponentIndex, startInnerIndex, endComponentIndex, endInnerIndex);
 	}
 	
+	private static SubstringBounds indexOfColorCoded(String text, String colorlessSubstring)
+	{
+		String colorlessText = ChatColor.stripColor(text.toString());
+		int toSkip = colorlessText.indexOf(colorlessSubstring);
+		if (toSkip < 0)
+			return null;
+		
+		int actualStart = 0;
+		while (toSkip > 0)
+		{
+			if (text.charAt(actualStart) == ChatColor.COLOR_CHAR) {
+				actualStart += 2;
+				continue;
+			}
+			toSkip--;
+			actualStart++;
+		}
+		
+		int actualEnd = actualStart;
+		toSkip = colorlessSubstring.length();
+		while (toSkip > 0)
+		{
+			if (text.charAt(actualEnd) == ChatColor.COLOR_CHAR) {
+				actualEnd += 2;
+				continue;
+			}
+			toSkip--;
+			actualEnd++;
+		}
+		
+		return new SubstringBounds(actualStart, actualEnd);
+	}
+	
 	private static class ParseResult
 	{
 		public final MessageInfo messageInfo;
@@ -295,6 +358,17 @@ public class ChatPacketListener extends PacketAdapter
 			this.formatComponents = formatComponents;
 			this.messageComponents = messageComponents;
 			this.messagePositions = messagePositions;
+		}
+	}
+	
+	private static class SubstringBounds
+	{
+		public final int begin;
+		public final int end;
+		
+		public SubstringBounds(int begin, int end) {
+			this.begin = begin;
+			this.end = end;
 		}
 	}
 	
