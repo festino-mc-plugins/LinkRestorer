@@ -10,9 +10,9 @@ public interface StyledMessageBuilder
 	
 	public void clear();
 	
-	public TheStyledMessageBuilder appendSplitting(String text);
+	public StyledMessageBuilder appendSplitting(String text);
 	
-	public TheStyledMessageBuilder appendSplitting(String text, Collection<StyleAttribute> additionalAttributes);
+	public StyledMessageBuilder appendSplitting(String text, Collection<StyleAttribute> additionalAttributes);
 
-	public TheStyledMessageBuilder append(String text);
+	public StyledMessageBuilder append(String text);
 }
