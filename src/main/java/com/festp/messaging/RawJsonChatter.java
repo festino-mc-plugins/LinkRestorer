@@ -218,8 +218,8 @@ public class RawJsonChatter implements Chatter
 			name = getDisplayName(sender);
 
 		if (sender instanceof Player) {
-			MentionedPlayer playerComponent = new MentionedPlayer((Player) sender, ChatColor.stripColor(name));
-			builder.appendSplitting(name, Lists.newArrayList(playerComponent));
+			MentionedPlayer playerAttribute = new MentionedPlayer((Player) sender, ChatColor.stripColor(name));
+			builder.appendSplitting(name, Lists.newArrayList(playerAttribute));
 		} else {
 			builder.appendSplitting(name);
 		}

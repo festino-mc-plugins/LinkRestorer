@@ -168,9 +168,9 @@ class ClosableStyledMessage
 	}
 	
 	
-	private List<StyleAttribute> mergeStyles(List<StyleAttribute> oldStyle, List<StyleAttribute> newComponents) {
+	private List<StyleAttribute> mergeStyles(List<StyleAttribute> oldStyle, List<StyleAttribute> newAttributes) {
 		List<StyleAttribute> newStyle = Lists.newArrayList(oldStyle);
-		for (StyleAttribute newAttribute : newComponents)
+		for (StyleAttribute newAttribute : newAttributes)
 		{
 			if (!(newAttribute instanceof UpdatableStyleAttribute)) {
 				newStyle.add(newAttribute);

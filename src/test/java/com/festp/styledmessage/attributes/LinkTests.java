@@ -1,4 +1,4 @@
-package com.festp.styledmessage.components;
+package com.festp.styledmessage.attributes;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
