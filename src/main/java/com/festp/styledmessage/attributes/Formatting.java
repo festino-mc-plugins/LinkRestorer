@@ -1,6 +1,10 @@
 package com.festp.styledmessage.attributes;
 
-import org.bukkit.ChatColor;
+import java.util.List;
+
+import com.google.common.collect.Lists;
+
+import net.md_5.bungee.api.ChatColor;
 
 public class Formatting implements UpdatableStyleAttribute
 {
@@ -101,11 +105,24 @@ public class Formatting implements UpdatableStyleAttribute
 				res.append("\"obfuscated\":\"true\",");
 			else if (c != ChatColor.RESET && !isRgbColor()) {
 				res.append("\"color\":\"");
-				res.append(c.name().toLowerCase());
+				res.append(c.getName().toLowerCase());
 				res.append("\",");
 			}
 		}
 		return res.toString();
+	}
+
+	public List<ChatColor> getChatColors() {
+		List<ChatColor> colors = Lists.newArrayList();
+		if (isRgbColor())
+			colors.add(ChatColor.of(color));
+		
+		String styleStr = getCodes();
+		for (int i = 1; i < styleStr.length(); i += 2)
+		{
+			colors.add(ChatColor.getByChar(styleStr.charAt(i)));
+		}
+		return colors;
 	}
 	
 	private boolean isRgbColor()

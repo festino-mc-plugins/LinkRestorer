@@ -128,8 +128,21 @@ public class ChatComponentBuilder
 		if (formatting.getHexColor() != null)
 			component.setColor(ChatColor.of(formatting.getHexColor()));
 		
-		//if (applyCodes)
-		//	component.setColor(ChatColor.of(formatting.getCodes()));
+		if (applyCodes)
+			for (ChatColor c : formatting.getChatColors()) {
+				if (c == ChatColor.BOLD)
+					component.setBold(true);
+				else if (c == ChatColor.STRIKETHROUGH)
+					component.setStrikethrough(true);
+				else if (c == ChatColor.ITALIC)
+					component.setItalic(true);
+				else if (c == ChatColor.MAGIC)
+					component.setObfuscated(true);
+				else if (c == ChatColor.UNDERLINE)
+					component.setUnderlined(true);
+				else
+					component.setColor(c);
+			}
 	}
 	
 	private boolean setLink(BaseComponent component, Link link)
