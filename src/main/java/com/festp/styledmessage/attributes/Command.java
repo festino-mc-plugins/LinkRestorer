@@ -1,4 +1,4 @@
-package com.festp.styledmessage.components;
+package com.festp.styledmessage.attributes;
 
 public class Command implements StyleAttribute
 {

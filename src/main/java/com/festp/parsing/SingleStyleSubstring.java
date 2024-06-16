@@ -2,7 +2,7 @@ package com.festp.parsing;
 
 import java.util.List;
 
-import com.festp.styledmessage.components.StyleAttribute;
+import com.festp.styledmessage.attributes.StyleAttribute;
 
 public class SingleStyleSubstring {
 	public final int beginIndex;

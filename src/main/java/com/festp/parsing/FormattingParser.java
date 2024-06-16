@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.bukkit.ChatColor;
 
-import com.festp.styledmessage.components.Formatting;
+import com.festp.styledmessage.attributes.Formatting;
 import com.google.common.collect.Lists;
 
 public class FormattingParser implements StyleParser

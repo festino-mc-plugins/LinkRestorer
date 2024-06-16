@@ -2,7 +2,7 @@ package com.festp.styledmessage;
 
 import java.util.List;
 
-import com.festp.styledmessage.components.StyleAttribute;
+import com.festp.styledmessage.attributes.StyleAttribute;
 
 public class SingleStyleMessage {
 	private final String plainText;

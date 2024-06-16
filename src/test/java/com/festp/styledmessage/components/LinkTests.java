@@ -3,7 +3,7 @@ package com.festp.styledmessage.components;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.festp.styledmessage.components.Link;
+import com.festp.styledmessage.attributes.Link;
 
 class LinkTests {
 	@Test

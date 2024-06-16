@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.festp.parsing.StyleParser;
 import com.festp.styledmessage.ClosableStyledMessage.ClosableStyledMessagePart;
-import com.festp.styledmessage.components.StyleAttribute;
+import com.festp.styledmessage.attributes.StyleAttribute;
 import com.google.common.collect.Lists;
 
 public class TheStyledMessageBuilder implements StyledMessageBuilder

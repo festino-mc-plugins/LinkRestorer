@@ -1,4 +1,4 @@
-package com.festp.styledmessage.components;
+package com.festp.styledmessage.attributes;
 
 public interface UpdatableStyleAttribute extends StyleAttribute
 {

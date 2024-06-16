@@ -4,12 +4,12 @@ import java.util.List;
 
 import com.festp.styledmessage.SingleStyleMessage;
 import com.festp.styledmessage.StyledMessage;
-import com.festp.styledmessage.components.Command;
-import com.festp.styledmessage.components.CopyableText;
-import com.festp.styledmessage.components.Link;
-import com.festp.styledmessage.components.MentionedPlayer;
-import com.festp.styledmessage.components.StyleAttribute;
-import com.festp.styledmessage.components.Formatting;
+import com.festp.styledmessage.attributes.Command;
+import com.festp.styledmessage.attributes.CopyableText;
+import com.festp.styledmessage.attributes.Formatting;
+import com.festp.styledmessage.attributes.Link;
+import com.festp.styledmessage.attributes.MentionedPlayer;
+import com.festp.styledmessage.attributes.StyleAttribute;
 import com.festp.utils.LinkUtils;
 import com.google.common.collect.Lists;
 

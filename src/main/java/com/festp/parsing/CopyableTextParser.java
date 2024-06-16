@@ -3,9 +3,9 @@ package com.festp.parsing;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.festp.styledmessage.components.Command;
-import com.festp.styledmessage.components.CopyableText;
-import com.festp.styledmessage.components.StyleAttribute;
+import com.festp.styledmessage.attributes.Command;
+import com.festp.styledmessage.attributes.CopyableText;
+import com.festp.styledmessage.attributes.StyleAttribute;
 import com.festp.utils.CommandValidator;
 import com.google.common.collect.Lists;
 

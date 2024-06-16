@@ -11,7 +11,7 @@ import org.mockito.Mockito;
 import com.festp.styledmessage.SingleStyleMessage;
 import com.festp.styledmessage.StyledMessage;
 import com.festp.styledmessage.TheStyledMessageBuilder;
-import com.festp.styledmessage.components.StyleAttribute;
+import com.festp.styledmessage.attributes.StyleAttribute;
 import com.google.common.collect.Lists;
 
 class StyledMessageBuilderTests

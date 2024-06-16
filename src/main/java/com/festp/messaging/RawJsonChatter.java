@@ -17,10 +17,10 @@ import com.festp.styledmessage.SingleStyleMessage;
 import com.festp.styledmessage.StyledMessage;
 import com.festp.styledmessage.StyledMessageBuilder;
 import com.festp.styledmessage.StyledMessageBuilderFactory;
-import com.festp.styledmessage.components.Link;
-import com.festp.styledmessage.components.MentionedPlayer;
-import com.festp.styledmessage.components.StyleAttribute;
-import com.festp.styledmessage.components.Formatting;
+import com.festp.styledmessage.attributes.Formatting;
+import com.festp.styledmessage.attributes.Link;
+import com.festp.styledmessage.attributes.MentionedPlayer;
+import com.festp.styledmessage.attributes.StyleAttribute;
 import com.google.common.collect.Lists;
 
 import net.md_5.bungee.api.chat.BaseComponent;

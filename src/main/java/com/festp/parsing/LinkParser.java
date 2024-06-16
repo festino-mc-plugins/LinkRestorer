@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.festp.styledmessage.components.Link;
-import com.festp.styledmessage.components.StyleAttribute;
+import com.festp.styledmessage.attributes.Link;
+import com.festp.styledmessage.attributes.StyleAttribute;
 import com.google.common.collect.Lists;
 
 public class LinkParser implements StyleParser {

@@ -8,7 +8,7 @@ import org.mockito.Mockito;
 
 import com.festp.parsing.SingleStyleSubstring;
 import com.festp.styledmessage.ClosableStyledMessage.ClosableStyledMessagePart;
-import com.festp.styledmessage.components.StyleAttribute;
+import com.festp.styledmessage.attributes.StyleAttribute;
 import com.festp.styledmessage.SingleStyleMessage;
 import com.google.common.collect.Lists;
 

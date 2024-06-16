@@ -8,9 +8,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.festp.styledmessage.SingleStyleMessage;
 import com.festp.styledmessage.StyledMessage;
-import com.festp.styledmessage.components.Command;
-import com.festp.styledmessage.components.Link;
-import com.festp.styledmessage.components.Formatting;
+import com.festp.styledmessage.attributes.Command;
+import com.festp.styledmessage.attributes.Formatting;
+import com.festp.styledmessage.attributes.Link;
 import com.google.common.collect.Lists;
 
 class RawJsonBuilderTests {

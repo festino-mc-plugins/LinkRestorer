@@ -3,10 +3,10 @@ package com.festp.parsing;
 import org.bukkit.ChatColor;
 import org.junit.jupiter.api.Assertions;
 
-import com.festp.styledmessage.components.Command;
-import com.festp.styledmessage.components.CopyableText;
-import com.festp.styledmessage.components.Link;
-import com.festp.styledmessage.components.Formatting;
+import com.festp.styledmessage.attributes.Command;
+import com.festp.styledmessage.attributes.CopyableText;
+import com.festp.styledmessage.attributes.Formatting;
+import com.festp.styledmessage.attributes.Link;
 
 class SingleStyleSubstringHelpers
 {

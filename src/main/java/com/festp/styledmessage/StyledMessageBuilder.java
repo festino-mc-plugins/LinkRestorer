@@ -2,7 +2,7 @@ package com.festp.styledmessage;
 
 import java.util.Collection;
 
-import com.festp.styledmessage.components.StyleAttribute;
+import com.festp.styledmessage.attributes.StyleAttribute;
 
 public interface StyledMessageBuilder
 {

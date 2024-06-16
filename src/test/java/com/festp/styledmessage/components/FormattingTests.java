@@ -7,7 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import com.festp.styledmessage.components.Formatting;
+import com.festp.styledmessage.attributes.Formatting;
 
 class FormattingTests {
 

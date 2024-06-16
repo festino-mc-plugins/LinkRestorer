@@ -3,8 +3,8 @@ package com.festp.styledmessage;
 import java.util.List;
 
 import com.festp.parsing.SingleStyleSubstring;
-import com.festp.styledmessage.components.StyleAttribute;
-import com.festp.styledmessage.components.UpdatableStyleAttribute;
+import com.festp.styledmessage.attributes.StyleAttribute;
+import com.festp.styledmessage.attributes.UpdatableStyleAttribute;
 import com.google.common.collect.Lists;
 
 class ClosableStyledMessage
