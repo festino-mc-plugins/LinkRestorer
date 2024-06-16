@@ -7,7 +7,7 @@ import org.bukkit.permissions.Permissible;
 import com.festp.config.Config;
 import com.festp.config.Config.Key;
 import com.festp.parsing.CommandParser;
-import com.festp.parsing.ComponentParser;
+import com.festp.parsing.StyleParser;
 import com.festp.parsing.CopyableTextParser;
 import com.festp.parsing.LinkParser;
 import com.festp.parsing.TextStyleParser;
@@ -36,9 +36,9 @@ public class TheStyledMessageBuilderFactory implements StyledMessageBuilderFacto
 		boolean useIpLinks = config.get(Key.ENABLE_IP_LINKS, false) && user.hasPermission(PERMISSION_IP_LINKS);
 		boolean useCommands = config.get(Key.ENABLE_COMMANDS, false) && user.hasPermission(PERMISSION_COMMANDS);
 		boolean useCopyableText = config.get(Key.ENABLE_COPYABLE_TEXT, false) && user.hasPermission(PERMISSION_COPYABLE_TEXT);
-		List<ComponentParser> globalParsers = Lists.newArrayList(getTextStyleParser());
+		List<StyleParser> globalParsers = Lists.newArrayList(getTextStyleParser());
 		
-		List<ComponentParser> splittingParsers = Lists.newArrayList();
+		List<StyleParser> splittingParsers = Lists.newArrayList();
 		if (useCommands || useCopyableText)
 			splittingParsers.add(getCopyableTextParser(useCommands, useCopyableText));
 		if (useLinks || useIpLinks)
@@ -49,24 +49,24 @@ public class TheStyledMessageBuilderFactory implements StyledMessageBuilderFacto
 		return new TheStyledMessageBuilder(globalParsers, splittingParsers);
 	}
 	
-	private ComponentParser getTextStyleParser()
+	private StyleParser getTextStyleParser()
 	{
 		return new TextStyleParser();
 	}
 	
-	private ComponentParser getCopyableTextParser(boolean useCommands, boolean useCopyableText)
+	private StyleParser getCopyableTextParser(boolean useCommands, boolean useCopyableText)
 	{
 		return new CopyableTextParser(
 				config.get(Key.COPYABLE_TEXT_BEGIN_QUOTES), config.get(Key.COPYABLE_TEXT_END_QUOTES),
 				useCommands, useCopyableText, commandValidator);
 	}
 	
-	private ComponentParser getLinkParser(boolean useLinks, boolean useIpLinks)
+	private StyleParser getLinkParser(boolean useLinks, boolean useIpLinks)
 	{
 		return new LinkParser(useLinks, useIpLinks);
 	}
 	
-	private ComponentParser getCommandParser()
+	private StyleParser getCommandParser()
 	{
 		return new CommandParser(commandValidator, config.get(Key.COMMANDS_REMOVE_STARTING_DOT, true));
 	}

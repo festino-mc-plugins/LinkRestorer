@@ -2,7 +2,7 @@ package com.festp.styledmessage.components;
 
 import org.bukkit.ChatColor;
 
-public class TextStyle implements UpdatableTextComponent {
+public class TextStyle implements UpdatableStyleAttribute {
 	private String color = "";
 	private String style = "";
 	
@@ -17,7 +17,7 @@ public class TextStyle implements UpdatableTextComponent {
 	}
 
 	/** @return the same TextStyle object for chaining */
-	public void update(UpdatableTextComponent other)
+	public void update(UpdatableStyleAttribute other)
 	{
 		if (!(other instanceof TextStyle)) return;
 		

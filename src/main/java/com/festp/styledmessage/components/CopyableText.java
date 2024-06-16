@@ -1,7 +1,7 @@
 package com.festp.styledmessage.components;
 
 
-public class CopyableText implements TextComponent
+public class CopyableText implements StyleAttribute
 {
 	private final String text;
 	

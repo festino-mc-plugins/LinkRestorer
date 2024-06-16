@@ -1,6 +1,6 @@
 package com.festp.styledmessage.components;
 
-public class Link implements TextComponent
+public class Link implements StyleAttribute
 {
 	private final String url;
 	

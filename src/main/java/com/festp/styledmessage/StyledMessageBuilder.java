@@ -2,7 +2,7 @@ package com.festp.styledmessage;
 
 import java.util.Collection;
 
-import com.festp.styledmessage.components.TextComponent;
+import com.festp.styledmessage.components.StyleAttribute;
 
 public interface StyledMessageBuilder
 {
@@ -12,7 +12,7 @@ public interface StyledMessageBuilder
 	
 	public TheStyledMessageBuilder appendSplitting(String text);
 	
-	public TheStyledMessageBuilder appendSplitting(String text, Collection<TextComponent> additionalComponents);
+	public TheStyledMessageBuilder appendSplitting(String text, Collection<StyleAttribute> additionalAttributes);
 
 	public TheStyledMessageBuilder append(String text);
 }

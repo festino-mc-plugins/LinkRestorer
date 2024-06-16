@@ -15,13 +15,13 @@ class SingleStyleSubstringHelpers
 	{
 		Assertions.assertEquals(beginIndex, substring.beginIndex);
 		Assertions.assertEquals(endIndex, substring.endIndex);
-		Assertions.assertEquals(0, substring.components.size());
+		Assertions.assertEquals(0, substring.style.size());
 	}
 	
 	public static void assertLink(SingleStyleSubstring substring, int beginIndex, int endIndex, String url)
 	{
 		assertLink(substring, beginIndex, endIndex);
-		Link link = (Link) substring.components.get(0);
+		Link link = (Link) substring.style.get(0);
 		Assertions.assertEquals(url, link.getUrl());
 	}
 	
@@ -29,38 +29,38 @@ class SingleStyleSubstringHelpers
 	{
 		Assertions.assertEquals(beginIndex, substring.beginIndex);
 		Assertions.assertEquals(endIndex, substring.endIndex);
-		Assertions.assertEquals(1, substring.components.size());
-		Assertions.assertTrue(substring.components.get(0) instanceof Link);
+		Assertions.assertEquals(1, substring.style.size());
+		Assertions.assertTrue(substring.style.get(0) instanceof Link);
 	}
 	
 	public static void assertCommand(SingleStyleSubstring substring, int beginIndex, int endIndex, String command)
 	{
 		assertCommand(substring, beginIndex, endIndex);
-		Command commandComponent = (Command) substring.components.get(0);
-		Assertions.assertEquals(command, commandComponent.getCommand());
+		Command commandAttribute = (Command) substring.style.get(0);
+		Assertions.assertEquals(command, commandAttribute.getCommand());
 	}
 	
 	public static void assertCommand(SingleStyleSubstring substring, int beginIndex, int endIndex)
 	{
 		Assertions.assertEquals(beginIndex, substring.beginIndex);
 		Assertions.assertEquals(endIndex, substring.endIndex);
-		Assertions.assertEquals(1, substring.components.size());
-		Assertions.assertTrue(substring.components.get(0) instanceof Command);
+		Assertions.assertEquals(1, substring.style.size());
+		Assertions.assertTrue(substring.style.get(0) instanceof Command);
 	}
 	
 	public static void assertCopyable(SingleStyleSubstring substring, int beginIndex, int endIndex, String copyableText)
 	{
 		assertCopyable(substring, beginIndex, endIndex);
-		CopyableText copyableComponent = (CopyableText) substring.components.get(0);
-		Assertions.assertEquals(copyableText, copyableComponent.getText());
+		CopyableText copyableAttribute = (CopyableText) substring.style.get(0);
+		Assertions.assertEquals(copyableText, copyableAttribute.getText());
 	}
 	
 	public static void assertCopyable(SingleStyleSubstring substring, int beginIndex, int endIndex)
 	{
 		Assertions.assertEquals(beginIndex, substring.beginIndex);
 		Assertions.assertEquals(endIndex, substring.endIndex);
-		Assertions.assertEquals(1, substring.components.size());
-		Assertions.assertTrue(substring.components.get(0) instanceof CopyableText);
+		Assertions.assertEquals(1, substring.style.size());
+		Assertions.assertTrue(substring.style.get(0) instanceof CopyableText);
 	}
 
 	public static void assertColor(SingleStyleSubstring substring, int beginIndex, int endIndex, ChatColor chatColor)
@@ -77,8 +77,8 @@ class SingleStyleSubstringHelpers
 	{
 		Assertions.assertEquals(beginIndex, substring.beginIndex);
 		Assertions.assertEquals(endIndex, substring.endIndex);
-		Assertions.assertEquals(1, substring.components.size());
-		TextStyle style = (TextStyle) substring.components.get(0);
+		Assertions.assertEquals(1, substring.style.size());
+		TextStyle style = (TextStyle) substring.style.get(0);
 		Assertions.assertEquals(expectedStyle.getFullJson(), style.getFullJson());
 	}
 }

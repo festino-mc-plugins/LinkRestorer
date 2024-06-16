@@ -6,10 +6,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.festp.styledmessage.components.Link;
-import com.festp.styledmessage.components.TextComponent;
+import com.festp.styledmessage.components.StyleAttribute;
 import com.google.common.collect.Lists;
 
-public class LinkParser implements ComponentParser {
+public class LinkParser implements StyleParser {
 	// TODO check telegram desktop code
 	// TextWithTags Ui::InputField::getTextWithTags, getTextWithTagsPart, getTextPart...
 	private static final String LINK_REGEX = "(((?:https?):\\/\\/)?(?:(?:[-a-z0-9_а-яА-Я]{1,}\\.){1,}([a-z0-9а-яА-Я]{1,}).*?(?=[\\.\\?!,;:]?(?:[" + String.valueOf(org.bukkit.ChatColor.COLOR_CHAR) + " \\n]|$))))";
@@ -28,8 +28,8 @@ public class LinkParser implements ComponentParser {
 	}
 
 	@Override
-	public List<SingleStyleSubstring> getComponents(String message) {
-		List<TextComponent> emptyStyle = Lists.newArrayList();
+	public List<SingleStyleSubstring> getStyles(String message) {
+		List<StyleAttribute> emptyStyle = Lists.newArrayList();
 		Matcher matcher = PATTERN.matcher(message);
 
 		int prevEnd = 0;

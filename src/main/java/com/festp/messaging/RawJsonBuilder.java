@@ -8,7 +8,7 @@ import com.festp.styledmessage.components.Command;
 import com.festp.styledmessage.components.CopyableText;
 import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.MentionedPlayer;
-import com.festp.styledmessage.components.TextComponent;
+import com.festp.styledmessage.components.StyleAttribute;
 import com.festp.styledmessage.components.TextStyle;
 import com.festp.utils.LinkUtils;
 import com.google.common.collect.Lists;
@@ -51,36 +51,36 @@ public class RawJsonBuilder
 	{
 		for (SingleStyleMessage part : styledMessage.getStyledParts())
 		{
-			List<TextComponent> components = part.getComponents();
+			List<StyleAttribute> style = part.getStyle();
 			String text = part.getText();
 			StringBuilder json = new StringBuilder();
-			// add the last components first (otherwise TextStyle may rewrite Link codes)
-			for (int i = components.size() - 1; i >= 0; i--)
+			// add the last attributes first (otherwise TextStyle may rewrite Link codes)
+			for (int i = style.size() - 1; i >= 0; i--)
 			{
-				TextComponent component = components.get(i);
-				if (component instanceof TextStyle)
+				StyleAttribute attribute = style.get(i);
+				if (attribute instanceof TextStyle)
 				{
-					appendTextStyle(json, (TextStyle) component);
-					text = ((TextStyle) component).getCodes() + text;
+					appendTextStyle(json, (TextStyle) attribute);
+					text = ((TextStyle) attribute).getCodes() + text;
 				}
-				else if (component instanceof Link)
+				else if (attribute instanceof Link)
 				{
-					appendLink(json, (Link) component);
+					appendLink(json, (Link) attribute);
 					text = String.format(settings.formatLinks, text);
 				}
-				else if (component instanceof Command)
+				else if (attribute instanceof Command)
 				{
-					appendCommand(json, (Command) component);
+					appendCommand(json, (Command) attribute);
 					text = String.format(settings.formatCommands, text);
 				}
-				else if (component instanceof CopyableText)
+				else if (attribute instanceof CopyableText)
 				{
-					appendCopyableText(json, (CopyableText) component);
+					appendCopyableText(json, (CopyableText) attribute);
 					text = String.format(settings.formatCopyableText, text);
 				}
-				else if (component instanceof MentionedPlayer)
+				else if (attribute instanceof MentionedPlayer)
 				{
-					appendPlayer(json, (MentionedPlayer) component);
+					appendPlayer(json, (MentionedPlayer) attribute);
 				}
 			}
 			tryWrap(text, json);
@@ -105,20 +105,20 @@ public class RawJsonBuilder
 	}
 	
 	/** Check for more info: <a>https://minecraft.fandom.com/wiki/Raw_JSON_text_format#Translated_Text</a> */
-	public void appendTranslated(String identifier, CharSequence[] textComponents, TextStyle style)
+	public void appendTranslated(String identifier, CharSequence[] components, TextStyle style)
 	{
 		command.append("{");
 		command.append(style.getFullJson());
 		command.append("\"translate\":\"");
 		command.append(identifier);
 		command.append("\"");
-		if (textComponents == null || textComponents.length == 0) {
+		if (components == null || components.length == 0) {
 			command.append("},");
 			return;
 		}
 		command.append(",\"with\":[");
 		int n = 0;
-		for (CharSequence component : textComponents) {
+		for (CharSequence component : components) {
 			if (n > 0)
 				command.append(',');
 			command.append(component);

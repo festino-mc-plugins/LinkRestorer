@@ -5,11 +5,11 @@ import java.util.List;
 
 import com.festp.styledmessage.components.Command;
 import com.festp.styledmessage.components.CopyableText;
-import com.festp.styledmessage.components.TextComponent;
+import com.festp.styledmessage.components.StyleAttribute;
 import com.festp.utils.CommandValidator;
 import com.google.common.collect.Lists;
 
-public class CopyableTextParser implements ComponentParser
+public class CopyableTextParser implements StyleParser
 {
 	private final boolean useCommands;
 	private final boolean useCopyableText;
@@ -27,12 +27,12 @@ public class CopyableTextParser implements ComponentParser
 	}
 	
 	@Override
-	public List<SingleStyleSubstring> getComponents(String message) {
+	public List<SingleStyleSubstring> getStyles(String message) {
 		if (beginQuotes.isEmpty() || endQuotes.isEmpty()) {
 			return Lists.newArrayList(new SingleStyleSubstring(0, message.length(), Lists.newArrayList()));
 		}
 
-		List<TextComponent> emptyStyle = Lists.newArrayList();
+		List<StyleAttribute> emptyStyle = Lists.newArrayList();
 
 		int prevEnd = 0;
 		MatchInfo match = nextMatch(message, prevEnd);
@@ -46,9 +46,9 @@ public class CopyableTextParser implements ComponentParser
 			
 			int copyableStart = match.contentStart;
 			int copyableEnd = match.contentEnd;
-			TextComponent component = getComponent(message.substring(copyableStart, copyableEnd));
-			List<TextComponent> components = component == null ? emptyStyle : Lists.newArrayList(component);
-			substrings.add(new SingleStyleSubstring(copyableStart, copyableEnd, components));
+			StyleAttribute attribute = getAttribute(message.substring(copyableStart, copyableEnd));
+			List<StyleAttribute> style = attribute == null ? emptyStyle : Lists.newArrayList(attribute);
+			substrings.add(new SingleStyleSubstring(copyableStart, copyableEnd, style));
 			
 			prevEnd = end;
 			match = nextMatch(message, prevEnd);
@@ -59,7 +59,7 @@ public class CopyableTextParser implements ComponentParser
 		return substrings;
 	}
 	
-	private TextComponent getComponent(String s)
+	private StyleAttribute getAttribute(String s)
 	{
 		int spaceIndex = s.indexOf(' ');
 		String firstPart = spaceIndex < 0 ? s : s.substring(0, spaceIndex);

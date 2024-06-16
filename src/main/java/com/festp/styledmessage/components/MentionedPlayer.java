@@ -2,7 +2,7 @@ package com.festp.styledmessage.components;
 
 import org.bukkit.entity.Player;
 
-public class MentionedPlayer implements TextComponent {
+public class MentionedPlayer implements StyleAttribute {
 	private final Player player;
 	private final String decoratedName;
 	

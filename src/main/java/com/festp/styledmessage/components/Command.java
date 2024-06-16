@@ -1,6 +1,6 @@
 package com.festp.styledmessage.components;
 
-public class Command implements TextComponent
+public class Command implements StyleAttribute
 {
 	private final String command;
 	

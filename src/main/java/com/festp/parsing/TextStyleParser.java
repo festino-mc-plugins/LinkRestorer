@@ -7,10 +7,10 @@ import org.bukkit.ChatColor;
 import com.festp.styledmessage.components.TextStyle;
 import com.google.common.collect.Lists;
 
-public class TextStyleParser implements ComponentParser
+public class TextStyleParser implements StyleParser
 {
 	@Override
-	public List<SingleStyleSubstring> getComponents(String message) {
+	public List<SingleStyleSubstring> getStyles(String message) {
 		List<SingleStyleSubstring> substrings = Lists.newArrayList();
 		TextStyle style = new TextStyle();
 		int beginIndex = 0;

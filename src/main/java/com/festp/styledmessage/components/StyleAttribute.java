@@ -1,4 +1,4 @@
 package com.festp.styledmessage.components;
 
-public interface TextComponent {
+public interface StyleAttribute {
 }

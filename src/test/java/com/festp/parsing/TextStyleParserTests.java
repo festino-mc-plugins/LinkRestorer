@@ -12,7 +12,7 @@ class TextStyleParserTests extends SingleStyleSubstringHelpers
 	void parse_Empty() {
 		TextStyleParser parser = new TextStyleParser();
 		
-		List<SingleStyleSubstring> substrings = parser.getComponents("");
+		List<SingleStyleSubstring> substrings = parser.getStyles("");
 
 		Assertions.assertEquals(1, substrings.size());
 		assertColor(substrings.get(0), 0, 0, ChatColor.RESET);
@@ -23,7 +23,7 @@ class TextStyleParserTests extends SingleStyleSubstringHelpers
 		String message = "hi";
 		TextStyleParser parser = new TextStyleParser();
 		
-		List<SingleStyleSubstring> substrings = parser.getComponents(message);
+		List<SingleStyleSubstring> substrings = parser.getStyles(message);
 
 		Assertions.assertEquals(1, substrings.size());
 		assertColor(substrings.get(0), 0, 2, ChatColor.COLOR_CHAR + "r");
@@ -36,7 +36,7 @@ class TextStyleParserTests extends SingleStyleSubstringHelpers
 		String message = hexColor + "hi";
 		TextStyleParser parser = new TextStyleParser();
 		
-		List<SingleStyleSubstring> substrings = parser.getComponents(message);
+		List<SingleStyleSubstring> substrings = parser.getStyles(message);
 
 		Assertions.assertEquals(1, substrings.size());
 		assertColor(substrings.get(0), 14, 16, hexColor);
@@ -47,7 +47,7 @@ class TextStyleParserTests extends SingleStyleSubstringHelpers
 		String message = "hi, " + ChatColor.BOLD + "Player" + ChatColor.RESET + "!";
 		TextStyleParser parser = new TextStyleParser();
 		
-		List<SingleStyleSubstring> substrings = parser.getComponents(message);
+		List<SingleStyleSubstring> substrings = parser.getStyles(message);
 
 		Assertions.assertEquals(3, substrings.size());
 		assertColor(substrings.get(0), 0, 4, ChatColor.RESET);
@@ -60,7 +60,7 @@ class TextStyleParserTests extends SingleStyleSubstringHelpers
 		String message = "test" + ChatColor.RED;
 		TextStyleParser parser = new TextStyleParser();
 		
-		List<SingleStyleSubstring> substrings = parser.getComponents(message);
+		List<SingleStyleSubstring> substrings = parser.getStyles(message);
 
 		Assertions.assertEquals(2, substrings.size());
 		assertColor(substrings.get(0), 0, 4, ChatColor.RESET);

@@ -3,19 +3,19 @@ package com.festp.styledmessage;
 import java.util.List;
 
 import com.festp.parsing.SingleStyleSubstring;
-import com.festp.styledmessage.components.TextComponent;
-import com.festp.styledmessage.components.UpdatableTextComponent;
+import com.festp.styledmessage.components.StyleAttribute;
+import com.festp.styledmessage.components.UpdatableStyleAttribute;
 import com.google.common.collect.Lists;
 
 class ClosableStyledMessage
 {
 	private List<ClosableStyledMessagePart> styledParts;
-	private List<TextComponent> endStyle;
+	private List<StyleAttribute> endStyle;
 	
 	public ClosableStyledMessage(List<SingleStyleMessage> styledParts)
 	{
 		this.styledParts = Lists.newArrayList(new ClosableStyledMessagePart(styledParts, false));
-		this.endStyle = styledParts.size() == 0 ? Lists.newArrayList() : styledParts.get(styledParts.size() - 1).getComponents();
+		this.endStyle = styledParts.size() == 0 ? Lists.newArrayList() : styledParts.get(styledParts.size() - 1).getStyle();
 	}
 	
 	public class ClosableStyledMessagePart
@@ -56,7 +56,7 @@ class ClosableStyledMessage
 		return styledParts;
 	}
 
-	public List<TextComponent> getEndStyle() {
+	public List<StyleAttribute> getEndStyle() {
 		return endStyle;
 	}
 	
@@ -80,13 +80,13 @@ class ClosableStyledMessage
 		List<ClosableStyledMessagePart> newParts = Lists.newArrayList();
 		boolean inClosed = false;
 		List<SingleStyleMessage> newStyledParts = Lists.newArrayList();
-		List<TextComponent> endComponents = null;
+		List<StyleAttribute> endAttributes = null;
 		for (SingleStyleSubstring styledSubstring : styledSubstrings)
 		{
 			if (!validateSubstring(styledSubstring, partLength))
 				continue;
 			
-			if (closeChanged && (styledSubstring.components.size() > 0) != inClosed) {
+			if (closeChanged && (styledSubstring.style.size() > 0) != inClosed) {
 				if (newStyledParts.size() > 0) {
 					newParts.add(new ClosableStyledMessagePart(newStyledParts, inClosed));
 					newStyledParts = Lists.newArrayList();
@@ -94,15 +94,15 @@ class ClosableStyledMessage
 				inClosed = !inClosed;
 			}
 			appendSubstring(newStyledParts, styledSubstring, part.styledParts);
-			endComponents = styledSubstring.components;
+			endAttributes = styledSubstring.style;
 		}
 		if (newStyledParts.size() > 0) {
 			newParts.add(new ClosableStyledMessagePart(newStyledParts, closeChanged && inClosed));
 		}
 		
-		if (endComponents != null)
+		if (endAttributes != null)
 		{
-			endStyle = mergeStyles(endStyle, endComponents);
+			endStyle = mergeStyles(endStyle, endAttributes);
 		}
 		
 		styledParts.remove(index);
@@ -149,18 +149,18 @@ class ClosableStyledMessage
 				continue;
 			}
 			
-			List<TextComponent> components = styledSubstring.components.size() == 0 ? oldPart.getComponents() :
-				oldPart.getComponents().size() == 0 ? styledSubstring.components : null;
+			List<StyleAttribute> style = styledSubstring.style.size() == 0 ? oldPart.getStyle() :
+				oldPart.getStyle().size() == 0 ? styledSubstring.style : null;
 			
-			if (components == null) {
-				components = mergeStyles(oldPart.getComponents(), styledSubstring.components);
+			if (style == null) {
+				style = mergeStyles(oldPart.getStyle(), styledSubstring.style);
 			}
 			
 			int beginIndex = Math.max(styledSubstring.beginIndex - partBeginIndex, 0);
 			int endIndex = Math.min(styledSubstring.endIndex - partBeginIndex, partLength);
 			if (beginIndex < endIndex) {
 				String plainText = oldPart.getText().substring(beginIndex, endIndex);
-				parts.add(new SingleStyleMessage(plainText, components));
+				parts.add(new SingleStyleMessage(plainText, style));
 			}
 			partBeginIndex = partEndIndex;
 			if (partBeginIndex >= styledSubstring.endIndex) break;
@@ -168,28 +168,28 @@ class ClosableStyledMessage
 	}
 	
 	
-	private List<TextComponent> mergeStyles(List<TextComponent> oldStyle, List<TextComponent> newComponents) {
-		List<TextComponent> newStyle = Lists.newArrayList(oldStyle);
-		for (TextComponent newComponent : newComponents)
+	private List<StyleAttribute> mergeStyles(List<StyleAttribute> oldStyle, List<StyleAttribute> newComponents) {
+		List<StyleAttribute> newStyle = Lists.newArrayList(oldStyle);
+		for (StyleAttribute newAttribute : newComponents)
 		{
-			if (!(newComponent instanceof UpdatableTextComponent)) {
-				newStyle.add(newComponent);
+			if (!(newAttribute instanceof UpdatableStyleAttribute)) {
+				newStyle.add(newAttribute);
 				continue;
 			}
 			boolean updated = false;
 			for (int i = 0; i < newStyle.size(); i++)
 			{
-				TextComponent oldComponent = newStyle.get(i);
-				if (newComponent.getClass().equals(oldComponent.getClass())) {
-					UpdatableTextComponent updatedComponent = ((UpdatableTextComponent) oldComponent).clone();
-					((UpdatableTextComponent) updatedComponent).update((UpdatableTextComponent) newComponent);
-					newStyle.set(i, updatedComponent);
+				StyleAttribute oldAttribute = newStyle.get(i);
+				if (newAttribute.getClass().equals(oldAttribute.getClass())) {
+					UpdatableStyleAttribute updatedAttribute = ((UpdatableStyleAttribute) oldAttribute).clone();
+					((UpdatableStyleAttribute) updatedAttribute).update((UpdatableStyleAttribute) newAttribute);
+					newStyle.set(i, updatedAttribute);
 					updated = true;
 					break;
 				}
 			}
 			if (!updated) {
-				newStyle.add(newComponent);
+				newStyle.add(newAttribute);
 			}
 		}
 		return newStyle;

@@ -19,7 +19,7 @@ import com.festp.styledmessage.StyledMessageBuilder;
 import com.festp.styledmessage.StyledMessageBuilderFactory;
 import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.MentionedPlayer;
-import com.festp.styledmessage.components.TextComponent;
+import com.festp.styledmessage.components.StyleAttribute;
 import com.festp.styledmessage.components.TextStyle;
 import com.google.common.collect.Lists;
 
@@ -240,9 +240,9 @@ public class RawJsonChatter implements Chatter
 		List<Link> links = Lists.newArrayList();
 		List<String> urls = Lists.newArrayList();
 		for (SingleStyleMessage part : styledMessage.getStyledParts())
-			for (TextComponent component : part.getComponents())
-				if (component instanceof Link) {
-					Link link = (Link) component;
+			for (StyleAttribute attribute : part.getStyle())
+				if (attribute instanceof Link) {
+					Link link = (Link) attribute;
 					if (!urls.contains(link.getUrl())) {
 						links.add(link);
 						urls.add(link.getUrl());
@@ -258,8 +258,8 @@ public class RawJsonChatter implements Chatter
 			return false;
 		
 		for (SingleStyleMessage part : styledMessage.getStyledParts())
-			for (TextComponent component : part.getComponents())
-				if (!(component instanceof TextStyle))
+			for (StyleAttribute attribute : part.getStyle())
+				if (!(attribute instanceof TextStyle))
 					return true;
 		
 		StringBuilder text = new StringBuilder();
