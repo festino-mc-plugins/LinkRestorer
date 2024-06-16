@@ -7,6 +7,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.festp.Logger;
 import com.festp.config.Config;
 
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.chat.ComponentSerializer;
+
 public class SpigotMessageSender implements MessageSender
 {
 	
@@ -34,5 +37,14 @@ public class SpigotMessageSender implements MessageSender
 				Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command.toString());
 			}
 		});
+	}
+	
+	public void sendChatComponents(Player player, BaseComponent... components)
+	{
+		boolean isLogging = config.get(Config.Key.LOG_DEBUG, false);
+		if (isLogging) Logger.info("Sending components: " + ComponentSerializer.toString(components));
+		
+		// TODO compare to player.sendRawMessage(message);
+		player.spigot().sendMessage(components);
 	}
 }

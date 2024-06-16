@@ -24,9 +24,8 @@ import com.festp.styledmessage.attributes.StyleAttribute;
 import com.google.common.collect.Lists;
 
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.chat.ComponentSerializer;
 
-public class RawJsonChatter implements Chatter
+public class ChatComponentChatter implements Chatter
 {
 	private static final String PLACEHOLDER_NAME = "%1$s";
 	private static final String PLACEHOLDER_MESSAGE = "%2$s";
@@ -37,7 +36,7 @@ public class RawJsonChatter implements Chatter
 	private final StyledMessageBuilderFactory factory;
 	private final MessageSender messageSender;
 
-	public RawJsonChatter(Config config, StyledMessageBuilderFactory factory, MessageSender messageSender)
+	public ChatComponentChatter(Config config, StyledMessageBuilderFactory factory, MessageSender messageSender)
 	{
 		this.config = config;
 		this.factory = factory;
@@ -45,19 +44,7 @@ public class RawJsonChatter implements Chatter
 	}
 
 	/**
-	 * Generates command for chat messages containing links<br>
-	 * {@literal<FEST_Channel>} test https://www.netflix.com/browse extra text<br>
-	 * like<br>
-	 * /tellraw @a [<br>
-	 * {"text":"<"},<br>
-	 * {"text":"FEST_Channel",<br>
-	 * "hoverEvent":{"action":"show_text","value":"FEST_Channel\nType: Player\n4a9b60fa-6c37-3673-b0ae-02ee83a6356d"},<br>
-	 * "clickEvent":{"action":"suggest_command","value":"/tell FEST_Channel"}},<br>
-	 * {"text":"> test "},<br>
-	 * {"text":"https://www.netflix.com/browse","underlined":true,<br>
-	 * "clickEvent":{"action":"open_url","value":"https://www.netflix.com/browse"}},<br>
-	 * {"text":" extra text"}<br>
-	 * ]
+	 * Generates and sends chat components for messages containing StyleAttribute other than Formatting<br>
 	 * 
 	 * @param recipients is <i>null</i> if all the players will get the message; console will always get the message
 	 * @param sender is message sender
@@ -106,11 +93,11 @@ public class RawJsonChatter implements Chatter
 		}
 		builder.appendSplitting(format.substring(prevEnd));
 
-		RawJsonBuilder jsonBuilder = newRawJsonBuilder();
-		jsonBuilder.appendStyledMessage(builder.build());
-		String rawJson = jsonBuilder.toString();
+		ChatComponentBuilder componentBuilder = newComponentBuilder();
+		componentBuilder.appendStyledMessage(builder.build());
+		BaseComponent components = componentBuilder.build();
 		for (Player p : recipients) {
-			messageSender.sendRawJson(p, rawJson);
+			messageSender.sendChatComponents(p, components);
 		}
 		return true;
 	}
@@ -131,8 +118,7 @@ public class RawJsonChatter implements Chatter
 		for (int i = indices.size() - 1; i >= 0; i--) {
 			components.addAll(indices.get(i), message);
 		}
-		String rawJson = ComponentSerializer.toString(components);
-		messageSender.sendRawJson(recipient, rawJson);
+		messageSender.sendChatComponents(recipient, components.toArray(new BaseComponent[0]));
 		return true;
 	}
 	
@@ -143,38 +129,38 @@ public class RawJsonChatter implements Chatter
 		if (!canSend(styledMessage, message))
 			return false;
 		
-		String fromStr = "commands.message.display.outgoing"; // "You whisper to %s: %s"
-		String toStr = "commands.message.display.incoming"; // "%s whispers to you: %s"
+		String fromIdentifier = "commands.message.display.outgoing"; // "You whisper to %s: %s"
+		String toIdentifier = "commands.message.display.incoming"; // "%s whispers to you: %s"
 		
 		Formatting baseFormatting = new Formatting().update(WHISPER_STYLE_CODES);
-		RawJsonBuilder messageBuilder = newRawJsonBuilder();
+		ChatComponentBuilder messageBuilder = newComponentBuilder();
 		messageBuilder.appendStyledMessage(styledMessage);
-		CharSequence messageJson = messageBuilder.toCharSequence();
+		BaseComponent messageComponent = messageBuilder.build();
 
-		RawJsonBuilder nameFromBuilder = newRawJsonBuilder();
+		ChatComponentBuilder nameFromBuilder = newComponentBuilder();
 		builder.clear();
 		appendSender(builder, sender, true);
 		nameFromBuilder.appendStyledMessage(builder.build());
-		CharSequence nameFromJson = nameFromBuilder.toCharSequence();
+		BaseComponent nameFromComponent = nameFromBuilder.build();
 		
 		for (Player recipient : recipients)
 		{
 			if (sender instanceof Player)
 			{
-				RawJsonBuilder nameToBuilder = newRawJsonBuilder();
+				ChatComponentBuilder nameToBuilder = newComponentBuilder();
 				builder.clear();
 				appendSender(builder, recipient, true);
 				nameToBuilder.appendStyledMessage(builder.build());
-				CharSequence nameToJson = nameFromBuilder.toCharSequence();
+				BaseComponent nameToComponent = nameToBuilder.build();
 				
-				RawJsonBuilder from = newRawJsonBuilder();
-				from.appendTranslated(fromStr, new CharSequence[] { nameToJson, messageJson }, baseFormatting);
-				messageSender.sendRawJson((Player)sender, from.toString());
+				ChatComponentBuilder from = newComponentBuilder(baseFormatting);
+				from.appendTranslated(fromIdentifier, Lists.newArrayList(nameToComponent, messageComponent));
+				messageSender.sendChatComponents((Player)sender, from.build());
 			}
 			
-			RawJsonBuilder to = newRawJsonBuilder();
-			to.appendTranslated(toStr, new CharSequence[] { nameFromJson, messageJson }, baseFormatting);
-			messageSender.sendRawJson(recipient, to.toString());
+			ChatComponentBuilder to = newComponentBuilder(baseFormatting);
+			to.appendTranslated(toIdentifier, Lists.newArrayList(nameFromComponent, messageComponent));
+			messageSender.sendChatComponents(recipient, to.build());
 		}
 		return true;
 	}
@@ -187,26 +173,31 @@ public class RawJsonChatter implements Chatter
 			return false;
 		
 		Iterable<Link> links = getLinks(styledMessage);
-		RawJsonBuilder jsonBuilder = newRawJsonBuilder();
+		ChatComponentBuilder componentBuilder = newComponentBuilder();
 		Formatting formatting = new Formatting().update(WHISPER_STYLE_CODES);
-		jsonBuilder.appendJoinedLinks(links, formatting, ", ");
-		String linkCommand = jsonBuilder.toString();
+		componentBuilder.appendJoinedLinks(links, formatting, ", ");
+		BaseComponent components = componentBuilder.build();
 		
 		if (sender instanceof Player)
-			messageSender.sendRawJson((Player)sender, linkCommand);
+			messageSender.sendChatComponents((Player)sender, components);
 		
 		for (Player recipient : recipients)
 		{
 			if (recipient == sender)
 				continue;
-			messageSender.sendRawJson(recipient, linkCommand);
+			messageSender.sendChatComponents(recipient, components);
 		}
 		return true;
 	}
 	
-	private RawJsonBuilder newRawJsonBuilder()
+	private ChatComponentBuilder newComponentBuilder(Formatting baseFormatting)
 	{
-		return new RawJsonBuilder(config.getDisplaySettings());
+		return new ChatComponentBuilder(config.getDisplaySettings(), baseFormatting);
+	}
+	
+	private ChatComponentBuilder newComponentBuilder()
+	{
+		return newComponentBuilder(new Formatting());
 	}
 	
 	private static void appendSender(StyledMessageBuilder builder, CommandSender sender, boolean stripColors)

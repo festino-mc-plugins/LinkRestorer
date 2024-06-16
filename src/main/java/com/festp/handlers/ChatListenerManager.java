@@ -11,7 +11,7 @@ import com.festp.config.ConfigListener;
 import com.festp.config.Config.Key;
 import com.festp.messaging.Chatter;
 import com.festp.messaging.MessageSender;
-import com.festp.messaging.RawJsonChatter;
+import com.festp.messaging.ChatComponentChatter;
 import com.festp.messaging.SpigotMessageSender;
 import com.festp.styledmessage.StyledMessageBuilderFactory;
 import com.festp.styledmessage.TheStyledMessageBuilderFactory;
@@ -41,7 +41,7 @@ public class ChatListenerManager implements ListenerManager, ConfigListener
 		
 		StyledMessageBuilderFactory factory = new TheStyledMessageBuilderFactory(config, new SpigotCommandValidator(config));
 		MessageSender messageSender = new SpigotMessageSender(plugin, config);
-		Chatter chatter = new RawJsonChatter(config, factory, messageSender);
+		Chatter chatter = new ChatComponentChatter(config, factory, messageSender);
 
 		chatHandler = new ChatHandler(chatter);
 		smallHandler = new SmallCommandsHandler(chatter);

@@ -2,7 +2,8 @@ package com.festp.styledmessage.attributes;
 
 import org.bukkit.ChatColor;
 
-public class Formatting implements UpdatableStyleAttribute {
+public class Formatting implements UpdatableStyleAttribute
+{
 	private String color = "";
 	private String style = "";
 	
@@ -69,12 +70,14 @@ public class Formatting implements UpdatableStyleAttribute {
 	
 	/**
 	 * @return empty string or JSON fields with a trailing comma like '"color":"#ABCDEF",'*/
-	public String getJson()
-	{
-		if (isRgbColor())
-			return "\"color\":\"" + color + "\",";
-		
-		return "";
+	public String getJson() {
+		return isRgbColor() ? "\"color\":\"" + color + "\"," : "";
+	}
+
+	/**
+	 * @return null if color is not hex, string like "#ABCDEF" else */
+	public String getHexColor() {
+		return isRgbColor() ? color : null;
 	}
 
 	/** @return <b>"color":"gray","italic":"true",</b><br>

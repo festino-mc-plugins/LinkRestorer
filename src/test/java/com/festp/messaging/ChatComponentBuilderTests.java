@@ -13,59 +13,68 @@ import com.festp.styledmessage.attributes.Formatting;
 import com.festp.styledmessage.attributes.Link;
 import com.google.common.collect.Lists;
 
-class RawJsonBuilderTests {
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.chat.ComponentSerializer;
+
+class ChatComponentBuilderTests
+{
 	@ParameterizedTest
 	@CsvSource(value = {
 			"example.com/モエソデmoesode,example.com/%E3%83%A2%E3%82%A8%E3%82%BD%E3%83%87moesode",
 			"https://www.лекарство.net,https://www.%D0%BB%D0%B5%D0%BA%D0%B0%D1%80%D1%81%D1%82%D0%B2%D0%BE.net"
 			}, delimiter = ',')
 	void appendJoinedLinks_ApplyUrlEncoding(String url, String expectedUrl) {
-		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings("%s", "%s", "%s", "", "", "", false));
+		ChatComponentBuilder builder = new ChatComponentBuilder(new DisplaySettings("%s", "%s", "%s", "", "", "", false));
 		Link link = new Link(url);
 		
 		builder.appendJoinedLinks(Lists.newArrayList(link), new Formatting(), "");
-		String json = builder.toString();
+		BaseComponent components = builder.build();
 		
-		String expectedJson = "[{\"text\":\"\"},{\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + expectedUrl + "\"},\"text\":\"" + url + "\"}]";
-		Assertions.assertEquals(expectedJson, json);
+		String expectedJson = "[{\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + expectedUrl + "\"},\"text\":\"" + url + "\"}]";
+		assertEquals(expectedJson, components);
 	}
 	
 	@Test
 	void appendStyledMessage_EscapesQuotesAndCackSlashes() {
-		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings("%s", "%s", "%s", "", "", "", false));
+		ChatComponentBuilder builder = new ChatComponentBuilder(new DisplaySettings("%s", "%s", "%s", "", "", "", false));
 		
 		builder.appendStyledMessage(new StyledMessage("\\ and \""));
-		String json = builder.toString();
+		BaseComponent components = builder.build();
 		
-		String expectedJson = "[{\"text\":\"\"},{\"text\":\"\\\\ and \\\"\"}]";
-		Assertions.assertEquals(expectedJson, json);
+		String expectedJson = "[{\"text\":\"\\\\ and \\\"\"}]";
+		assertEquals(expectedJson, components);
 	}
 	
 	@Test
 	void appendStyledMessage_EscapesQuotesAndCackSlashes_LinkUrl() {
-		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings("%s", "%s", "%s", "", "", "", false));
+		ChatComponentBuilder builder = new ChatComponentBuilder(new DisplaySettings("%s", "%s", "%s", "", "", "", false));
 		
 		SingleStyleMessage styledPart = new SingleStyleMessage("a", Lists.newArrayList(new Link("\\\"")));
 		builder.appendStyledMessage(new StyledMessage(Lists.newArrayList(styledPart)));
-		String json = builder.toString();
+		BaseComponent components = builder.build();
 
 		String expectedUrl = "\\\\\\\""; // not "\\\\%22"
-		String expectedJson = "[{\"text\":\"\"},{\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + expectedUrl + "\"},\"text\":\"a\"}]";
-		Assertions.assertEquals(expectedJson, json);
+		String expectedJson = "[{\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + expectedUrl + "\"},\"text\":\"a\"}]";
+		assertEquals(expectedJson, components);
 	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = {false, true})
 	void appendStyledMessage_CommandAction(boolean runCommands) {
 		String action = runCommands ? "run_command" : "suggest_command";
-		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings("%s", "%s", "%s", "", "", "", runCommands));
+		ChatComponentBuilder builder = new ChatComponentBuilder(new DisplaySettings("%s", "%s", "%s", "", "", "", runCommands));
 		String cmd = "/ping";
 		Command command = new Command(cmd);
 		
 		builder.appendStyledMessage(new StyledMessage(Lists.newArrayList(new SingleStyleMessage(cmd, Lists.newArrayList(command)))));
-		String json = builder.toString();
+		BaseComponent components = builder.build();
 		
-		String expectedJson = "[{\"text\":\"\"},{\"clickEvent\":{\"action\":\"" + action + "\",\"value\":\"" + cmd + "\"},\"text\":\"" + cmd + "\"}]";
-		Assertions.assertEquals(expectedJson, json);
+		String expectedJson = "[{\"clickEvent\":{\"action\":\"" + action + "\",\"value\":\"" + cmd + "\"},\"text\":\"" + cmd + "\"}]";
+		assertEquals(expectedJson, components);
+	}
+	
+	private void assertEquals(String expectedInnerRawJson, BaseComponent component) {
+		String json = ComponentSerializer.toString(component);
+		Assertions.assertEquals("{\"extra\":" + expectedInnerRawJson + ",\"text\":\"\"}", json);
 	}
 }
