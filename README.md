@@ -26,3 +26,5 @@ use /help
 
 Dynamic configuration is provided using the **/links** command.  
 You can disable some features if you don't need them. You can also disable features using the corresponding permissions.  
+
+[BETA] Using ProtocolLib, the plugin is compatible with other message-modifying plugins. If `modify-packets: true`, it will intercept messages and resend them with new click and hover events.
