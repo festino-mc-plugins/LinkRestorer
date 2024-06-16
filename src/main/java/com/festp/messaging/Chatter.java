@@ -1,6 +1,7 @@
 package com.festp.messaging;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -18,7 +19,7 @@ public interface Chatter
 	public boolean sendIntercepted(
 			CommandSender sender,
 			Player recipient,
-			Collection<? extends BaseComponent> formatComponents,
-			Collection<? extends Integer> messagePositions,
-			Collection<? extends BaseComponent> message);
+			List<BaseComponent> formatComponents,
+			List<Integer> messagePositions,
+			List<BaseComponent> message);
 }

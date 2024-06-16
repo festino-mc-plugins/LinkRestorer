@@ -75,18 +75,21 @@ public class ChatComponentBuilder
 				}
 				else if (attribute instanceof Link)
 				{
-					changed |= setLink(component, (Link) attribute);
+					setLink(component, (Link) attribute);
 					text = String.format(settings.formatLinks, text);
+					changed = true;
 				}
 				else if (attribute instanceof Command)
 				{
-					changed |= setCommand(component, (Command) attribute);
+					setCommand(component, (Command) attribute);
 					text = String.format(settings.formatCommands, text);
+					changed = true;
 				}
 				else if (attribute instanceof CopyableText)
 				{
-					changed |= setCopyableText(component, (CopyableText) attribute);
+					setCopyableText(component, (CopyableText) attribute);
 					text = String.format(settings.formatCopyableText, text);
+					changed = true;
 				}
 				else if (attribute instanceof MentionedPlayer)
 				{
@@ -145,41 +148,28 @@ public class ChatComponentBuilder
 			}
 	}
 	
-	private boolean setLink(BaseComponent component, Link link)
+	private void setLink(BaseComponent component, Link link)
 	{
-		boolean success = setOpenUrl(component, link.getUrl());
-		if (!success)
-			return false;
-		
-		return setShowText(component, settings.tooltipLinks);
+		setOpenUrl(component, link.getUrl());
+		setShowText(component, settings.tooltipLinks);
 	}
 	
-	private boolean setCommand(BaseComponent component, Command command) {
-		boolean success;
+	private void setCommand(BaseComponent component, Command command) {
 		if (settings.runCommands)
-			success = setRunCommand(component, command.getCommand());
+			setRunCommand(component, command.getCommand());
 		else
-			success = setSuggestCommand(component, command.getCommand());
+			setSuggestCommand(component, command.getCommand());
 		
-		if (!success)
-			return false;
-		
-		return setShowText(component, settings.tooltipCommands);
+		setShowText(component, settings.tooltipCommands);
 	}
 	
-	private boolean setCopyableText(BaseComponent component, CopyableText copyableText) {
-		boolean success = setSuggestCommand(component, copyableText.getText());
-		if (!success)
-			return false;
-		
-		return setShowText(component, settings.tooltipCopyableText);
+	private void setCopyableText(BaseComponent component, CopyableText copyableText) {
+		setSuggestCommand(component, copyableText.getText());
+		setShowText(component, settings.tooltipCopyableText);
 	}
 	
 	private static boolean setShowText(BaseComponent component, String tooltip) {
 		if (tooltip.isEmpty())
-			return false;
-		
-		if (component.getHoverEvent() != null)
 			return false;
 		
 		component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(tooltip)));
@@ -187,9 +177,6 @@ public class ChatComponentBuilder
 	}
 	
 	private static boolean setShowPlayer(BaseComponent component, Player player) {
-		if (component.getHoverEvent() != null)
-			return false;
-
 		String plainName = player.getName();
 		Entity entity = new Entity("player", player.getUniqueId().toString(), new TextComponent(plainName));
 		component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, entity));
@@ -211,9 +198,6 @@ public class ChatComponentBuilder
 	
 	private static boolean setClickEvent(BaseComponent component, ClickEvent.Action action, String value) {
 		if (value.isEmpty())
-			return false;
-		
-		if (component.getClickEvent() != null)
 			return false;
 		
 		component.setClickEvent(new ClickEvent(action, value));

@@ -18,15 +18,15 @@ public class BaseComponentUtils
 	public static class ParseResult
 	{
 		public final MessageInfo messageInfo;
-		public final Collection<? extends BaseComponent> formatComponents;
-		public final Collection<? extends BaseComponent> messageComponents;
-		public final Collection<? extends Integer> messagePositions;
+		public final List<BaseComponent> formatComponents;
+		public final List<BaseComponent> messageComponents;
+		public final List<Integer> messagePositions;
 		
 		public ParseResult(
 				MessageInfo messageInfo,
-				Collection<? extends BaseComponent> formatComponents,
-				Collection<? extends BaseComponent> messageComponents,
-				Collection<? extends Integer> messagePositions)
+				List<BaseComponent> formatComponents,
+				List<BaseComponent> messageComponents,
+				List<Integer> messagePositions)
 		{
 			this.messageInfo = messageInfo;
 			this.formatComponents = formatComponents;

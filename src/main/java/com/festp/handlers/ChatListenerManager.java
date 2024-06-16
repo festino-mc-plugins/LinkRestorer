@@ -49,7 +49,7 @@ public class ChatListenerManager implements ListenerManager, ConfigListener
 		
 		if (plugin.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
 			memoryChatHandler = new MemoryChatHandler();
-			packetListener = new ChatPacketListener(plugin, chatter, memoryChatHandler);
+			packetListener = new ChatPacketListener(plugin, chatter, memoryChatHandler, config);
 			clearMessageInfoTask = null;
 		}
 		else {

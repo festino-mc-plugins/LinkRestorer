@@ -2,7 +2,6 @@ package com.festp.messaging;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,6 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
+import com.festp.Logger;
 import com.festp.config.Config;
 import com.festp.styledmessage.SingleStyleMessage;
 import com.festp.styledmessage.StyledMessage;
@@ -24,6 +24,7 @@ import com.festp.styledmessage.attributes.StyleAttribute;
 import com.google.common.collect.Lists;
 
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.chat.ComponentSerializer;
 
 public class ChatComponentChatter implements Chatter
 {
@@ -105,18 +106,61 @@ public class ChatComponentChatter implements Chatter
 	public boolean sendIntercepted(
 			CommandSender sender,
 			Player recipient,
-			Collection<? extends BaseComponent> formatComponents,
-			Collection<? extends Integer> messagePositions,
-			Collection<? extends BaseComponent> message)
+			List<BaseComponent> formatComponents,
+			List<Integer> messagePositions,
+			List<BaseComponent> message)
 	{
-		if (new Random().nextBoolean()) return false;
-		// parse styled message
-		// try merge events (our have less priority)
-		// send only if any event has changed
+		boolean isLogging = config.get(Config.Key.LOG_DEBUG, false);
+		boolean changed = false;
+		List<BaseComponent> updatedMessage = Lists.newArrayList();
+		// iterate groups without events imitating closed parts
+		for (int i = 0; i < message.size(); i++) {
+			StringBuilder text = new StringBuilder();
+			// our events have less priority
+			while (i < message.size() && message.get(i).getClickEvent() == null && message.get(i).getHoverEvent() == null) {
+				BaseComponent component = message.get(i);
+				String componentText = component.toLegacyText();
+				// {"text":"§nabc§rdef"} is not equal to {"text":"abc§rdef", "underlined":true}
+				String baseColorCodes = component.getColorRaw() != null ? component.getColorRaw().toString() : ""
+						              + (component.isUnderlined() ? ChatColor.UNDERLINE.toString() : "")
+						              + (component.isBold() ? ChatColor.BOLD.toString() : "")
+						              + (component.isItalic() ? ChatColor.ITALIC.toString() : "")
+						              + (component.isObfuscated() ? ChatColor.MAGIC.toString() : "")
+						              + (component.isStrikethrough() ? ChatColor.STRIKETHROUGH.toString() : "");
+				componentText.replace(ChatColor.RESET.toString(), ChatColor.RESET.toString() + baseColorCodes);
+				text.append(componentText);
+				i++;
+			}
+			
+			if (text.length() > 0) {
+				StyledMessageBuilder builder = factory.create(sender);
+				StyledMessage styledMessage = builder.append(text.toString()).build();
+				
+				ChatComponentBuilder componentBuilder = newComponentBuilder();
+				componentBuilder.appendStyledMessage(styledMessage);
+				updatedMessage.add(componentBuilder.build());
+				if (isLogging) Logger.info("Processing message part: "
+						+ text.toString() + " -> " + ComponentSerializer.toString(componentBuilder.build())
+						+ " (changed: " + componentBuilder.isChanged() + ")");
+				changed |= componentBuilder.isChanged();
+			}
+			
+			if (i < message.size()) {
+				updatedMessage.add(message.get(i));
+			}
+		}
+		
+		if (!changed) {
+			if (isLogging) Logger.info("Message has not been changed, will not resend: " + ComponentSerializer.toString(message));
+			return false;
+		}
+		
 		List<BaseComponent> components = Lists.newArrayList(formatComponents);
 		List<Integer> indices = Lists.newArrayList(messagePositions);
+		// inverse order to not update indices
 		for (int i = indices.size() - 1; i >= 0; i--) {
-			components.addAll(indices.get(i), message);
+			// TODO test if need to deep copy components if indices.size() > 1
+			components.addAll(indices.get(i), updatedMessage);
 		}
 		messageSender.sendChatComponents(recipient, components.toArray(new BaseComponent[0]));
 		return true;
