@@ -2,25 +2,17 @@ package com.festp;
 
 import java.io.File;
 
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.festp.commands.LinksCommand;
 import com.festp.config.Config;
 import com.festp.config.LangConfig;
-import com.festp.handlers.ChatHandler;
-import com.festp.handlers.SmallCommandsHandler;
-import com.festp.handlers.WhisperHandler;
-import com.festp.messaging.Chatter;
-import com.festp.messaging.MessageSender;
-import com.festp.messaging.RawJsonChatter;
-import com.festp.messaging.SpigotMessageSender;
-import com.festp.styledmessage.StyledMessageBuilderFactory;
-import com.festp.styledmessage.TheStyledMessageBuilderFactory;
-import com.festp.utils.SpigotCommandValidator;
+import com.festp.handlers.ChatListenerManager;
 
 public class Main extends JavaPlugin
 {
+	private ChatListenerManager listenerManager;
+	
 	public void onEnable()
 	{
 		Logger.setLogger(getLogger());
@@ -28,24 +20,21 @@ public class Main extends JavaPlugin
 		lang.load();
 		Config config = new Config(this, lang);
 		config.load();
-
-		StyledMessageBuilderFactory factory = new TheStyledMessageBuilderFactory(config, new SpigotCommandValidator(config));
-		MessageSender messageSender = new SpigotMessageSender(this, config);
-		Chatter chatter = new RawJsonChatter(config, factory, messageSender);
-
-		PluginManager pm = getServer().getPluginManager();
-
-		ChatHandler chatHandler = new ChatHandler(chatter);
-		pm.registerEvents(chatHandler, this);
-
-		SmallCommandsHandler smallHandler = new SmallCommandsHandler(chatter);
-		pm.registerEvents(smallHandler, this);
-
-		WhisperHandler whisperHandler = new WhisperHandler(chatter, config);
-		pm.registerEvents(whisperHandler, this);
+		
+		listenerManager = new ChatListenerManager(this, config);
+		listenerManager.register();
+		config.addListener(listenerManager);
+		// TODO send messages on join (to players having configure permission) if (!listenerManager.canRegister())
 
 		LinksCommand commandWorker = new LinksCommand(config, lang);
 		getCommand(LinksCommand.COMMAND).setExecutor(commandWorker);
 		getCommand(LinksCommand.COMMAND).setTabCompleter(commandWorker);
+	}
+	
+	public void onDisable()
+	{
+		listenerManager.unregister();
+		getCommand(LinksCommand.COMMAND).setExecutor(null);
+		getCommand(LinksCommand.COMMAND).setTabCompleter(null);
 	}
 }

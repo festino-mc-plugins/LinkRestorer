@@ -1,4 +1,6 @@
 log-debug-info: false
+# If enabled, the plugin will modify messages after Spigot AsyncPlayerChatEvent listeners. Requires ProtocolLib.
+modify-packets: false
 
 enable-links: true
 enable-ip-links: true

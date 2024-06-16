@@ -2,16 +2,16 @@ package com.festp.styledmessage;
 
 import java.util.List;
 
-import com.festp.styledmessage.components.TextComponent;
+import com.festp.styledmessage.attributes.StyleAttribute;
 
 public class SingleStyleMessage {
 	private final String plainText;
-	private final List<TextComponent> components;
+	private final List<StyleAttribute> style;
 	
-	public SingleStyleMessage(String plainText, List<TextComponent> components)
+	public SingleStyleMessage(String plainText, List<StyleAttribute> style)
 	{
 		this.plainText = plainText;
-		this.components = components;
+		this.style = style;
 	}
 	
 	public String getText()
@@ -19,8 +19,8 @@ public class SingleStyleMessage {
 		return plainText;
 	}
 	
-	public List<TextComponent> getComponents()
+	public List<StyleAttribute> getStyle()
 	{
-		return components;
+		return style;
 	}
 }

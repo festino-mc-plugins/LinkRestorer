@@ -3,20 +3,20 @@ package com.festp.styledmessage;
 import java.util.Collection;
 import java.util.List;
 
-import com.festp.parsing.ComponentParser;
+import com.festp.parsing.StyleParser;
 import com.festp.styledmessage.ClosableStyledMessage.ClosableStyledMessagePart;
-import com.festp.styledmessage.components.TextComponent;
+import com.festp.styledmessage.attributes.StyleAttribute;
 import com.google.common.collect.Lists;
 
 public class TheStyledMessageBuilder implements StyledMessageBuilder
 {
-	private final List<ComponentParser> globalParsers;
-	private final List<ComponentParser> splittingParsers;
+	private final List<StyleParser> globalParsers;
+	private final List<StyleParser> splittingParsers;
 	private StyledMessage styledMessage;
-	private List<TextComponent> startStyle;
+	private List<StyleAttribute> startStyle;
 	
-	public TheStyledMessageBuilder(List<ComponentParser> globalParsers,
-								List<ComponentParser> splittingParsers)
+	public TheStyledMessageBuilder(List<StyleParser> globalParsers,
+								List<StyleParser> splittingParsers)
 	{
 		this.globalParsers = globalParsers;
 		this.splittingParsers = splittingParsers;
@@ -44,13 +44,13 @@ public class TheStyledMessageBuilder implements StyledMessageBuilder
 		return this;
 	}
 	
-	public TheStyledMessageBuilder appendSplitting(String text, Collection<TextComponent> additionalComponents)
+	public TheStyledMessageBuilder appendSplitting(String text, Collection<StyleAttribute> additionalAttributes)
 	{
 		int startLength = styledMessage.getStyledParts().size();
 		append(text, false);
 		int endLength = styledMessage.getStyledParts().size();
 		for (int i = startLength; i < endLength; i++) {
-			styledMessage.getStyledParts().get(i).getComponents().addAll(additionalComponents);
+			styledMessage.getStyledParts().get(i).getStyle().addAll(additionalAttributes);
 		}
 		return this;
 	}
@@ -64,11 +64,11 @@ public class TheStyledMessageBuilder implements StyledMessageBuilder
 	{
 		ClosableStyledMessage closableMessage = new ClosableStyledMessage(Lists.newArrayList(new SingleStyleMessage(text, startStyle)));
 		
-		for (ComponentParser parser : globalParsers)
+		for (StyleParser parser : globalParsers)
 		{
 			for (ClosableStyledMessagePart part : closableMessage.getOpenParts())
 			{
-				part.replace(parser.getComponents(part.getPlainText()), false);
+				part.replace(parser.getStyles(part.getPlainText()), false);
 			}
 		}
 
@@ -80,16 +80,15 @@ public class TheStyledMessageBuilder implements StyledMessageBuilder
 			return this;
 		}
 		
-		for (ComponentParser parser : splittingParsers)
+		for (StyleParser parser : splittingParsers)
 		{
 			for (ClosableStyledMessagePart part : closableMessage.getOpenParts())
 			{
-				part.replace(parser.getComponents(part.getPlainText()), true);
+				part.replace(parser.getStyles(part.getPlainText()), true);
 			}
 		}
 
 		styledMessage.addAll(closableMessage.getStyledParts());
 		return this;
 	}
-	
 }

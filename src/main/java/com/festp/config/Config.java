@@ -12,6 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.festp.Logger;
 import com.festp.messaging.DisplaySettings;
 import com.festp.utils.FileUtils;
+import com.google.common.collect.Lists;
 
 public class Config implements IConfig
 {
@@ -19,6 +20,7 @@ public class Config implements IConfig
 	private LangConfig lang;
 	private MemoryConfiguration config;
 	private final HashMap<String, Object> map = new HashMap<>();
+	private final List<ConfigListener> listeners = Lists.newArrayList();
 	
 	public Config(JavaPlugin jp, LangConfig lang) {
 		this.plugin = jp;
@@ -45,6 +47,7 @@ public class Config implements IConfig
 		map.putAll(config.getValues(true));
 		saveSilently();
 		Logger.info(lang.config_reload);
+		callListeners();
 	}
 
 	public void save() {
@@ -61,6 +64,7 @@ public class Config implements IConfig
 	public void set(Key key, Object value) {
 		map.put(key.toString(), value);
 		save();
+		callListeners();
 	}
 	
 	
@@ -125,6 +129,7 @@ public class Config implements IConfig
 	private static final String UNDERLINE_FORMAT = "&" + ChatColor.UNDERLINE.toString().charAt(1) + "%s";
 	public enum Key implements IConfig.Key {
 		LOG_DEBUG("log-debug-info", false),
+		MODIFY_PACKETS("modify-packets", false),
 		
 		ENABLE_LINKS("enable-links", true),
 		ENABLE_IP_LINKS("enable-ip-links", true),
@@ -210,6 +215,27 @@ public class Config implements IConfig
 				keys.add(key.name);
 			}
 			return keys;
+		}
+	}
+	
+	public void addListener(ConfigListener listener) {
+		if (listener == null) {
+			Logger.severe("ConfigListener could not be null!");
+			return;
+		}
+		listeners.add(listener);
+	}
+	
+	private void callListeners()
+	{
+		for (ConfigListener listener : listeners)
+		{
+			try {
+				listener.onConfigUpdate();
+			} catch (Exception e) {
+				Logger.severe(listener.toString() + " failed with an error:");
+				e.printStackTrace();
+			}
 		}
 	}
 }

@@ -1,39 +1,43 @@
-package com.festp.styledmessage.components;
+package com.festp.styledmessage.attributes;
 
-import org.bukkit.ChatColor;
+import java.util.List;
 
-public class TextStyle implements UpdatableTextComponent {
+import com.google.common.collect.Lists;
+
+import net.md_5.bungee.api.ChatColor;
+
+public class Formatting implements UpdatableStyleAttribute
+{
 	private String color = "";
 	private String style = "";
 	
-	public TextStyle() { }
+	public Formatting() { }
 	
-	public TextStyle clone()
+	public Formatting clone()
 	{
-		TextStyle copy = new TextStyle();
+		Formatting copy = new Formatting();
 		copy.color = color;
 		copy.style = style;
 		return copy; 
 	}
 
-	/** @return the same TextStyle object for chaining */
-	public void update(UpdatableTextComponent other)
+	public void update(UpdatableStyleAttribute other)
 	{
-		if (!(other instanceof TextStyle)) return;
+		if (!(other instanceof Formatting)) return;
 		
-		TextStyle otherStyle = (TextStyle) other;
-		update(otherStyle.getCodes());
-		if (otherStyle.isRgbColor()) color = otherStyle.color;
+		Formatting otherFormatting = (Formatting) other;
+		update(otherFormatting.getCodes());
+		if (otherFormatting.isRgbColor()) color = otherFormatting.color;
 	}
 
-	/** @return the same TextStyle object for chaining */
-	public TextStyle update(String s)
+	/** @return the same Formatting object for chaining */
+	public Formatting update(String s)
 	{
 		return update(s, 0, s.length());
 	}
 
-	/** @return the same TextStyle object for chaining */
-	public TextStyle update(String s, int minIndex, int maxIndex)
+	/** @return the same Formatting object for chaining */
+	public Formatting update(String s, int minIndex, int maxIndex)
 	{
 		for (int i = minIndex; i + 1 < maxIndex; i += 2)
 		{
@@ -70,12 +74,14 @@ public class TextStyle implements UpdatableTextComponent {
 	
 	/**
 	 * @return empty string or JSON fields with a trailing comma like '"color":"#ABCDEF",'*/
-	public String getJson()
-	{
-		if (isRgbColor())
-			return "\"color\":\"" + color + "\",";
-		
-		return "";
+	public String getJson() {
+		return isRgbColor() ? "\"color\":\"" + color + "\"," : "";
+	}
+
+	/**
+	 * @return null if color is not hex, string like "#ABCDEF" else */
+	public String getHexColor() {
+		return isRgbColor() ? color : null;
 	}
 
 	/** @return <b>"color":"gray","italic":"true",</b><br>
@@ -99,11 +105,24 @@ public class TextStyle implements UpdatableTextComponent {
 				res.append("\"obfuscated\":\"true\",");
 			else if (c != ChatColor.RESET && !isRgbColor()) {
 				res.append("\"color\":\"");
-				res.append(c.name().toLowerCase());
+				res.append(c.getName().toLowerCase());
 				res.append("\",");
 			}
 		}
 		return res.toString();
+	}
+
+	public List<ChatColor> getChatColors() {
+		List<ChatColor> colors = Lists.newArrayList();
+		if (isRgbColor())
+			colors.add(ChatColor.of(color));
+		
+		String styleStr = getCodes();
+		for (int i = 1; i < styleStr.length(); i += 2)
+		{
+			colors.add(ChatColor.getByChar(styleStr.charAt(i)));
+		}
+		return colors;
 	}
 	
 	private boolean isRgbColor()

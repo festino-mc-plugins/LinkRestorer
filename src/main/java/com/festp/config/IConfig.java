@@ -1,6 +1,7 @@
 package com.festp.config;
 
 public interface IConfig {
+	public void addListener(ConfigListener listener);
 	interface Key {
 		Object getDefault();
 	}
