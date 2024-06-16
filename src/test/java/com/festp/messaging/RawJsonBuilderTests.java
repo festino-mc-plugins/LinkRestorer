@@ -10,7 +10,7 @@ import com.festp.styledmessage.SingleStyleMessage;
 import com.festp.styledmessage.StyledMessage;
 import com.festp.styledmessage.components.Command;
 import com.festp.styledmessage.components.Link;
-import com.festp.styledmessage.components.TextStyle;
+import com.festp.styledmessage.components.Formatting;
 import com.google.common.collect.Lists;
 
 class RawJsonBuilderTests {
@@ -23,7 +23,7 @@ class RawJsonBuilderTests {
 		RawJsonBuilder builder = new RawJsonBuilder(new DisplaySettings("%s", "%s", "%s", "", "", "", false));
 		Link link = new Link(url);
 		
-		builder.appendJoinedLinks(Lists.newArrayList(link), new TextStyle(), "");
+		builder.appendJoinedLinks(Lists.newArrayList(link), new Formatting(), "");
 		String json = builder.toString();
 		
 		String expectedJson = "[{\"text\":\"\"},{\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + expectedUrl + "\"},\"text\":\"" + url + "\"}]";

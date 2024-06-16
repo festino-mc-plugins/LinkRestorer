@@ -4,15 +4,15 @@ import java.util.List;
 
 import org.bukkit.ChatColor;
 
-import com.festp.styledmessage.components.TextStyle;
+import com.festp.styledmessage.components.Formatting;
 import com.google.common.collect.Lists;
 
-public class TextStyleParser implements StyleParser
+public class FormattingParser implements StyleParser
 {
 	@Override
 	public List<SingleStyleSubstring> getStyles(String message) {
 		List<SingleStyleSubstring> substrings = Lists.newArrayList();
-		TextStyle style = new TextStyle();
+		Formatting formatting = new Formatting();
 		int beginIndex = 0;
 		int substringBegin = 0;
 		for (int i = 0; i < message.length(); i++)
@@ -31,10 +31,10 @@ public class TextStyleParser implements StyleParser
 			
 			if (beginIndex != nextBeginIndex)
 			{
-				substrings.add(new SingleStyleSubstring(substringBegin, nextBeginIndex, Lists.newArrayList(style.clone())));
+				substrings.add(new SingleStyleSubstring(substringBegin, nextBeginIndex, Lists.newArrayList(formatting.clone())));
 			}
 			
-			style.update(message, nextBeginIndex, i);
+			formatting.update(message, nextBeginIndex, i);
 
 			beginIndex = nextBeginIndex;
 			substringBegin = i;
@@ -42,7 +42,7 @@ public class TextStyleParser implements StyleParser
 		}
 
 		int nextBeginIndex = message.length();
-		substrings.add(new SingleStyleSubstring(substringBegin, nextBeginIndex, Lists.newArrayList(style)));
+		substrings.add(new SingleStyleSubstring(substringBegin, nextBeginIndex, Lists.newArrayList(formatting)));
 		
 		return substrings;
 	}

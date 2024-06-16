@@ -2,38 +2,37 @@ package com.festp.styledmessage.components;
 
 import org.bukkit.ChatColor;
 
-public class TextStyle implements UpdatableStyleAttribute {
+public class Formatting implements UpdatableStyleAttribute {
 	private String color = "";
 	private String style = "";
 	
-	public TextStyle() { }
+	public Formatting() { }
 	
-	public TextStyle clone()
+	public Formatting clone()
 	{
-		TextStyle copy = new TextStyle();
+		Formatting copy = new Formatting();
 		copy.color = color;
 		copy.style = style;
 		return copy; 
 	}
 
-	/** @return the same TextStyle object for chaining */
 	public void update(UpdatableStyleAttribute other)
 	{
-		if (!(other instanceof TextStyle)) return;
+		if (!(other instanceof Formatting)) return;
 		
-		TextStyle otherStyle = (TextStyle) other;
-		update(otherStyle.getCodes());
-		if (otherStyle.isRgbColor()) color = otherStyle.color;
+		Formatting otherFormatting = (Formatting) other;
+		update(otherFormatting.getCodes());
+		if (otherFormatting.isRgbColor()) color = otherFormatting.color;
 	}
 
-	/** @return the same TextStyle object for chaining */
-	public TextStyle update(String s)
+	/** @return the same Formatting object for chaining */
+	public Formatting update(String s)
 	{
 		return update(s, 0, s.length());
 	}
 
-	/** @return the same TextStyle object for chaining */
-	public TextStyle update(String s, int minIndex, int maxIndex)
+	/** @return the same Formatting object for chaining */
+	public Formatting update(String s, int minIndex, int maxIndex)
 	{
 		for (int i = minIndex; i + 1 < maxIndex; i += 2)
 		{

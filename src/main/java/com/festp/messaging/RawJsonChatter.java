@@ -20,7 +20,7 @@ import com.festp.styledmessage.StyledMessageBuilderFactory;
 import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.MentionedPlayer;
 import com.festp.styledmessage.components.StyleAttribute;
-import com.festp.styledmessage.components.TextStyle;
+import com.festp.styledmessage.components.Formatting;
 import com.google.common.collect.Lists;
 
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -146,7 +146,7 @@ public class RawJsonChatter implements Chatter
 		String fromStr = "commands.message.display.outgoing"; // "You whisper to %s: %s"
 		String toStr = "commands.message.display.incoming"; // "%s whispers to you: %s"
 		
-		TextStyle style = new TextStyle().update(WHISPER_STYLE_CODES);
+		Formatting baseFormatting = new Formatting().update(WHISPER_STYLE_CODES);
 		RawJsonBuilder messageBuilder = newRawJsonBuilder();
 		messageBuilder.appendStyledMessage(styledMessage);
 		CharSequence messageJson = messageBuilder.toCharSequence();
@@ -168,12 +168,12 @@ public class RawJsonChatter implements Chatter
 				CharSequence nameToJson = nameFromBuilder.toCharSequence();
 				
 				RawJsonBuilder from = newRawJsonBuilder();
-				from.appendTranslated(fromStr, new CharSequence[] { nameToJson, messageJson }, style);
+				from.appendTranslated(fromStr, new CharSequence[] { nameToJson, messageJson }, baseFormatting);
 				messageSender.sendRawJson((Player)sender, from.toString());
 			}
 			
 			RawJsonBuilder to = newRawJsonBuilder();
-			to.appendTranslated(toStr, new CharSequence[] { nameFromJson, messageJson }, style);
+			to.appendTranslated(toStr, new CharSequence[] { nameFromJson, messageJson }, baseFormatting);
 			messageSender.sendRawJson(recipient, to.toString());
 		}
 		return true;
@@ -188,8 +188,8 @@ public class RawJsonChatter implements Chatter
 		
 		Iterable<Link> links = getLinks(styledMessage);
 		RawJsonBuilder jsonBuilder = newRawJsonBuilder();
-		TextStyle style = new TextStyle().update(WHISPER_STYLE_CODES);
-		jsonBuilder.appendJoinedLinks(links, style, ", ");
+		Formatting formatting = new Formatting().update(WHISPER_STYLE_CODES);
+		jsonBuilder.appendJoinedLinks(links, formatting, ", ");
 		String linkCommand = jsonBuilder.toString();
 		
 		if (sender instanceof Player)
@@ -259,7 +259,7 @@ public class RawJsonChatter implements Chatter
 		
 		for (SingleStyleMessage part : styledMessage.getStyledParts())
 			for (StyleAttribute attribute : part.getStyle())
-				if (!(attribute instanceof TextStyle))
+				if (!(attribute instanceof Formatting))
 					return true;
 		
 		StringBuilder text = new StringBuilder();

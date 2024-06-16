@@ -9,7 +9,7 @@ import com.festp.styledmessage.components.CopyableText;
 import com.festp.styledmessage.components.Link;
 import com.festp.styledmessage.components.MentionedPlayer;
 import com.festp.styledmessage.components.StyleAttribute;
-import com.festp.styledmessage.components.TextStyle;
+import com.festp.styledmessage.components.Formatting;
 import com.festp.utils.LinkUtils;
 import com.google.common.collect.Lists;
 
@@ -20,14 +20,14 @@ public class RawJsonBuilder
 
 	public RawJsonBuilder(DisplaySettings settings)
 	{
-		this(settings, new TextStyle());
+		this(settings, new Formatting());
 	}
 	
-	public RawJsonBuilder(DisplaySettings settings, TextStyle baseTextStyle)
+	public RawJsonBuilder(DisplaySettings settings, Formatting baseFormatting)
 	{
 		this.settings = settings;
 		command = new StringBuilder();
-		command.append("{").append(baseTextStyle.getFullJson()).append("\"text\":\"\"},");
+		command.append("{").append(baseFormatting.getFullJson()).append("\"text\":\"\"},");
 	}
 	
 	@Override
@@ -54,14 +54,14 @@ public class RawJsonBuilder
 			List<StyleAttribute> style = part.getStyle();
 			String text = part.getText();
 			StringBuilder json = new StringBuilder();
-			// add the last attributes first (otherwise TextStyle may rewrite Link codes)
+			// add the last attributes first (otherwise Formatting may rewrite Link codes)
 			for (int i = style.size() - 1; i >= 0; i--)
 			{
 				StyleAttribute attribute = style.get(i);
-				if (attribute instanceof TextStyle)
+				if (attribute instanceof Formatting)
 				{
-					appendTextStyle(json, (TextStyle) attribute);
-					text = ((TextStyle) attribute).getCodes() + text;
+					appendTextStyle(json, (Formatting) attribute);
+					text = ((Formatting) attribute).getCodes() + text;
 				}
 				else if (attribute instanceof Link)
 				{
@@ -87,7 +87,7 @@ public class RawJsonBuilder
 		}
 	}
 	
-	public void appendJoinedLinks(Iterable<Link> links, TextStyle style, String sep)
+	public void appendJoinedLinks(Iterable<Link> links, Formatting formatting, String sep)
 	{
 		boolean isFirst = true;
 		StyledMessage styledMessage = new StyledMessage();
@@ -105,10 +105,10 @@ public class RawJsonBuilder
 	}
 	
 	/** Check for more info: <a>https://minecraft.fandom.com/wiki/Raw_JSON_text_format#Translated_Text</a> */
-	public void appendTranslated(String identifier, CharSequence[] components, TextStyle style)
+	public void appendTranslated(String identifier, CharSequence[] components, Formatting formatting)
 	{
 		command.append("{");
-		command.append(style.getFullJson());
+		command.append(formatting.getFullJson());
 		command.append("\"translate\":\"");
 		command.append(identifier);
 		command.append("\"");
@@ -136,8 +136,8 @@ public class RawJsonBuilder
 		json.append(getShowTextJson(tooltip));
 	}
 	
-	private void appendTextStyle(StringBuilder json, TextStyle style) {
-		json.append(style.getJson());
+	private void appendTextStyle(StringBuilder json, Formatting formatting) {
+		json.append(formatting.getJson());
 	}
 	
 	private void appendLink(StringBuilder json, Link link)

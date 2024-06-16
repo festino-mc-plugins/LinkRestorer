@@ -10,7 +10,7 @@ import com.festp.parsing.CommandParser;
 import com.festp.parsing.StyleParser;
 import com.festp.parsing.CopyableTextParser;
 import com.festp.parsing.LinkParser;
-import com.festp.parsing.TextStyleParser;
+import com.festp.parsing.FormattingParser;
 import com.festp.utils.CommandValidator;
 import com.google.common.collect.Lists;
 
@@ -36,7 +36,7 @@ public class TheStyledMessageBuilderFactory implements StyledMessageBuilderFacto
 		boolean useIpLinks = config.get(Key.ENABLE_IP_LINKS, false) && user.hasPermission(PERMISSION_IP_LINKS);
 		boolean useCommands = config.get(Key.ENABLE_COMMANDS, false) && user.hasPermission(PERMISSION_COMMANDS);
 		boolean useCopyableText = config.get(Key.ENABLE_COPYABLE_TEXT, false) && user.hasPermission(PERMISSION_COPYABLE_TEXT);
-		List<StyleParser> globalParsers = Lists.newArrayList(getTextStyleParser());
+		List<StyleParser> globalParsers = Lists.newArrayList(getFormattingParser());
 		
 		List<StyleParser> splittingParsers = Lists.newArrayList();
 		if (useCommands || useCopyableText)
@@ -49,9 +49,9 @@ public class TheStyledMessageBuilderFactory implements StyledMessageBuilderFacto
 		return new TheStyledMessageBuilder(globalParsers, splittingParsers);
 	}
 	
-	private StyleParser getTextStyleParser()
+	private StyleParser getFormattingParser()
 	{
-		return new TextStyleParser();
+		return new FormattingParser();
 	}
 	
 	private StyleParser getCopyableTextParser(boolean useCommands, boolean useCopyableText)

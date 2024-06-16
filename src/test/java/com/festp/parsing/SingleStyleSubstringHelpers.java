@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions;
 import com.festp.styledmessage.components.Command;
 import com.festp.styledmessage.components.CopyableText;
 import com.festp.styledmessage.components.Link;
-import com.festp.styledmessage.components.TextStyle;
+import com.festp.styledmessage.components.Formatting;
 
 class SingleStyleSubstringHelpers
 {
@@ -63,22 +63,22 @@ class SingleStyleSubstringHelpers
 		Assertions.assertTrue(substring.style.get(0) instanceof CopyableText);
 	}
 
-	public static void assertColor(SingleStyleSubstring substring, int beginIndex, int endIndex, ChatColor chatColor)
+	public static void assertFormatting(SingleStyleSubstring substring, int beginIndex, int endIndex, ChatColor chatColor)
 	{
-		assertColor(substring, beginIndex, endIndex, chatColor.toString());
+		assertFormatting(substring, beginIndex, endIndex, chatColor.toString());
 	}
 
-	public static void assertColor(SingleStyleSubstring substring, int beginIndex, int endIndex, String color)
+	public static void assertFormatting(SingleStyleSubstring substring, int beginIndex, int endIndex, String formatting)
 	{
-		assertColor(substring, beginIndex, endIndex, new TextStyle().update(color));
+		assertFormatting(substring, beginIndex, endIndex, new Formatting().update(formatting));
 	}
 	
-	public static void assertColor(SingleStyleSubstring substring, int beginIndex, int endIndex, TextStyle expectedStyle)
+	public static void assertFormatting(SingleStyleSubstring substring, int beginIndex, int endIndex, Formatting expectedFormatting)
 	{
 		Assertions.assertEquals(beginIndex, substring.beginIndex);
 		Assertions.assertEquals(endIndex, substring.endIndex);
 		Assertions.assertEquals(1, substring.style.size());
-		TextStyle style = (TextStyle) substring.style.get(0);
-		Assertions.assertEquals(expectedStyle.getFullJson(), style.getFullJson());
+		Formatting formatting = (Formatting) substring.style.get(0);
+		Assertions.assertEquals(expectedFormatting.getFullJson(), formatting.getFullJson());
 	}
 }
