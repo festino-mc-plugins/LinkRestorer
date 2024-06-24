@@ -12,15 +12,18 @@ import org.bukkit.event.server.ServerCommandEvent;
 import com.festp.Logger;
 import com.festp.config.Config;
 import com.festp.messaging.Chatter;
+import com.festp.utils.CommandValidator;
 
 public class WhisperHandler implements Listener
 {
-	private Chatter chatter;
-	private Config config;
+	private final Chatter chatter;
+	private final CommandValidator commandValidator;
+	private final Config config;
 	
-	public WhisperHandler(Chatter chatter, Config config)
+	public WhisperHandler(Chatter chatter, CommandValidator commandValidator, Config config)
 	{
 		this.chatter = chatter;
+		this.commandValidator = commandValidator;
 		this.config = config;
 	}
 	
@@ -73,11 +76,8 @@ public class WhisperHandler implements Listener
 		}
 	}
 
-	private static boolean isWhisperCommand(String command)
+	private boolean isWhisperCommand(String command)
 	{
-		// EssentialsX Chat: aliases: [w,m,t,pm,emsg,epm,tell,etell,whisper,ewhisper]
-		// (https://github.com/EssentialsX/Essentials/blob/f7cbc7b0d37ea7a674955758da099524b009ad03/Essentials/src/main/resources/plugin.yml)
-		// (https://github.com/EssentialsX/Essentials/blob/f7cbc7b0d37ea7a674955758da099524b009ad03/Essentials/src/main/resources/config.yml)
-		return command.equalsIgnoreCase("w") || command.equalsIgnoreCase("msg") || command.equalsIgnoreCase("tell");
+		return commandValidator.getCommandAliases("tell").contains(command.toLowerCase());
 	}
 }

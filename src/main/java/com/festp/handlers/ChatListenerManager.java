@@ -15,6 +15,7 @@ import com.festp.messaging.ChatComponentChatter;
 import com.festp.messaging.SpigotMessageSender;
 import com.festp.styledmessage.StyledMessageBuilderFactory;
 import com.festp.styledmessage.TheStyledMessageBuilderFactory;
+import com.festp.utils.CommandValidator;
 import com.festp.utils.SpigotCommandValidator;
 
 public class ChatListenerManager implements ListenerManager, ConfigListener
@@ -39,13 +40,14 @@ public class ChatListenerManager implements ListenerManager, ConfigListener
 		this.config = config;
 		listenPackets = getListenPackets();
 		
-		StyledMessageBuilderFactory factory = new TheStyledMessageBuilderFactory(config, new SpigotCommandValidator(config));
+		CommandValidator commandValidator = new SpigotCommandValidator(config);
+		StyledMessageBuilderFactory factory = new TheStyledMessageBuilderFactory(config, commandValidator);
 		MessageSender messageSender = new SpigotMessageSender(plugin, config);
 		Chatter chatter = new ChatComponentChatter(config, factory, messageSender);
 
 		chatHandler = new ChatHandler(chatter);
 		smallHandler = new SmallCommandsHandler(chatter);
-		whisperHandler = new WhisperHandler(chatter, config);
+		whisperHandler = new WhisperHandler(chatter, commandValidator, config);
 		
 		if (plugin.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
 			memoryChatHandler = new MemoryChatHandler();
